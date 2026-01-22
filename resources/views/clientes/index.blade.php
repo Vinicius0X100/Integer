@@ -419,6 +419,44 @@
     </div>
 </div>
 
+<!-- Modal Exclusão Cliente -->
+<div class="modal fade" id="deleteClientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg" style="background-color: var(--apple-card-bg); backdrop-filter: saturate(180%) blur(20px);">
+            <div class="modal-header border-bottom border-secondary border-opacity-10">
+                <h5 class="modal-title fw-bold text-white">Excluir Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-2"></i>
+                    </div>
+                    <h4 class="fw-bold text-white">Ação Irreversível!</h4>
+                    <p class="text-white-50">Tem certeza que deseja excluir este cliente? Todos os dados associados serão perdidos permanentemente.</p>
+                </div>
+                
+                <form id="deleteClientForm" action="" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    
+                    <div class="form-group">
+                        <label for="password" class="text-white-50 small mb-2 fw-bold text-uppercase">Senha de Administrador</label>
+                        <input type="password" class="form-control form-control-lg bg-dark border-secondary border-opacity-25 text-white" id="password" name="password" placeholder="Digite sua senha para confirmar..." required>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-danger rounded-pill py-2 fw-bold">
+                            <i class="bi bi-trash-fill me-2"></i> Confirmar Exclusão
+                        </button>
+                        <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')

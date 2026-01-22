@@ -37,9 +37,8 @@
                                 <label for="role" class="form-label fw-medium">Papel (Role) <span class="text-danger">*</span></label>
                                 <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
                                     <option value="">Selecione...</option>
+                                    <option value="organizer" {{ old('role') == 'organizer' ? 'selected' : '' }}>Organizador</option>
                                     <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Usuário</option>
-                                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="support" {{ old('role') == 'support' ? 'selected' : '' }}>Suporte</option>
                                 </select>
                                 @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
