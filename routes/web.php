@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ConfirmPasswordController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ServicoController;
@@ -24,6 +25,9 @@ Route::middleware('auth')->group(function () {
     // Password Confirmation Routes
     Route::get('password/confirm', [ConfirmPasswordController::class, 'show'])->name('password.confirm');
     Route::post('password/confirm', [ConfirmPasswordController::class, 'store']);
+
+    // Profile Route
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/check-password', [DashboardController::class, 'checkPassword'])->name('dashboard.check_password');
