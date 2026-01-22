@@ -62,7 +62,74 @@ class DashboardController extends Controller
             ? (($newUsersMonth - $newUsersLastMonth) / $newUsersLastMonth) * 100 
             : ($newUsersMonth > 0 ? 100 : 0);
 
-        // --- Novas Métricas Financeiras ---
+        // Serviços Concluídos Total (Movido para fora do bloco financeiro protegido)
+        $servicosConcluidos = Servico::where('status', 'concluido')->count();
+
+        // 5. Distribuição por Papel (Role)
+        $roles = User::select('papel', DB::raw('count(*) as total'))
+                     ->groupBy('papel')
+                     ->pluck('total', 'papel');
+
+        // Dados do Gráfico de Usuários (Mantido aqui pois não é financeiro)
+        $months = collect([]);
+        $userCounts = collect([]);
+        $createdServicesCounts = collect([]);
+        $completedServicesCounts = collect([]);
+        
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $monthName = $date->locale('pt_BR')->isoFormat('MMMM');
+            $year = $date->year;
+            $month = $date->month;
+            
+            // Users
+            $countUsers = User::whereYear('criado_em', $year)
+                         ->whereMonth('criado_em', $month)
+                         ->count();
+
+            // Serviços (Produtividade)
+            $created = Servico::whereYear('created_at', $year)
+                        ->whereMonth('created_at', $month)
+                        ->count();
+            
+            $completed = Servico::where('status', 'concluido')
+                        ->whereYear('updated_at', $year)
+                        ->whereMonth('updated_at', $month)
+                        ->count();
+            
+            $months->push(ucfirst($monthName));
+            $userCounts->push($countUsers);
+            $createdServicesCounts->push($created);
+            $completedServicesCounts->push($completed);
+        }
+
+        return view('dashboard', compact(
+            'totalUsers', 
+            'activeUsers', 
+            'inactiveUsers', 
+            'newUsersMonth', 
+            'growth',
+            'months',
+            'userCounts',
+            'createdServicesCounts',
+            'completedServicesCounts',
+            'roles',
+            'news',
+            'servicosConcluidos'
+        ));
+    }
+
+    public function getFinancialData(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->password, $request->user()->senha)) {
+            return response()->json(['success' => false, 'message' => 'Senha incorreta.'], 403);
+        }
+
+        // --- Cálculos Financeiros (Só executados após senha correta) ---
         
         // Lucro Realizado (Concluídos) - Este Mês
         $lucroRealizadoMes = Servico::where('status', 'concluido')
@@ -84,85 +151,55 @@ class DashboardController extends Controller
         $lucroPresumido = Servico::whereIn('status', ['pendente', 'em_andamento'])
             ->sum('lucro_estimado');
 
-        // Serviços Concluídos Total
+        // Ticket Médio
         $servicosConcluidos = Servico::where('status', 'concluido')->count();
+        $totalRevenue = Servico::where('status', 'concluido')->sum('valor_total');
+        $ticketMedio = $servicosConcluidos > 0 ? $totalRevenue / $servicosConcluidos : 0;
 
-        // 4. Dados para o Gráfico (Últimos 6 meses)
-        $months = collect([]);
-        $userCounts = collect([]);
-        $lucroCounts = collect([]);
-        $receitaCounts = collect([]); // New
-        $custoCounts = collect([]);   // New
-        $createdServicesCounts = collect([]); // New
-        $completedServicesCounts = collect([]); // New
-        
+        // Dados para o Gráfico Financeiro
+        $lucroCounts = [];
+        $receitaCounts = [];
+        $custoCounts = [];
+        $monthsLabels = [];
+
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $monthName = $date->locale('pt_BR')->isoFormat('MMMM');
             $year = $date->year;
             $month = $date->month;
             
-            // Users
-            $countUsers = User::whereYear('criado_em', $year)
-                         ->whereMonth('criado_em', $month)
-                         ->count();
+            $monthsLabels[] = ucfirst($monthName);
 
-            // Financeiro (Baseado em data de conclusão/update para status concluido)
+            // Financeiro
             $financials = Servico::where('status', 'concluido')
                         ->whereYear('updated_at', $year)
                         ->whereMonth('updated_at', $month)
                         ->selectRaw('SUM(lucro_estimado) as lucro, SUM(valor_total) as receita, SUM(custo_interno) as custo')
                         ->first();
             
-            // Adicionar Recorrência para o Mês do Loop
+            // Recorrência
             $loopDateStart = Carbon::create($year, $month, 1)->startOfDay();
             $loopDateEnd = Carbon::create($year, $month, 1)->endOfMonth();
 
-            // Lógica de Recorrência (SaaS):
-            // Considera o valor se o serviço for recorrente E estiver ativo no período (data_servico <= fim_mes E (prazo_entrega >= inicio_mes OU prazo_entrega IS NULL))
-            // Assumindo que status 'cancelado' invalida a receita, mas outros status (pendente/em_andamento/concluido) mantêm a cobrança ativa se estiver dentro do prazo.
             $recurrenceVal = Servico::where('recorrente', 1)
-                ->where('status', '!=', 'cancelado') // Exclui apenas cancelados
+                ->where('status', '!=', 'cancelado')
                 ->where('data_servico', '<=', $loopDateEnd)
                 ->where(function($query) use ($loopDateStart) {
                     $query->where('prazo_entrega', '>=', $loopDateStart)
-                          ->orWhereNull('prazo_entrega'); // Se prazo for null, assume contrato indeterminado
+                          ->orWhereNull('prazo_entrega'); 
                 })
                 ->sum('valor_recorrencia');
 
             $finalLucro = ($financials->lucro ?? 0) + $recurrenceVal;
             $finalReceita = ($financials->receita ?? 0) + $recurrenceVal;
 
-            // Serviços (Produtividade)
-            $created = Servico::whereYear('created_at', $year)
-                        ->whereMonth('created_at', $month)
-                        ->count();
-            
-            $completed = Servico::where('status', 'concluido')
-                        ->whereYear('updated_at', $year)
-                        ->whereMonth('updated_at', $month)
-                        ->count();
-            
-            $months->push(ucfirst($monthName));
-            $userCounts->push($countUsers);
-            $lucroCounts->push($finalLucro);
-            $receitaCounts->push($finalReceita);
-            $custoCounts->push($financials->custo ?? 0);
-            $createdServicesCounts->push($created);
-            $completedServicesCounts->push($completed);
+            $lucroCounts[] = $finalLucro;
+            $receitaCounts[] = $finalReceita;
+            $custoCounts[] = $financials->custo ?? 0;
         }
 
-        // 5. Distribuição por Papel (Role)
-        $roles = User::select('papel', DB::raw('count(*) as total'))
-                     ->groupBy('papel')
-                     ->pluck('total', 'papel');
-        
-        // 6. Ticket Médio (Serviços Concluídos)
-        $totalRevenue = Servico::where('status', 'concluido')->sum('valor_total');
-        $ticketMedio = $servicosConcluidos > 0 ? $totalRevenue / $servicosConcluidos : 0;
-
-        // 7. Lucro por Quadrimestre (Últimos 4)
-        $quadrimesters = collect([]);
+        // Lucro por Quadrimestre
+        $quadrimesters = [];
         $dateIterator = now();
 
         for ($i = 0; $i < 4; $i++) {
@@ -190,7 +227,6 @@ class DashboardController extends Controller
                 ->whereBetween('updated_at', [$qStart, $qEnd])
                 ->sum('lucro_estimado');
 
-            // Adicionar recorrência mês a mês dentro do quadrimestre
             $iterDate = $qStart->copy();
             while ($iterDate->lte($qEnd)) {
                 $mStart = $iterDate->copy()->startOfMonth();
@@ -209,35 +245,47 @@ class DashboardController extends Controller
                 $iterDate->addMonth();
             }
 
-            $quadrimesters->push([
+            $quadrimesters[] = [
                 'label' => $qLabel,
-                'lucro' => $lucroQuad,
+                'lucro' => number_format($lucroQuad, 2, ',', '.'),
+                'raw_lucro' => $lucroQuad,
                 'is_current' => $i === 0
-            ]);
+            ];
 
             $dateIterator = $nextDate;
         }
+        
+        // Find max quad profit for the comparison badge
+        $maxQuadLucro = collect($quadrimesters)->max('raw_lucro');
 
-        return view('dashboard', compact(
-            'totalUsers', 
-            'activeUsers', 
-            'inactiveUsers', 
-            'newUsersMonth', 
-            'growth',
-            'months',
-            'userCounts',
-            'lucroCounts',
-            'receitaCounts',
-            'custoCounts',
-            'createdServicesCounts',
-            'completedServicesCounts',
-            'roles',
-            'news',
-            'lucroRealizadoMes',
-            'lucroPresumido',
-            'servicosConcluidos',
-            'ticketMedio',
-            'quadrimesters'
-        ));
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'lucroRealizadoMes' => number_format($lucroRealizadoMes, 2, ',', '.'),
+                'lucroPresumido' => number_format($lucroPresumido, 2, ',', '.'),
+                'ticketMedio' => number_format($ticketMedio, 2, ',', '.'),
+                'quadrimesters' => $quadrimesters,
+                'maxQuadLucro' => number_format($maxQuadLucro, 2, ',', '.'),
+                'chart' => [
+                    'labels' => $monthsLabels,
+                    'lucro' => $lucroCounts,
+                    'receita' => $receitaCounts,
+                    'custo' => $custoCounts
+                ]
+            ]
+        ]);
+    }
+
+    public function checkPassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->password, $request->user()->senha)) {
+            return response()->json(['success' => false, 'message' => 'Senha incorreta.'], 403);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

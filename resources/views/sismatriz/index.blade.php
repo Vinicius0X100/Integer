@@ -121,7 +121,15 @@
                                 </td>
                                 <td class="py-3">
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">
-                                        {{ ucfirst($user->role) }}
+                                        @php
+                                            $roleLabel = match($user->role) {
+                                                'admin' => 'Administrador',
+                                                'organizer' => 'Organizador',
+                                                'user' => 'Usuário',
+                                                default => ucfirst($user->role)
+                                            };
+                                        @endphp
+                                        {{ $roleLabel }}
                                     </span>
                                 </td>
                                 <td class="py-3">

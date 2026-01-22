@@ -11,17 +11,97 @@
         transform: translateY(-3px);
         background-color: rgba(255,255,255,0.2) !important;
     }
-    .line-clamp-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
     .backdrop-blur {
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
     }
+    
+    /* Financial Section Styles */
+    .financial-wrapper {
+        border-radius: 20px;
+        overflow: hidden; /* Ensure blur doesn't leak */
+        transition: all 0.5s ease;
+    }
+    
+    .financial-content {
+        transition: filter 0.5s ease;
+        filter: blur(20px); /* Strong blur by default */
+        pointer-events: none; /* Prevent interaction when locked */
+        user-select: none;
+    }
+    
+    .financial-content.unlocked {
+        filter: blur(0);
+        pointer-events: auto;
+        user-select: auto;
+    }
+
+    .financial-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 50;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+        background: rgba(255, 255, 255, 0.05); /* Very slight tint */
+    }
+
+    .financial-overlay.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .lock-card {
+        background: var(--apple-card-bg);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border: 1px solid var(--apple-border);
+        padding: 40px;
+        border-radius: 24px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        max-width: 400px;
+        width: 90%;
+        transform: translateY(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .lock-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .password-input-group {
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+
+    .password-input-group.show {
+        max-height: 100px; /* Enough space for input */
+        opacity: 1;
+        margin-top: 20px;
+    }
+    
+    .skeleton-text {
+        color: transparent;
+        background-color: rgba(128, 128, 128, 0.2);
+        border-radius: 4px;
+        display: inline-block;
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+    }
 </style>
+
 <div class="row g-4">
     <!-- Welcome Section -->
     <div class="col-12">
@@ -40,6 +120,9 @@
                             <a href="{{ route('users.index') }}" class="btn btn-outline-light rounded-pill px-4 fw-bold hover-scale">
                                 <i class="bi bi-people me-2"></i> Gerenciar Usuários
                             </a>
+                            <button id="hideFinancialBtn" class="btn btn-warning rounded-pill px-4 fw-bold hover-scale d-none" onclick="lockFinancials()">
+                                <i class="bi bi-eye-slash-fill me-2"></i> Ocultar Financeiro
+                            </button>
                         </div>
                     </div>
                     <div class="col-lg-4">
@@ -74,7 +157,7 @@
         </div>
     </div>
 
-    <!-- Stats Cards Row 1: Users -->
+    <!-- Stats Cards Row 1: Users (Always Visible) -->
     <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body p-4">
@@ -155,41 +238,7 @@
         </div>
     </div>
 
-    <!-- Stats Cards Row 2: Financial -->
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <h6 class="text-uppercase text-muted small fw-bold mb-1">Lucro Realizado (Mês)</h6>
-                        <h2 class="display-6 fw-bold mb-0 text-success">R$ {{ number_format($lucroRealizadoMes, 2, ',', '.') }}</h2>
-                    </div>
-                    <div class="bg-success bg-opacity-10 text-success rounded-circle p-3">
-                        <i class="bi bi-currency-dollar fs-4"></i>
-                    </div>
-                </div>
-                <p class="mb-0 small text-muted">Baseado em serviços concluídos este mês.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <h6 class="text-uppercase text-muted small fw-bold mb-1">Lucro Presumido</h6>
-                        <h2 class="display-6 fw-bold mb-0 text-info">R$ {{ number_format($lucroPresumido, 2, ',', '.') }}</h2>
-                    </div>
-                    <div class="bg-info bg-opacity-10 text-info rounded-circle p-3">
-                        <i class="bi bi-graph-up-arrow fs-4"></i>
-                    </div>
-                </div>
-                <p class="mb-0 small text-muted">Previsão de serviços em andamento/pendentes.</p>
-            </div>
-        </div>
-    </div>
-
+    <!-- Productivity & Roles Section (Always Visible) -->
     <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body p-4">
@@ -203,80 +252,6 @@
                     </div>
                 </div>
                 <p class="mb-0 small text-muted">Total de serviços finalizados com sucesso.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Cards Row 3: Advanced Financials -->
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
-                <h5 class="fw-bold mb-0">Lucro por Quadrimestre</h5>
-                <p class="text-muted small">Comparativo de desempenho dos últimos períodos</p>
-            </div>
-            <div class="card-body p-4">
-                <div class="row g-3">
-                    @foreach($quadrimesters as $quad)
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-3 h-100 {{ $quad['is_current'] ? 'bg-primary bg-opacity-10 border border-primary border-opacity-25' : 'bg-light border border-light' }}">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge {{ $quad['is_current'] ? 'bg-primary' : 'bg-secondary bg-opacity-25 text-secondary' }} rounded-pill">
-                                        {{ $quad['label'] }}
-                                    </span>
-                                    @if($quad['is_current'])
-                                        <small class="text-primary fw-bold"><i class="bi bi-circle-fill small me-1"></i>Atual</small>
-                                    @endif
-                                </div>
-                                <h4 class="mb-0 fw-bold {{ $quad['is_current'] ? 'text-primary' : 'text-dark' }}">
-                                    R$ {{ number_format($quad['lucro'], 2, ',', '.') }}
-                                </h4>
-                                <small class="text-muted">Lucro Realizado</small>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body p-4 d-flex flex-column justify-content-center">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                        <h6 class="text-uppercase text-muted small fw-bold mb-1">Ticket Médio</h6>
-                        <h2 class="display-6 fw-bold mb-0 text-dark">R$ {{ number_format($ticketMedio, 2, ',', '.') }}</h2>
-                    </div>
-                    <div class="bg-secondary bg-opacity-10 text-dark rounded-circle p-3">
-                        <i class="bi bi-receipt fs-4"></i>
-                    </div>
-                </div>
-                <p class="mb-0 small text-muted">Valor médio recebido por serviço concluído.</p>
-                <hr class="my-4 opacity-10">
-                <div class="d-flex align-items-center gap-3">
-                     <div class="bg-success bg-opacity-10 text-success rounded-circle p-2">
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                    <div>
-                        <small class="d-block text-muted lh-1">Maior Lucro (Quad)</small>
-                        <span class="fw-bold text-dark">R$ {{ number_format($quadrimesters->max('lucro'), 2, ',', '.') }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Section: Financial & Roles -->
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="fw-bold mb-0">Evolução Financeira</h5>
-                    <p class="text-muted small">Lucro realizado nos últimos 6 meses</p>
-                </div>
-            </div>
-            <div class="card-body p-4">
-                <canvas id="financialChart" height="300"></canvas>
             </div>
         </div>
     </div>
@@ -295,25 +270,7 @@
         </div>
     </div>
 
-    <!-- Charts Section: Users & Productivity -->
-    <div class="col-md-6">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
-                <div class="d-flex align-items-center gap-2 mb-0">
-                    @if(file_exists(public_path('img/sacratech-id.png')))
-                        <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech iD" height="20">
-                    @endif
-                    <h5 class="fw-bold mb-0">Usuários Sacratech iD</h5>
-                </div>
-                <p class="text-muted small">Evolução de novos usuários nos últimos 6 meses</p>
-            </div>
-            <div class="card-body p-4">
-                <canvas id="userEvolutionChart" height="250"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
                 <h5 class="fw-bold mb-0">Produtividade de Serviços</h5>
@@ -324,12 +281,164 @@
             </div>
         </div>
     </div>
+
+    <!-- PROTECTED FINANCIAL SECTION WRAPPER -->
+    <div class="col-12 financial-wrapper position-relative">
+        
+        <!-- Overlay for Protection -->
+        <div id="financialOverlay" class="financial-overlay">
+            <div class="lock-card">
+                <div id="lockIconContainer">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-inline-block mb-3">
+                        <i class="bi bi-shield-lock-fill fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">Dados Financeiros Protegidos</h4>
+                    <p class="text-muted mb-4 small">Esta seção contém informações sensíveis. Digite sua senha de administrador para visualizar.</p>
+                    
+                    <button class="btn btn-primary rounded-pill px-5 fw-bold w-100" onclick="showPasswordInput()">
+                        Desbloquear
+                    </button>
+                </div>
+
+                <div id="passwordInputContainer" class="password-input-group">
+                    <div class="form-group mb-3 text-start">
+                        <label class="form-label small fw-bold text-muted">Senha do Administrador</label>
+                        <input type="password" id="adminPassword" class="form-control form-control-lg" placeholder="Digite sua senha..." onkeypress="handleEnter(event)">
+                        <div class="invalid-feedback" id="passwordError">Senha incorreta.</div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light rounded-pill flex-grow-1" onclick="hidePasswordInput()">Cancelar</button>
+                        <button class="btn btn-primary rounded-pill flex-grow-1 fw-bold" id="btnUnlock" onclick="unlockFinancials()">
+                            <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                            Acessar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blurred Financial Content -->
+        <div id="financialContent" class="financial-content">
+            <div class="row g-4">
+                <!-- Financial Cards -->
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="text-uppercase text-muted small fw-bold mb-1">Lucro Realizado (Mês)</h6>
+                                    <h2 class="display-6 fw-bold mb-0 text-success" id="val-lucro-realizado">----</h2>
+                                </div>
+                                <div class="bg-success bg-opacity-10 text-success rounded-circle p-3">
+                                    <i class="bi bi-currency-dollar fs-4"></i>
+                                </div>
+                            </div>
+                            <p class="mb-0 small text-muted">Baseado em serviços concluídos este mês.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="text-uppercase text-muted small fw-bold mb-1">Lucro Presumido</h6>
+                                    <h2 class="display-6 fw-bold mb-0 text-info" id="val-lucro-presumido">----</h2>
+                                </div>
+                                <div class="bg-info bg-opacity-10 text-info rounded-circle p-3">
+                                    <i class="bi bi-graph-up-arrow fs-4"></i>
+                                </div>
+                            </div>
+                            <p class="mb-0 small text-muted">Previsão de serviços em andamento/pendentes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4 d-flex flex-column justify-content-center">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="text-uppercase text-muted small fw-bold mb-1">Ticket Médio</h6>
+                                    <h2 class="display-6 fw-bold mb-0 text-dark" id="val-ticket-medio">----</h2>
+                                </div>
+                                <div class="bg-secondary bg-opacity-10 text-dark rounded-circle p-3">
+                                    <i class="bi bi-receipt fs-4"></i>
+                                </div>
+                            </div>
+                            <p class="mb-0 small text-muted">Valor médio recebido por serviço concluído.</p>
+                            <hr class="my-4 opacity-10">
+                            <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-success bg-opacity-10 text-success rounded-circle p-2">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                </div>
+                                <div>
+                                    <small class="d-block text-muted lh-1">Maior Lucro (Quad)</small>
+                                    <span class="fw-bold text-dark" id="val-max-quad">----</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Financials (Quadrimestres) -->
+                <div class="col-md-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                            <h5 class="fw-bold mb-0">Lucro por Quadrimestre</h5>
+                            <p class="text-muted small">Comparativo de desempenho dos últimos períodos</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3" id="quadrimesters-container">
+                                <!-- Placeholders for 4 Quadrimestres -->
+                                @for($i=0; $i<4; $i++)
+                                <div class="col-md-3">
+                                    <div class="p-3 rounded-3 h-100 bg-light border border-light">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill">----</span>
+                                        </div>
+                                        <h4 class="mb-0 fw-bold text-dark">----</h4>
+                                        <small class="text-muted">Lucro Realizado</small>
+                                    </div>
+                                </div>
+                                @endfor
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Chart -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-0">Evolução Financeira</h5>
+                                <p class="text-muted small">Lucro realizado nos últimos 6 meses</p>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <canvas id="financialChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END PROTECTED SECTION -->
+
 </div>
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    // --- Global Chart Instances ---
+    let financialChartInstance = null;
+    let roleChartInstance = null;
+    let productivityChartInstance = null;
+    let userEvolutionChartInstance = null;
+
     document.addEventListener('DOMContentLoaded', function() {
         // Animation for Numbers
         const counters = document.querySelectorAll('.count-up');
@@ -351,145 +460,224 @@
             updateCount();
         });
 
-        // Setup Charts Theme Colors
-        const getThemeColors = () => {
-            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-            return {
-                text: isDark ? '#f5f5f7' : '#1d1d1f',
-                grid: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-                tooltipBg: isDark ? '#333' : '#fff',
-                tooltipText: isDark ? '#fff' : '#000'
-            };
+        // --- Weather Widget Logic (Mock) ---
+        const updateClock = () => {
+            const now = new Date();
+            document.getElementById('clock-time').innerText = now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('clock-date').innerText = now.toLocaleDateString('pt-BR', {weekday: 'long', day: 'numeric', month: 'long'});
         };
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        let theme = getThemeColors();
+        // Simulate Weather Fetch
+        setTimeout(() => {
+            document.getElementById('weather-location').innerText = 'São Paulo, SP';
+            document.getElementById('weather-temp').innerText = '24°';
+            document.getElementById('weather-desc').innerText = 'Parcialmente Nublado';
+            document.getElementById('weather-icon').className = 'bi bi-cloud-sun fs-1';
+        }, 1500);
 
-        // Common Chart Options
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        color: theme.text,
-                        usePointStyle: true,
-                        font: { family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: theme.tooltipBg,
-                    titleColor: theme.tooltipText,
-                    bodyColor: theme.tooltipText,
-                    borderColor: theme.grid,
-                    borderWidth: 1,
-                    padding: 10
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: theme.grid, borderDash: [5, 5] },
-                    ticks: { color: theme.text }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: theme.text }
-                }
-            }
-        };
+        // --- Initialize Public Charts ---
+        initPublicCharts();
 
-        // 1. Financial Chart
-        const ctxFinancial = document.getElementById('financialChart').getContext('2d');
-        const financialChart = new Chart(ctxFinancial, {
-            type: 'bar',
+        // --- Initialize Financial Chart (Empty/Placeholder) ---
+        const ctxFin = document.getElementById('financialChart').getContext('2d');
+        financialChartInstance = new Chart(ctxFin, {
+            type: 'line',
             data: {
-                labels: {!! $months->toJson() !!},
-                datasets: [
-                    {
-                        label: 'Receita Total',
-                        data: {!! $receitaCounts->toJson() !!},
-                        backgroundColor: 'rgba(52, 199, 89, 0.7)', // Green
-                        borderColor: '#34c759',
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        order: 2
-                    },
-                    {
-                        label: 'Custo Interno',
-                        data: {!! $custoCounts->toJson() !!},
-                        backgroundColor: 'rgba(255, 59, 48, 0.7)', // Red
-                        borderColor: '#ff3b30',
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        order: 3
-                    },
-                    {
-                        type: 'line',
-                        label: 'Lucro Líquido',
-                        data: {!! $lucroCounts->toJson() !!},
-                        borderColor: '#0071e3', // Blue
-                        backgroundColor: 'rgba(0, 113, 227, 0.1)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#0071e3',
-                        pointRadius: 4,
-                        fill: false,
-                        tension: 0.4,
-                        order: 1
-                    }
-                ]
+                labels: ['--', '--', '--', '--', '--', '--'],
+                datasets: [{
+                    label: 'Lucro (Bloqueado)',
+                    data: [0, 0, 0, 0, 0, 0],
+                    borderColor: '#e0e0e0',
+                    backgroundColor: 'rgba(224, 224, 224, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
             },
             options: {
-                ...commonOptions,
-                plugins: {
-                    ...commonOptions.plugins,
-                    tooltip: {
-                        ...commonOptions.plugins.tooltip,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y);
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    ...commonOptions.scales,
-                    y: {
-                        ...commonOptions.scales.y,
-                        ticks: {
-                            color: theme.text,
-                            callback: function(value) {
-                                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumSignificantDigits: 2 }).format(value);
-                            }
-                        }
-                    }
-                }
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { display: false }, x: { display: false } }
             }
         });
+    });
 
-        // 2. Role Distribution Chart (Doughnut)
+    // --- Interaction Logic for Protection ---
+
+    function showPasswordInput() {
+        document.getElementById('lockIconContainer').classList.add('d-none');
+        document.getElementById('passwordInputContainer').classList.add('show');
+        setTimeout(() => document.getElementById('adminPassword').focus(), 100);
+    }
+
+    function hidePasswordInput() {
+        document.getElementById('passwordInputContainer').classList.remove('show');
+        document.getElementById('lockIconContainer').classList.remove('d-none');
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPassword').classList.remove('is-invalid');
+    }
+
+    function handleEnter(e) {
+        if (e.key === 'Enter') unlockFinancials();
+    }
+
+    function unlockFinancials() {
+        const password = document.getElementById('adminPassword').value;
+        const btn = document.getElementById('btnUnlock');
+        const spinner = btn.querySelector('.spinner-border');
+        const errorDiv = document.getElementById('passwordError');
+
+        if (!password) return;
+
+        // Loading state
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        document.getElementById('adminPassword').classList.remove('is-invalid');
+
+        fetch('{{ route("dashboard.financial_data") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ password: password })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Unlock Success
+                updateFinancialData(data.data);
+                
+                // Animate Unlock
+                const overlay = document.getElementById('financialOverlay');
+                const content = document.getElementById('financialContent');
+                
+                overlay.classList.add('hidden');
+                content.classList.add('unlocked');
+                
+                // Show Hide Button
+                document.getElementById('hideFinancialBtn').classList.remove('d-none');
+                
+                // Clear password input
+                document.getElementById('adminPassword').value = '';
+            } else {
+                // Error
+                document.getElementById('adminPassword').classList.add('is-invalid');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Erro ao comunicar com o servidor.');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            spinner.classList.add('d-none');
+        });
+    }
+
+    function lockFinancials() {
+        const overlay = document.getElementById('financialOverlay');
+        const content = document.getElementById('financialContent');
+        
+        overlay.classList.remove('hidden');
+        content.classList.remove('unlocked');
+        
+        // Reset overlay state
+        hidePasswordInput();
+        
+        // Hide button
+        document.getElementById('hideFinancialBtn').classList.add('d-none');
+    }
+
+    function updateFinancialData(data) {
+        // Update Text Values
+        document.getElementById('val-lucro-realizado').innerText = 'R$ ' + data.lucroRealizadoMes;
+        document.getElementById('val-lucro-presumido').innerText = 'R$ ' + data.lucroPresumido;
+        document.getElementById('val-ticket-medio').innerText = 'R$ ' + data.ticketMedio;
+        document.getElementById('val-max-quad').innerText = 'R$ ' + data.maxQuadLucro;
+
+        // Update Quadrimesters
+        const quadContainer = document.getElementById('quadrimesters-container');
+        quadContainer.innerHTML = ''; // Clear placeholders
+        
+        data.quadrimesters.forEach(quad => {
+            const activeClass = quad.is_current 
+                ? 'bg-primary bg-opacity-10 border border-primary border-opacity-25' 
+                : 'bg-light border border-light';
+            
+            const badgeClass = quad.is_current 
+                ? 'bg-primary' 
+                : 'bg-secondary bg-opacity-25 text-secondary';
+                
+            const textClass = quad.is_current ? 'text-primary' : 'text-dark';
+            
+            const html = `
+                <div class="col-md-3">
+                    <div class="p-3 rounded-3 h-100 ${activeClass}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge ${badgeClass} rounded-pill">
+                                ${quad.label}
+                            </span>
+                            ${quad.is_current ? '<small class="text-primary fw-bold"><i class="bi bi-circle-fill small me-1"></i>Atual</small>' : ''}
+                        </div>
+                        <h4 class="mb-0 fw-bold ${textClass}">
+                            R$ ${quad.lucro}
+                        </h4>
+                        <small class="text-muted">Lucro Realizado</small>
+                    </div>
+                </div>
+            `;
+            quadContainer.insertAdjacentHTML('beforeend', html);
+        });
+
+        // Update Financial Chart
+        if (financialChartInstance) {
+            financialChartInstance.data.labels = data.chart.labels;
+            financialChartInstance.data.datasets = [
+                {
+                    label: 'Lucro Realizado',
+                    data: data.chart.lucro,
+                    borderColor: '#198754', // success
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Receita Total',
+                    data: data.chart.receita,
+                    borderColor: '#0d6efd', // primary
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.4
+                }
+            ];
+            financialChartInstance.options.scales = {
+                y: { display: true, beginAtZero: true },
+                x: { display: true }
+            };
+            financialChartInstance.options.plugins.legend.display = true;
+            financialChartInstance.update();
+        }
+    }
+
+    function initPublicCharts() {
+        // Role Distribution Chart
         const ctxRole = document.getElementById('roleDistributionChart').getContext('2d');
-        const roleDistributionChart = new Chart(ctxRole, {
+        roleChartInstance = new Chart(ctxRole, {
             type: 'doughnut',
             data: {
-                labels: {!! $roles->keys()->toJson() !!},
+                labels: {!! json_encode($roles->keys()) !!},
                 datasets: [{
-                    data: {!! $roles->values()->toJson() !!},
+                    data: {!! json_encode($roles->values()) !!},
                     backgroundColor: [
-                        'rgba(0, 113, 227, 0.8)', // Blue
-                        'rgba(52, 199, 89, 0.8)',  // Green
-                        'rgba(255, 149, 0, 0.8)',  // Orange
-                        'rgba(255, 59, 48, 0.8)',  // Red
-                        'rgba(175, 82, 222, 0.8)'  // Purple
+                        '#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14'
                     ],
-                    borderWidth: 0,
-                    hoverOffset: 4
+                    borderWidth: 0
                 }]
             },
             options: {
@@ -497,219 +685,47 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right',
-                        labels: { color: theme.text, usePointStyle: true }
+                        position: 'bottom',
+                        labels: { usePointStyle: true, padding: 20 }
                     }
                 },
                 cutout: '70%'
             }
         });
 
-        // 3. User Evolution Chart (Sacratech iD)
-        const ctxUser = document.getElementById('userEvolutionChart').getContext('2d');
-        const userEvolutionChart = new Chart(ctxUser, {
-            type: 'line',
-            data: {
-                labels: {!! $months->toJson() !!},
-                datasets: [{
-                    label: 'Novos Usuários',
-                    data: {!! $userCounts->toJson() !!},
-                    borderColor: '#00c7be', // Teal
-                    backgroundColor: 'rgba(0, 199, 190, 0.1)',
-                    borderWidth: 3,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#00c7be',
-                    pointRadius: 4,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: commonOptions
-        });
-
-        // 4. Productivity Chart
+        // Productivity Chart
         const ctxProd = document.getElementById('productivityChart').getContext('2d');
-        const productivityChart = new Chart(ctxProd, {
-            type: 'line',
+        productivityChartInstance = new Chart(ctxProd, {
+            type: 'bar',
             data: {
-                labels: {!! $months->toJson() !!},
+                labels: {!! json_encode($months) !!},
                 datasets: [
                     {
-                        label: 'Serviços Criados',
-                        data: {!! $createdServicesCounts->toJson() !!},
-                        borderColor: '#ff9500', // Orange
-                        backgroundColor: 'rgba(255, 149, 0, 0.1)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#ff9500',
-                        pointRadius: 4,
-                        fill: true,
-                        tension: 0.4
+                        label: 'Criados',
+                        data: {!! json_encode($createdServicesCounts) !!},
+                        backgroundColor: '#0d6efd',
+                        borderRadius: 4
                     },
                     {
-                        label: 'Serviços Concluídos',
-                        data: {!! $completedServicesCounts->toJson() !!},
-                        borderColor: '#5856d6', // Purple
-                        backgroundColor: 'rgba(88, 86, 214, 0.1)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#5856d6',
-                        pointRadius: 4,
-                        fill: true,
-                        tension: 0.4
+                        label: 'Concluídos',
+                        data: {!! json_encode($completedServicesCounts) !!},
+                        backgroundColor: '#198754',
+                        borderRadius: 4
                     }
                 ]
             },
-            options: commonOptions
-        });
-
-        // Theme Observer Logic
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
-                    const newTheme = getThemeColors();
-                    
-                    const updateChartColors = (chart, isDoughnut = false) => {
-                        chart.options.plugins.legend.labels.color = newTheme.text;
-                        chart.options.plugins.tooltip.backgroundColor = newTheme.tooltipBg;
-                        chart.options.plugins.tooltip.titleColor = newTheme.tooltipText;
-                        chart.options.plugins.tooltip.bodyColor = newTheme.tooltipText;
-                        chart.options.plugins.tooltip.borderColor = newTheme.grid;
-                        
-                        if (!isDoughnut) {
-                            chart.options.scales.y.grid.color = newTheme.grid;
-                            chart.options.scales.y.ticks.color = newTheme.text;
-                            chart.options.scales.x.ticks.color = newTheme.text;
-                        }
-                        chart.update();
-                    };
-
-                    updateChartColors(financialChart);
-                    updateChartColors(roleDistributionChart, true);
-                    updateChartColors(userEvolutionChart);
-                    updateChartColors(productivityChart);
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
                 }
-            });
+            }
         });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['data-bs-theme']
-        });
-
-        // --- Clock & Weather Widget ---
-        function updateClock() {
-            const now = new Date();
-            const timeElement = document.getElementById('clock-time');
-            const dateElement = document.getElementById('clock-date');
-            
-            if (timeElement && dateElement) {
-                timeElement.innerText = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                // Format: Quinta-feira, 21 de Jan
-                const options = { weekday: 'long', day: 'numeric', month: 'short' };
-                const dateStr = now.toLocaleDateString('pt-BR', options).replace('.', '');
-                dateElement.innerText = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-            }
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        function initWeather() {
-            const tempEl = document.getElementById('weather-temp');
-            const descEl = document.getElementById('weather-desc');
-            const iconEl = document.getElementById('weather-icon');
-            const locEl = document.getElementById('weather-location');
-
-            // Fallback default (São Paulo)
-            const defaultLat = -23.5505;
-            const defaultLon = -46.6333;
-
-            function fetchWeather(lat, lon) {
-                // 1. Get Location Name (Free API)
-                fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`)
-                    .then(r => r.json())
-                    .then(data => {
-                        // Priority: City -> Locality -> Default
-                        locEl.innerText = data.city || data.locality || 'Local Atual';
-                    })
-                    .catch(() => {
-                        locEl.innerText = 'Local Atual';
-                    });
-
-                // 2. Get Weather Data (Open-Meteo)
-                fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.current_weather) return;
-
-                        const weather = data.current_weather;
-                        const temp = Math.round(weather.temperature);
-                        const code = weather.weathercode;
-                        const isDay = weather.is_day;
-
-                        tempEl.innerText = `${temp}°`;
-
-                        // WMO Weather Codes to Bootstrap Icons
-                        const weatherMap = {
-                            0: { icon: 'bi-sun-fill', desc: 'Céu Limpo' },
-                            1: { icon: 'bi-sun', desc: 'Parcialmente Nublado' },
-                            2: { icon: 'bi-cloud-sun', desc: 'Nublado' },
-                            3: { icon: 'bi-clouds-fill', desc: 'Encoberto' },
-                            45: { icon: 'bi-cloud-haze', desc: 'Neblina' },
-                            48: { icon: 'bi-cloud-haze2', desc: 'Nevoeiro' },
-                            51: { icon: 'bi-cloud-drizzle', desc: 'Garoa Leve' },
-                            53: { icon: 'bi-cloud-drizzle', desc: 'Garoa' },
-                            55: { icon: 'bi-cloud-drizzle-fill', desc: 'Garoa Forte' },
-                            61: { icon: 'bi-cloud-rain', desc: 'Chuva Leve' },
-                            63: { icon: 'bi-cloud-rain-fill', desc: 'Chuva' },
-                            65: { icon: 'bi-cloud-rain-heavy-fill', desc: 'Chuva Forte' },
-                            71: { icon: 'bi-snow', desc: 'Neve Leve' },
-                            73: { icon: 'bi-snow', desc: 'Neve' },
-                            75: { icon: 'bi-snow2', desc: 'Neve Forte' },
-                            80: { icon: 'bi-cloud-rain', desc: 'Pancadas de Chuva' },
-                            81: { icon: 'bi-cloud-rain-fill', desc: 'Pancadas Fortes' },
-                            82: { icon: 'bi-cloud-rain-heavy-fill', desc: 'Tempestade' },
-                            95: { icon: 'bi-cloud-lightning-rain', desc: 'Trovoadas' },
-                            96: { icon: 'bi-cloud-lightning-rain-fill', desc: 'Trovoadas c/ Granizo' },
-                            99: { icon: 'bi-cloud-lightning-rain-fill', desc: 'Tempestade Severa' }
-                        };
-
-                        let info = weatherMap[code] || { icon: 'bi-cloud', desc: 'Indisponível' };
-
-                        // Night time adjustments
-                        if (isDay === 0) {
-                            if (code === 0) info.icon = 'bi-moon-stars-fill';
-                            if (code === 1) info.icon = 'bi-moon-stars';
-                            if (code === 2) info.icon = 'bi-cloud-moon';
-                        }
-
-                        iconEl.className = `bi ${info.icon} fs-1`;
-                        descEl.innerText = info.desc;
-                    })
-                    .catch(err => {
-                        console.error('Weather Error:', err);
-                        descEl.innerText = 'Indisponível';
-                    });
-            }
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        fetchWeather(position.coords.latitude, position.coords.longitude);
-                    },
-                    (error) => {
-                        console.log('Geo denied/error, using default SP');
-                        locEl.innerText = 'São Paulo';
-                        fetchWeather(defaultLat, defaultLon);
-                    }
-                );
-            } else {
-                locEl.innerText = 'São Paulo';
-                fetchWeather(defaultLat, defaultLon);
-            }
-        }
-
-        initWeather();
-    });
+    }
 </script>
 @endsection

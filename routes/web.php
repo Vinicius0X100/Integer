@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
     Route::post('password/confirm', [ConfirmPasswordController::class, 'store']);
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/dashboard/check-password', [DashboardController::class, 'checkPassword'])->name('dashboard.check_password');
+    Route::post('/dashboard/financial-data', [DashboardController::class, 'getFinancialData'])->name('dashboard.financial_data');
 
     // System Health
     Route::get('/system-health', [App\Http\Controllers\SystemHealthController::class, 'index'])->name('system_health.index');
@@ -48,7 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('sismatriz-main', \App\Http\Controllers\SisMatrizMainUserController::class);
 
     // Rotas de Clientes (Protegidas)
-    Route::middleware([EnsureUserIsAdmin::class, 'password.confirm'])->group(function () {
+    Route::middleware([EnsureUserIsAdmin::class])->group(function () {
         Route::post('clientes/bulk-action', [ClienteController::class, 'bulkAction'])->name('clientes.bulk_action');
         Route::any('clientes/generate-pdf', [ClienteController::class, 'generatePdf'])->name('clientes.pdf');
         Route::resource('clientes', ClienteController::class);

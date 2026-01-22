@@ -37,6 +37,7 @@
                                 <label for="role" class="form-label fw-medium">Papel (Role) <span class="text-danger">*</span></label>
                                 <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
                                     <option value="">Selecione...</option>
+                                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrador</option>
                                     <option value="organizer" {{ old('role') == 'organizer' ? 'selected' : '' }}>Organizador</option>
                                     <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Usuário</option>
                                 </select>

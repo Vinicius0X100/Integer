@@ -11,6 +11,9 @@
     <link rel="icon" type="image/png" href="{{ asset('img/logo-black.png') }}">
 
     <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="dns-prefetch" href="//fonts.bunny.net">
 
     <!-- Bootstrap 5.3 CSS -->
@@ -48,7 +51,7 @@
             --apple-text: #1d1d1f;
             --apple-border: rgba(0,0,0,0.05);
             --apple-blue: #0071e3;
-            --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --apple-font: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         [data-bs-theme="dark"] {
@@ -314,8 +317,13 @@
                         <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Gerenciamento</span>
                     </li>
                     <li class="mt-1">
-                        <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
-                            <i class="bi bi-people"></i> Usuários
+                        <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }} d-flex align-items-center">
+                            @if(file_exists(public_path('img/sacratech-id.png')))
+                                <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech iD Logo" style="width: 20px; height: 20px; object-fit: contain; margin-right: 10px;">
+                            @else
+                                <i class="bi bi-people"></i> 
+                            @endif
+                            Usuários do Sacratech iD
                         </a>
                     </li>
                     <li class="mt-2">
@@ -338,7 +346,7 @@
                             @else
                                 <i class="bi bi-building-fill"></i> 
                             @endif
-                            SisMatriz Principal
+                            SisMatriz
                         </a>
                     </li>
                     <li class="mt-2">
