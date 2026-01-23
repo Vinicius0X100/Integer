@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ServicoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ParoquiaController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 
 Route::get('/', function () {
@@ -52,6 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::post('sismatriz-main/bulk-action', [\App\Http\Controllers\SisMatrizMainUserController::class, 'bulkAction'])->name('sismatriz-main.bulk_action');
     Route::post('sismatriz-main/generate-pdf', [\App\Http\Controllers\SisMatrizMainUserController::class, 'generatePdf'])->name('sismatriz-main.pdf');
     Route::resource('sismatriz-main', \App\Http\Controllers\SisMatrizMainUserController::class);
+
+    // Rotas de Paróquias
+    Route::resource('paroquias', ParoquiaController::class);
 
     // Rotas de Clientes (Protegidas)
     Route::middleware([EnsureUserIsAdmin::class])->group(function () {

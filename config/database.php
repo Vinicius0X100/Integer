@@ -105,7 +105,7 @@ return [
             'driver' => 'mysql',
             'host' => env('DB_SISMATRIZ_HOST', '127.0.0.1'),
             'port' => env('DB_SISMATRIZ_PORT', '3306'),
-            'database' => env('DB_SISMATRIZ_MAIN_DATABASE', 'sismatriz'),
+            'database' => env('DB_SISMATRIZ_MAIN_DATABASE', 'sismatriz_dev'),
             'username' => env('DB_SISMATRIZ_USERNAME', 'root'),
             'password' => env('DB_SISMATRIZ_PASSWORD', ''),
             'unix_socket' => env('DB_SISMATRIZ_SOCKET', ''),

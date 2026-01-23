@@ -340,7 +340,7 @@
                         </a>
                     </li>
                     <li class="mt-1">
-                        <a href="{{ route('sismatriz-main.index') }}" class="{{ request()->routeIs('sismatriz-main.*') ? 'active' : '' }} d-flex align-items-center">
+                        <a href="#sismatrizSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('sismatriz-main.*') || request()->routeIs('paroquias.*') ? 'true' : 'false' }}" class="dropdown-toggle d-flex align-items-center">
                             @if(file_exists(public_path('img/sismatriz-logo.png')))
                                 <img src="{{ asset('img/sismatriz-logo.png') }}" alt="SisMatriz Logo" style="width: 20px; height: 20px; object-fit: contain; margin-right: 10px;">
                             @else
@@ -348,6 +348,18 @@
                             @endif
                             SisMatriz
                         </a>
+                        <ul class="collapse list-unstyled {{ request()->routeIs('sismatriz-main.*') || request()->routeIs('paroquias.*') ? 'show' : '' }}" id="sismatrizSubmenu" style="background-color: rgba(0,0,0,0.05); border-radius: 12px; margin: 5px 10px;">
+                            <li>
+                                <a href="{{ route('sismatriz-main.index') }}" class="{{ request()->routeIs('sismatriz-main.*') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                    Acessos e Usuários
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('paroquias.index') }}" class="{{ request()->routeIs('paroquias.*') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                    Paróquias
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="mt-2">
                         <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Monitoramento</span>

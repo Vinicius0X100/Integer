@@ -60,6 +60,20 @@ return [
             'report' => false,
         ],
 
+        'sftp_public' => [
+            'driver' => 'sftp',
+            'host' => env('SFTP_HOST'),
+            'username' => env('SFTP_USERNAME'),
+            'password' => env('SFTP_PASSWORD'),
+            'privateKey' => env('SFTP_PRIVATE_KEY'),
+            'passphrase' => env('SFTP_PASSPHRASE'),
+            'port' => (int) env('SFTP_PORT', 22),
+            'root' => env('SFTP_ROOT', '/var/www/html/public/uploads'),
+            'url' => env('SFTP_URL', 'https://backend.sismatriz.online/uploads'),
+            'timeout' => 30,
+            'throw' => true,
+        ],
+
     ],
 
     /*

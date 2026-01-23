@@ -23,23 +23,36 @@ class LoginController extends Controller
 
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $remember)) {
-            $request->session()->regenerate();
+        try {
+            if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $remember)) {
+                $request->session()->regenerate();
 
-            /** @var \App\Models\User $user */
-            $user = Auth::user();
-            
-            if ($user->papel !== 'admin') {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                /** @var \App\Models\User $user */
+                $user = Auth::user();
+                
+                if ($user->papel !== 'admin') {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
 
-                throw ValidationException::withMessages([
-                    'email' => 'Acesso restrito a administradores.',
-                ]);
+                    throw ValidationException::withMessages([
+                        'email' => 'Acesso restrito a administradores.',
+                    ]);
+                }
+
+                return redirect()->intended('dashboard');
             }
-
-            return redirect()->intended('dashboard');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Check for specific error code or message if needed, but generic catch is safer for now
+            // SQLSTATE[HY000]: General error: 1 no such table: usuarios
+            
+            throw ValidationException::withMessages([
+                'email' => 'Erro de conexão com o banco de dados. Por favor, tente novamente mais tarde ou contate o suporte.',
+            ]);
+        } catch (\Exception $e) {
+            throw ValidationException::withMessages([
+                'email' => 'Ocorreu um erro inesperado ao tentar fazer login.',
+            ]);
         }
 
         throw ValidationException::withMessages([
