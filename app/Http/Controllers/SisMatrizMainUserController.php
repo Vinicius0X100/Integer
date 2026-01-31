@@ -99,7 +99,7 @@ class SisMatrizMainUserController extends Controller
         
         // Avatar URL
         $user->avatar_url = $user->avatar && $user->avatar !== 'unknow_user.png' 
-            ? "https://backend.sismatriz.online/uploads/avatars/{$user->avatar}" 
+            ? "https://central.sismatriz.online/storage/uploads/avatars/{$user->avatar}" 
             : null;
 
         return response()->json($user);
