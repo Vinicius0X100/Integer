@@ -74,7 +74,7 @@
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
                                     @if($paroquia->foto)
-                                        <img src="https://backend.sismatriz.online/uploads/paroquias/{{ $paroquia->foto }}" alt="{{ $paroquia->name }}" class="rounded-circle me-3 border" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <img src="https://central.sismatriz.online/storage/uploads/paroquias/{{ $paroquia->foto }}" alt="{{ $paroquia->name }}" class="rounded-circle me-3 border" style="width: 40px; height: 40px; object-fit: cover;">
                                     @else
                                         <div class="avatar-initial rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold me-3" style="width: 40px; height: 40px;">
                                             {{ substr($paroquia->name, 0, 1) }}

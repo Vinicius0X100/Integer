@@ -35,7 +35,7 @@
                                                 $imageUrl = $paroquia->foto ? (
                                                     file_exists(public_path('uploads/paroquias/' . $paroquia->foto)) 
                                                         ? asset('uploads/paroquias/' . $paroquia->foto) 
-                                                        : 'https://backend.sismatriz.online/uploads/paroquias/' . $paroquia->foto
+                                                        : 'https://central.sismatriz.online/storage/uploads/paroquias/' . $paroquia->foto
                                                 ) : '';
                                             @endphp
                                             <img src="{{ $imageUrl }}" alt="Preview" id="imagePreview" class="h-100 w-100" style="object-fit: contain;">

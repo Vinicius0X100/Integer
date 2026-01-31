@@ -69,7 +69,7 @@ return [
             'passphrase' => env('SFTP_PASSPHRASE'),
             'port' => (int) env('SFTP_PORT', 22),
             'root' => env('SFTP_ROOT', '/var/www/html/public/uploads'),
-            'url' => env('SFTP_URL', 'https://backend.sismatriz.online/uploads'),
+            'url' => env('SFTP_URL', 'https://central.sismatriz.online/storage/uploads'),
             'timeout' => 30,
             'throw' => true,
         ],

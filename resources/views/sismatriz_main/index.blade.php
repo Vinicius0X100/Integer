@@ -131,7 +131,7 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     @if($user->avatar && $user->avatar !== 'unknow_user.png')
-                                        <img src="https://backend.sismatriz.online/uploads/avatars/{{ $user->avatar }}" alt="{{ $user->name }}" class="rounded-circle me-3 border" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <img src="https://central.sismatriz.online/storage/uploads/avatars/{{ $user->avatar }}" alt="{{ $user->name }}" class="rounded-circle me-3 border" style="width: 40px; height: 40px; object-fit: cover;">
                                     @else
                                         <div class="avatar-initial rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold me-3" style="width: 40px; height: 40px;">
                                             {{ substr($user->name, 0, 1) }}
@@ -172,7 +172,7 @@
                             </td>
                             <td>
                                 @if($user->paroquia && $user->paroquia->foto)
-                                    <img src="https://backend.sismatriz.online/uploads/paroquias/{{ $user->paroquia->foto }}" alt="{{ $user->paroquia->name }}" title="{{ $user->paroquia->name }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" data-bs-toggle="tooltip">
+                                    <img src="https://central.sismatriz.online/storage/uploads/paroquias/{{ $user->paroquia->foto }}" alt="{{ $user->paroquia->name }}" title="{{ $user->paroquia->name }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" data-bs-toggle="tooltip">
                                 @else
                                     <span class="text-muted small">-</span>
                                 @endif

@@ -31,7 +31,7 @@ class MonitorSystems extends Command
         $systems = [
             [
                 'name' => 'SisMatriz',
-                'url' => 'https://backend.sismatriz.online/api/health'
+                'url' => 'https://central.sismatriz.online/api/health'
             ],
             [
                 'name' => 'SisMatriz Ticket',
