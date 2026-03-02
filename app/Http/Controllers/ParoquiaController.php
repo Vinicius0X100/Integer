@@ -6,6 +6,7 @@ use App\Models\SisMatrizParoquia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ParoquiaController extends Controller
 {
@@ -48,10 +49,30 @@ class ParoquiaController extends Controller
             'paroco' => 'nullable|string|max:255',
             'status' => 'required|in:0,1',
             'foto' => 'nullable|image|max:2048',
+            'paroco_foto' => 'nullable|image|max:2048',
+            'paroco_mensagem' => 'nullable|string',
+            'paroco_email' => 'nullable|email|max:255',
+            'paroco_ordenacao' => 'nullable|date',
+            'paroco_aniversario' => 'nullable|date',
+            'facebook' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
+            'twitter' => 'nullable|string|max:255',
+            'youtube' => 'nullable|string|max:255',
         ]);
 
-        $data = $request->except('foto');
+        $data = $request->except(['foto', 'paroco_foto']);
         $data['added_at'] = now();
+
+        // Slug generation
+        $baseSlug = Str::slug($request->name);
+        $slug = $baseSlug;
+        $count = 1;
+
+        while (SisMatrizParoquia::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $count;
+            $count++;
+        }
+        $data['slug'] = $slug;
 
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
@@ -91,6 +112,31 @@ class ParoquiaController extends Controller
             }
         }
 
+        if ($request->hasFile('paroco_foto')) {
+            $file = $request->file('paroco_foto');
+            $filename = 'paroco_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            
+            try {
+                if (config('filesystems.disks.sftp_public.host')) {
+                    $path = 'paroquias/' . $filename;
+                    if (!Storage::disk('sftp_public')->exists('paroquias')) {
+                        Storage::disk('sftp_public')->makeDirectory('paroquias');
+                    }
+                    if (Storage::disk('sftp_public')->put($path, file_get_contents($file))) {
+                        $data['paroco_foto'] = $filename;
+                    }
+                } else {
+                    throw new \Exception('SFTP not configured');
+                }
+            } catch (\Exception $e) {
+                if (!file_exists(public_path('uploads/paroquias'))) {
+                    mkdir(public_path('uploads/paroquias'), 0755, true);
+                }
+                $file->move(public_path('uploads/paroquias'), $filename);
+                $data['paroco_foto'] = $filename;
+            }
+        }
+
         SisMatrizParoquia::create($data);
 
         return redirect()->route('paroquias.index')->with('success', 'Paróquia cadastrada com sucesso!');
@@ -116,9 +162,18 @@ class ParoquiaController extends Controller
             'paroco' => 'nullable|string|max:255',
             'status' => 'required|in:0,1',
             'foto' => 'nullable|image|max:2048',
+            'paroco_foto' => 'nullable|image|max:2048',
+            'paroco_mensagem' => 'nullable|string',
+            'paroco_email' => 'nullable|email|max:255',
+            'paroco_ordenacao' => 'nullable|date',
+            'paroco_aniversario' => 'nullable|date',
+            'facebook' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
+            'twitter' => 'nullable|string|max:255',
+            'youtube' => 'nullable|string|max:255',
         ]);
 
-        $data = $request->except('foto');
+        $data = $request->except(['foto', 'paroco_foto']);
 
         if ($request->hasFile('foto')) {
             // Delete old photo if exists
@@ -171,6 +226,44 @@ class ParoquiaController extends Controller
             }
         }
 
+        if ($request->hasFile('paroco_foto')) {
+            if ($paroquia->paroco_foto) {
+                if (config('filesystems.disks.sftp_public.host')) {
+                    try {
+                        Storage::disk('sftp_public')->delete('paroquias/' . $paroquia->paroco_foto);
+                    } catch (\Exception $e) {
+                        \Log::error('SFTP Delete failed: ' . $e->getMessage());
+                    }
+                }
+                if (file_exists(public_path('uploads/paroquias/' . $paroquia->paroco_foto))) {
+                    unlink(public_path('uploads/paroquias/' . $paroquia->paroco_foto));
+                }
+            }
+
+            $file = $request->file('paroco_foto');
+            $filename = 'paroco_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            
+            try {
+                if (config('filesystems.disks.sftp_public.host')) {
+                    $path = 'paroquias/' . $filename;
+                    if (!Storage::disk('sftp_public')->exists('paroquias')) {
+                        Storage::disk('sftp_public')->makeDirectory('paroquias');
+                    }
+                    if (Storage::disk('sftp_public')->put($path, file_get_contents($file))) {
+                        $data['paroco_foto'] = $filename;
+                    }
+                } else {
+                    throw new \Exception('SFTP not configured');
+                }
+            } catch (\Exception $e) {
+                if (!file_exists(public_path('uploads/paroquias'))) {
+                    mkdir(public_path('uploads/paroquias'), 0755, true);
+                }
+                $file->move(public_path('uploads/paroquias'), $filename);
+                $data['paroco_foto'] = $filename;
+            }
+        }
+
         $paroquia->update($data);
 
         return redirect()->route('paroquias.index')->with('success', 'Paróquia atualizada com sucesso!');
@@ -198,11 +291,24 @@ class ParoquiaController extends Controller
                     \Log::error('SFTP Delete failed: ' . $e->getMessage());
                 }
             }
-            // Try to delete from local
             if (file_exists(public_path('uploads/paroquias/' . $paroquia->foto))) {
                 unlink(public_path('uploads/paroquias/' . $paroquia->foto));
             }
         }
+
+        if ($paroquia->paroco_foto) {
+            if (config('filesystems.disks.sftp_public.host')) {
+                try {
+                    Storage::disk('sftp_public')->delete('paroquias/' . $paroquia->paroco_foto);
+                } catch (\Exception $e) {
+                    \Log::error('SFTP Delete failed: ' . $e->getMessage());
+                }
+            }
+            if (file_exists(public_path('uploads/paroquias/' . $paroquia->paroco_foto))) {
+                unlink(public_path('uploads/paroquias/' . $paroquia->paroco_foto));
+            }
+        }
+
 
         $paroquia->delete();
 

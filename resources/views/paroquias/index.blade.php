@@ -96,7 +96,21 @@
                                 <span class="small text-muted">{{ $paroquia->address ?? '-' }}</span>
                             </td>
                             <td>
-                                <span class="small text-muted">{{ $paroquia->paroco ?? '-' }}</span>
+                                <div class="d-flex align-items-center">
+                                    @if($paroquia->paroco_foto)
+                                        @php
+                                            $parocoImageUrl = file_exists(public_path('uploads/paroquias/' . $paroquia->paroco_foto)) 
+                                                ? asset('uploads/paroquias/' . $paroquia->paroco_foto) 
+                                                : 'https://central.sismatriz.online/storage/uploads/paroquias/' . $paroquia->paroco_foto;
+                                        @endphp
+                                        <img src="{{ $parocoImageUrl }}" alt="{{ $paroquia->paroco }}" class="rounded-circle me-2 border" style="width: 32px; height: 32px; object-fit: cover;">
+                                    @else
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-muted border me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                    @endif
+                                    <span class="small text-muted">{{ $paroquia->paroco ?? '-' }}</span>
+                                </div>
                             </td>
                             <td>
                                 <span class="small text-muted">{{ $paroquia->added_at ? $paroquia->added_at->format('d/m/Y H:i') : '-' }}</span>

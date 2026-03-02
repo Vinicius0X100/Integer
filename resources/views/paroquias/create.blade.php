@@ -56,6 +56,96 @@
                             </div>
 
                             <div class="col-md-6">
+                                <label for="paroco_email" class="form-label">Email do Pároco</label>
+                                <input type="email" class="form-control @error('paroco_email') is-invalid @enderror" id="paroco_email" name="paroco_email" value="{{ old('paroco_email') }}">
+                                @error('paroco_email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12">
+                                <label for="paroco_foto" class="form-label">Foto do Pároco</label>
+                                <div class="position-relative">
+                                    <div class="drop-zone p-5 rounded-4 text-center position-relative transition-all" id="dropZoneParoco" style="border: 2px dashed var(--apple-border); background-color: rgba(0,0,0,0.02); transition: all 0.3s ease;">
+                                        <input type="file" class="form-control position-absolute top-0 start-0 w-100 h-100 opacity-0 z-2 cursor-pointer" id="paroco_foto" name="paroco_foto" accept="image/*" onchange="previewImageParoco(this)">
+                                        
+                                        <div class="d-flex flex-column align-items-center justify-content-center" id="dropZoneContentParoco">
+                                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary mb-3">
+                                                <i class="bi bi-person-bounding-box fs-3"></i>
+                                            </div>
+                                            <h6 class="fw-bold mb-1">Arraste e solte a foto do pároco aqui</h6>
+                                            <p class="small text-muted mb-0">ou clique para selecionar do computador</p>
+                                        </div>
+
+                                        <div id="imagePreviewContainerParoco" class="d-none position-absolute top-0 start-0 w-100 h-100 bg-white rounded-4 d-flex align-items-center justify-content-center z-1 overflow-hidden" style="background-color: var(--apple-card-bg) !important;">
+                                            <img src="" alt="Preview" id="imagePreviewParoco" class="h-100 w-100" style="object-fit: contain;">
+                                            <button type="button" class="btn btn-sm btn-dark rounded-circle position-absolute top-0 end-0 m-3 z-3 shadow-sm" onclick="clearImageParoco(event)" title="Remover imagem">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="paroco_ordenacao" class="form-label">Data de Ordenação</label>
+                                <input type="date" class="form-control @error('paroco_ordenacao') is-invalid @enderror" id="paroco_ordenacao" name="paroco_ordenacao" value="{{ old('paroco_ordenacao') }}">
+                                @error('paroco_ordenacao')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="paroco_aniversario" class="form-label">Data de Aniversário</label>
+                                <input type="date" class="form-control @error('paroco_aniversario') is-invalid @enderror" id="paroco_aniversario" name="paroco_aniversario" value="{{ old('paroco_aniversario') }}">
+                                @error('paroco_aniversario')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12">
+                                <label for="paroco_mensagem" class="form-label">Mensagem do Pároco</label>
+                                <textarea class="form-control @error('paroco_mensagem') is-invalid @enderror" id="paroco_mensagem" name="paroco_mensagem" rows="3">{{ old('paroco_mensagem') }}</textarea>
+                                @error('paroco_mensagem')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12">
+                                <h6 class="fw-bold mt-3 mb-3">Redes Sociais</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="facebook" class="form-label"><i class="bi bi-facebook text-primary me-2"></i>Facebook</label>
+                                        <input type="text" class="form-control @error('facebook') is-invalid @enderror" id="facebook" name="facebook" value="{{ old('facebook') }}" placeholder="https://facebook.com/...">
+                                        @error('facebook')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="instagram" class="form-label"><i class="bi bi-instagram text-danger me-2"></i>Instagram</label>
+                                        <input type="text" class="form-control @error('instagram') is-invalid @enderror" id="instagram" name="instagram" value="{{ old('instagram') }}" placeholder="https://instagram.com/...">
+                                        @error('instagram')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="twitter" class="form-label"><i class="bi bi-twitter-x text-dark me-2"></i>X (Twitter)</label>
+                                        <input type="text" class="form-control @error('twitter') is-invalid @enderror" id="twitter" name="twitter" value="{{ old('twitter') }}" placeholder="https://twitter.com/...">
+                                        @error('twitter')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="youtube" class="form-label"><i class="bi bi-youtube text-danger me-2"></i>YouTube</label>
+                                        <input type="text" class="form-control @error('youtube') is-invalid @enderror" id="youtube" name="youtube" value="{{ old('youtube') }}" placeholder="https://youtube.com/...">
+                                        @error('youtube')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}">
                                 @error('email')
@@ -162,9 +252,11 @@
 
     // Drag and Drop Visual Feedback
     const dropZone = document.getElementById('dropZone');
+    const dropZoneParoco = document.getElementById('dropZoneParoco');
     
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, preventDefaults, false);
+        if(dropZoneParoco) dropZoneParoco.addEventListener(eventName, preventDefaults, false);
     });
 
     function preventDefaults(e) {
@@ -173,37 +265,80 @@
     }
 
     ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, highlight, false);
+        dropZone.addEventListener(eventName, () => highlight(dropZone), false);
+        if(dropZoneParoco) dropZoneParoco.addEventListener(eventName, () => highlight(dropZoneParoco), false);
     });
 
     ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, unhighlight, false);
+        dropZone.addEventListener(eventName, () => unhighlight(dropZone), false);
+        if(dropZoneParoco) dropZoneParoco.addEventListener(eventName, () => unhighlight(dropZoneParoco), false);
     });
 
     // Handle dropped files
-    dropZone.addEventListener('drop', handleDrop, false);
+    dropZone.addEventListener('drop', (e) => handleDrop(e, 'foto'), false);
+    if(dropZoneParoco) dropZoneParoco.addEventListener('drop', (e) => handleDrop(e, 'paroco_foto'), false);
 
-    function handleDrop(e) {
+    function handleDrop(e, inputId) {
         const dt = e.dataTransfer;
         const files = dt.files;
-        const input = document.getElementById('foto');
+        const input = document.getElementById(inputId);
         
         if (files && files.length > 0) {
             input.files = files;
-            previewImage(input);
+            if(inputId === 'foto') previewImage(input);
+            else previewImageParoco(input);
         }
     }
 
-    function highlight(e) {
-        dropZone.classList.add('bg-primary');
-        dropZone.classList.add('bg-opacity-10');
-        dropZone.style.borderColor = 'var(--apple-blue)';
+    function highlight(element) {
+        element.classList.add('bg-primary');
+        element.classList.add('bg-opacity-10');
+        element.style.borderColor = 'var(--apple-blue)';
     }
 
-    function unhighlight(e) {
-        dropZone.classList.remove('bg-primary');
-        dropZone.classList.remove('bg-opacity-10');
+    function unhighlight(element) {
+        element.classList.remove('bg-primary');
+        element.classList.remove('bg-opacity-10');
+        element.style.borderColor = 'var(--apple-border)';
+    }
+
+    function previewImageParoco(input) {
+        const dropZone = document.getElementById('dropZoneParoco');
+        const previewContainer = document.getElementById('imagePreviewContainerParoco');
+        const preview = document.getElementById('imagePreviewParoco');
+        const content = document.getElementById('dropZoneContentParoco');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.classList.remove('d-none');
+                content.classList.add('opacity-0');
+                dropZone.style.borderStyle = 'dashed';
+                dropZone.style.borderColor = '#28a745';
+                dropZone.style.backgroundColor = 'rgba(40, 167, 69, 0.05)';
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function clearImageParoco(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const input = document.getElementById('paroco_foto');
+        const dropZone = document.getElementById('dropZoneParoco');
+        const previewContainer = document.getElementById('imagePreviewContainerParoco');
+        const content = document.getElementById('dropZoneContentParoco');
+
+        input.value = '';
+        previewContainer.classList.add('d-none');
+        content.classList.remove('opacity-0');
+        dropZone.style.borderStyle = 'dashed';
         dropZone.style.borderColor = 'var(--apple-border)';
+        dropZone.style.backgroundColor = 'rgba(0,0,0,0.02)';
     }
 </script>
 @endpush

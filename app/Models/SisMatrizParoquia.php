@@ -24,9 +24,21 @@ class SisMatrizParoquia extends Model
         'status',
         'paroco',
         'foto',
+        'paroco_foto',
+        'paroco_mensagem',
+        'paroco_email',
+        'paroco_ordenacao',
+        'paroco_aniversario',
+        'facebook',
+        'instagram',
+        'twitter',
+        'youtube',
+        'slug',
     ];
 
     protected $casts = [
         'added_at' => 'datetime',
+        'paroco_ordenacao' => 'date',
+        'paroco_aniversario' => 'date',
     ];
 }
