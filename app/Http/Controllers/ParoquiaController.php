@@ -175,6 +175,20 @@ class ParoquiaController extends Controller
 
         $data = $request->except(['foto', 'paroco_foto']);
 
+        // Check if name has changed to update slug
+        if ($request->name !== $paroquia->name) {
+            $baseSlug = Str::slug($request->name);
+            $slug = $baseSlug;
+            $count = 1;
+
+            // Check for uniqueness excluding current record
+            while (SisMatrizParoquia::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+                $slug = $baseSlug . '-' . $count;
+                $count++;
+            }
+            $data['slug'] = $slug;
+        }
+
         if ($request->hasFile('foto')) {
             // Delete old photo if exists
             if ($paroquia->foto) {
