@@ -350,8 +350,13 @@
                         </a>
                         <ul class="collapse list-unstyled {{ request()->routeIs('sismatriz-main.*') || request()->routeIs('paroquias.*') ? 'show' : '' }}" id="sismatrizSubmenu" style="background-color: rgba(0,0,0,0.05); border-radius: 12px; margin: 5px 10px;">
                             <li>
-                                <a href="{{ route('sismatriz-main.index') }}" class="{{ request()->routeIs('sismatriz-main.*') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('sismatriz-main.index') }}" class="{{ request()->routeIs('sismatriz-main.index') || request()->routeIs('sismatriz-main.show') || request()->routeIs('sismatriz-main.create') || request()->routeIs('sismatriz-main.edit') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
                                     Acessos e Usuários
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('sismatriz-main.metrics') }}" class="{{ request()->routeIs('sismatriz-main.metrics') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                    Métricas e KPIs
                                 </a>
                             </li>
                             <li>
