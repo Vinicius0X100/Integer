@@ -91,7 +91,7 @@
                         <div>
                             <h6 class="text-uppercase text-muted small fw-bold mb-1 d-flex align-items-center gap-1">
                                 Acessos
-                                <i class="bi bi-question-circle-fill text-muted opacity-50" data-bs-toggle="tooltip" title="Total de logins realizados no período selecionado."></i>
+                                <i class="bi bi-question-circle-fill text-muted opacity-50" data-bs-toggle="tooltip" title="Total de logins realizados."></i>
                             </h6>
                             <h2 class="display-5 fw-bold mb-0 text-success">{{ number_format($totalAccesses, 0, ',', '.') }}</h2>
                         </div>
@@ -204,28 +204,32 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
         <!-- Access Evolution Chart -->
         <div class="col-12 col-lg-8">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom-0 py-3">
-                    <h6 class="fw-bold mb-0">Evolução de Acessos (Últimos 60 dias)</h6>
+                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold mb-0">Evolução de Acessos</h5>
+                    <small class="text-muted">Comparativo por dispositivo</small>
                 </div>
-                <div class="card-body">
-                    <canvas id="accessChart" style="height: 300px;"></canvas>
+                <div class="card-body p-4">
+                    <div style="height: 300px;">
+                        <canvas id="accessChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Comparative Chart -->
+
+        <!-- Registers Breakdown Chart -->
         <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom-0 py-3">
-                    <h6 class="fw-bold mb-0">Visão Geral de Registros</h6>
+                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold mb-0">Visão Geral</h5>
+                    <small class="text-muted">Registros e Sacramentos</small>
                 </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <div style="width: 100%; max-width: 300px;">
-                        <canvas id="registersChart" style="height: 300px;"></canvas>
+                <div class="card-body p-4 position-relative">
+                    <div style="height: 300px;">
+                        <canvas id="registersChart"></canvas>
                     </div>
                 </div>
             </div>

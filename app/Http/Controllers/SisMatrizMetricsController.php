@@ -21,9 +21,12 @@ class SisMatrizMetricsController extends Controller
         $paroquiaId = $request->input('paroquia_id');
         $roleId = $request->input('role');
         
-        // Date Filter (Defaults to last 60 days if not provided)
-        $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->endOfDay() : Carbon::now()->endOfDay();
-        $startDate = $request->input('start_date') ? Carbon::parse($request->input('start_date'))->startOfDay() : Carbon::now()->subDays(60)->startOfDay();
+        // Date Filter (No default dates, unless specified)
+        $startDateInput = $request->input('start_date');
+        $endDateInput = $request->input('end_date');
+
+        $startDate = $startDateInput ? Carbon::parse($startDateInput)->startOfDay() : null;
+        $endDate = $endDateInput ? Carbon::parse($endDateInput)->endOfDay() : null;
 
         // --- 1. Quantitative Cards (KPIs) ---
 
@@ -43,9 +46,15 @@ class SisMatrizMetricsController extends Controller
         
         $usersCount = $usersQuery->count();
 
-        // Accesses (Filtered by Date Range)
-        $accessQuery = SisMatrizUserAccess::query()
-            ->whereBetween('access_date', [$startDate, $endDate]);
+        // Accesses (Filtered by Date Range if provided)
+        $accessQuery = SisMatrizUserAccess::query();
+
+        if ($startDate) {
+            $accessQuery->where('access_date', '>=', $startDate);
+        }
+        if ($endDate) {
+            $accessQuery->where('access_date', '<=', $endDate);
+        }
 
         // Filter accesses by Parish/Role (requires join)
         if ($paroquiaId || $roleId) {
@@ -69,7 +78,12 @@ class SisMatrizMetricsController extends Controller
         if ($paroquiaId) {
             $registersQuery->where('paroquia_id', $paroquiaId);
         }
-        $registersQuery->whereBetween('created_at', [$startDate, $endDate]);
+        if ($startDate) {
+            $registersQuery->where('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $registersQuery->where('created_at', '<=', $endDate);
+        }
         $registersCount = $registersQuery->count();
 
         // Apurações (VinWatcheds)
@@ -77,7 +91,12 @@ class SisMatrizMetricsController extends Controller
         if ($paroquiaId) {
             $vinWatchedsQuery->where('paroquia_id', $paroquiaId);
         }
-        $vinWatchedsQuery->whereBetween('created_at', [$startDate, $endDate]);
+        if ($startDate) {
+            $vinWatchedsQuery->where('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $vinWatchedsQuery->where('created_at', '<=', $endDate);
+        }
         $vinWatchedsCount = $vinWatchedsQuery->count();
 
         // Batismos
@@ -85,7 +104,12 @@ class SisMatrizMetricsController extends Controller
         if ($paroquiaId) {
             $batismosQuery->where('paroquia_id', $paroquiaId);
         }
-        $batismosQuery->whereBetween('created_at', [$startDate, $endDate]);
+        if ($startDate) {
+            $batismosQuery->where('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $batismosQuery->where('created_at', '<=', $endDate);
+        }
         $batismosCount = $batismosQuery->count();
 
 
@@ -103,11 +127,36 @@ class SisMatrizMetricsController extends Controller
 
         // Prepare Chart Data
         $chartData = [];
-        // Generate all dates in range
-        $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
         $dates = [];
+
+        // Determine min and max dates for chart X-axis
+        if ($startDate && $endDate) {
+            $periodStart = $startDate;
+            $periodEnd = $endDate;
+        } elseif ($startDate) {
+            $periodStart = $startDate;
+            $periodEnd = $dailyAccesses->max('access_date') ? Carbon::parse($dailyAccesses->max('access_date')) : Carbon::now();
+        } elseif ($endDate) {
+            // If end date is set but start date is not, use data min or default
+            $minDate = $dailyAccesses->min('access_date');
+            $periodStart = $minDate ? Carbon::parse($minDate) : Carbon::parse($endDate)->subDays(30); 
+            $periodEnd = $endDate;
+        } else {
+            // No dates provided, use data range
+            if ($dailyAccesses->count() > 0) {
+                $periodStart = Carbon::parse($dailyAccesses->min('access_date'));
+                $periodEnd = Carbon::parse($dailyAccesses->max('access_date'));
+            } else {
+                // No data at all, show last 7 days empty chart
+                $periodStart = Carbon::now()->subDays(6);
+                $periodEnd = Carbon::now();
+            }
+        }
+
+        // Generate all dates in range
+        $period = \Carbon\CarbonPeriod::create($periodStart, $periodEnd);
         foreach ($period as $date) {
-            $dates[$date->format('Y-m-d')] = $date->format('d/m');
+            $dates[$date->format('Y-m-d')] = $date->format('d/m/Y'); // Show full date on tooltip/axis if needed, or d/m
         }
 
         $dataWeb = array_fill_keys(array_keys($dates), 0);
@@ -148,8 +197,8 @@ class SisMatrizMetricsController extends Controller
             'roles' => $roles,
             'selectedParoquia' => $paroquiaId,
             'selectedRole' => $roleId,
-            'startDate' => $startDate->format('Y-m-d'),
-            'endDate' => $endDate->format('Y-m-d'),
+            'startDate' => $startDateInput,
+            'endDate' => $endDateInput,
         ]);
     }
 }
