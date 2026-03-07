@@ -66,6 +66,10 @@
                             <input type="text" name="search" class="form-control bg-light border-start-0 rounded-end-pill border-0" placeholder="Buscar..." value="{{ request('search') }}">
                         </div>
                     </form>
+                    <button type="button" class="btn btn-light rounded-pill px-3 d-flex align-items-center gap-2 fw-medium whitespace-nowrap border" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="bi bi-download text-muted"></i>
+                        <span class="d-none d-lg-inline text-muted">Exportar</span>
+                    </button>
                     <a href="{{ route('sismatriz-main.create') }}" class="btn btn-primary rounded-pill px-3 d-flex align-items-center gap-2 fw-medium whitespace-nowrap">
                         <i class="bi bi-plus-lg"></i>
                         <span class="d-none d-lg-inline">Novo</span>
@@ -238,7 +242,6 @@
             <select id="bulkActionSelect" class="form-select form-select-sm bg-secondary bg-opacity-10 border-secondary border-opacity-25 text-white" style="width: 150px;">
                 <option value="">Ações...</option>
                 <option value="delete">Excluir</option>
-                <option value="pdf">Gerar PDF</option>
             </select>
             <button onclick="submitBulkAction()" class="btn btn-sm btn-light rounded-pill px-3">Aplicar</button>
         </div>
@@ -302,77 +305,6 @@
     </div>
 </div>
 
-<!-- Modal PDF Columns -->
-<div class="modal fade" id="pdfColumnsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold">Configurar Relatório PDF</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted small mb-3">Selecione as colunas que deseja exibir no relatório:</p>
-                <form id="pdfColumnsForm">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="columns[]" value="id" id="col_id">
-                                <label class="form-check-label" for="col_id">ID</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="columns[]" value="name" id="col_name" checked>
-                                <label class="form-check-label" for="col_name">Nome</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="columns[]" value="user" id="col_user" checked>
-                                <label class="form-check-label" for="col_user">Usuário (Login)</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="columns[]" value="email" id="col_email" checked>
-                                <label class="form-check-label" for="col_email">Email</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="columns[]" value="paroquia" id="col_paroquia" checked>
-                                <label class="form-check-label" for="col_paroquia">Paróquia</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="columns[]" value="roles" id="col_roles" checked>
-                                <label class="form-check-label" for="col_roles">Cargos</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="columns[]" value="status" id="col_status" checked>
-                                <label class="form-check-label" for="col_status">Status</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="columns[]" value="created_at" id="col_created_at">
-                                <label class="form-check-label" for="col_created_at">Data de Cadastro</label>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-top-0">
-                <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary rounded-pill px-4" onclick="generatePdfWithColumns()">Gerar PDF</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Modal Password for Bulk Action -->
 <div class="modal fade" id="bulkActionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -400,11 +332,171 @@
     <div id="selectedInputs"></div>
 </form>
 
-<form id="pdfForm" action="{{ route('sismatriz-main.pdf') }}" method="POST" style="display: none;" target="_blank">
-    @csrf
-    <input type="hidden" name="search" value="{{ request('search') }}">
-    <div id="pdfSelectedInputs"></div>
-</form>
+
+
+<!-- Modal Export -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold">Exportar Usuários</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{{ route('sismatriz-main.export') }}" method="POST" id="exportForm">
+                    @csrf
+                    
+                    <div id="exportErrorAlert" class="alert alert-danger d-none rounded-3 small mb-3"></div>
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <h6 class="fw-bold mb-3 text-primary bg-primary bg-opacity-10 p-2 rounded-3 d-inline-block"><i class="bi bi-funnel-fill me-2"></i>Filtros</h6>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label small text-muted text-uppercase fw-bold">Buscar</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+                                        <input type="text" name="search" class="form-control bg-light border-0" placeholder="Nome, email ou login..." value="{{ request('search') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted text-uppercase fw-bold">Paróquia</label>
+                                    <select name="paroquia_id" class="form-select bg-light border-0">
+                                        <option value="">Todas</option>
+                                        @foreach($paroquias as $p)
+                                            <option value="{{ $p->id }}" {{ request('paroquia_id') == $p->id ? 'selected' : '' }}>{{ \Illuminate\Support\Str::limit($p->name, 30) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted text-uppercase fw-bold">Cargo</label>
+                                    <select name="role" class="form-select bg-light border-0">
+                                        <option value="">Todos</option>
+                                        @foreach($rolesMap as $id => $roleName)
+                                            <option value="{{ $id }}" {{ request('role') == $id ? 'selected' : '' }}>{{ $roleName }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted text-uppercase fw-bold">Status</label>
+                                    <select name="status" class="form-select bg-light border-0">
+                                        <option value="">Todos</option>
+                                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Ativo</option>
+                                        <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Inativo</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted text-uppercase fw-bold">Status da Senha</label>
+                                    <select name="is_pass_change" class="form-select bg-light border-0">
+                                        <option value="">Todos</option>
+                                        <option value="1" {{ request('is_pass_change') === '1' ? 'selected' : '' }}>Alterada</option>
+                                        <option value="0" {{ request('is_pass_change') === '0' ? 'selected' : '' }}>Padrão</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <hr class="border-secondary border-opacity-10 my-0">
+                        </div>
+
+                        <div class="col-md-7">
+                            <h6 class="fw-bold mb-3 text-primary bg-primary bg-opacity-10 p-2 rounded-3 d-inline-block"><i class="bi bi-layout-three-columns me-2"></i>Colunas</h6>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="id" id="exp_col_id">
+                                        <label class="form-check-label" for="exp_col_id">ID</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="name" id="exp_col_name" checked>
+                                        <label class="form-check-label" for="exp_col_name">Nome</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="user" id="exp_col_user" checked>
+                                        <label class="form-check-label" for="exp_col_user">Login</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="email" id="exp_col_email" checked>
+                                        <label class="form-check-label" for="exp_col_email">Email</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="paroquia" id="exp_col_paroquia" checked>
+                                        <label class="form-check-label" for="exp_col_paroquia">Paróquia</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="roles" id="exp_col_roles" checked>
+                                        <label class="form-check-label" for="exp_col_roles">Cargos</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="status" id="exp_col_status" checked>
+                                        <label class="form-check-label" for="exp_col_status">Status</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="is_pass_change" id="exp_col_pass">
+                                        <label class="form-check-label" for="exp_col_pass">Status da Senha</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="columns[]" value="created_at" id="exp_col_created_at">
+                                        <label class="form-check-label" for="exp_col_created_at">Data Cadastro</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <h6 class="fw-bold mb-3 text-primary bg-primary bg-opacity-10 p-2 rounded-3 d-inline-block"><i class="bi bi-file-earmark-text me-2"></i>Formato</h6>
+                            <div class="d-flex flex-column gap-3">
+                                <div class="form-check card p-3 border hover-shadow transition-all">
+                                    <input class="form-check-input" type="radio" name="format" id="format_pdf" value="pdf" checked>
+                                    <label class="form-check-label d-flex align-items-center gap-2" for="format_pdf">
+                                        <i class="bi bi-file-pdf-fill text-danger fs-4"></i> 
+                                        <div>
+                                            <div class="fw-bold">PDF</div>
+                                            <div class="small text-muted">Documento portátil</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="form-check card p-3 border hover-shadow transition-all">
+                                    <input class="form-check-input" type="radio" name="format" id="format_csv" value="csv">
+                                    <label class="form-check-label d-flex align-items-center gap-2" for="format_csv">
+                                        <i class="bi bi-file-earmark-excel-fill text-success fs-4"></i> 
+                                        <div>
+                                            <div class="fw-bold">Excel (CSV)</div>
+                                            <div class="small text-muted">Planilha editável</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top-0 pt-0 pb-4 pe-4">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="exportForm" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="bi bi-download me-2"></i> Exportar Dados
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -707,6 +799,135 @@
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
         }
+    }
+
+    // Export Modal Logic - Inject Selected IDs
+    const exportModalEl = document.getElementById('exportModal');
+    if (exportModalEl) {
+        // Handle Form Submit (Loading State)
+        const exportForm = document.getElementById('exportForm');
+        if (exportForm) {
+            exportForm.addEventListener('submit', function(e) {
+                // Prevent default submission to handle validation first
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Button is outside the form (in modal footer), so we select by form attribute
+                const btn = document.querySelector('button[type="submit"][form="exportForm"]');
+                if (!btn) return;
+
+                const originalText = btn.innerHTML;
+                const errorAlert = document.getElementById('exportErrorAlert');
+                
+                // Hide previous errors
+                if (errorAlert) errorAlert.classList.add('d-none');
+                
+                // Show verifying state
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Verificando...';
+                
+                // Prepare data for check
+                const formData = new FormData(this);
+                
+                // Check if any results exist
+                fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.count === 0) {
+                        // Show error in modal
+                        if (errorAlert) {
+                            errorAlert.textContent = 'Nenhum registro encontrado para os filtros selecionados.';
+                            errorAlert.classList.remove('d-none');
+                        }
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    } else {
+                        // Proceed to download
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Exportando...';
+                        
+                        // Submit naturally for download (bypass listener)
+                        // Using HTMLFormElement.prototype.submit.call(form) or just form.submit() 
+                        // bypasses the onsubmit handler, preventing infinite loop
+                        this.submit();
+                        
+                        // Reset button after delay
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                            
+                            // Force hide global loader if it appeared anyway
+                            const globalLoader = document.getElementById('global-page-loader');
+                            if (globalLoader) {
+                                globalLoader.style.opacity = '0';
+                                setTimeout(() => { globalLoader.classList.add('d-none'); }, 300);
+                            }
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // In case of error, try to submit anyway or show error
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    if (errorAlert) {
+                        errorAlert.textContent = 'Erro ao verificar dados. Tente novamente.';
+                        errorAlert.classList.remove('d-none');
+                    }
+                });
+            });
+        }
+
+        exportModalEl.addEventListener('show.bs.modal', function () {
+            const form = document.getElementById('exportForm');
+            if (!form) return;
+
+            // Remove any existing selected inputs
+            form.querySelectorAll('input[name="selected[]"]').forEach(el => el.remove());
+            
+            const ids = getSelectedIds();
+            if (ids.size > 0) {
+                // Add selected IDs
+                ids.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'selected[]';
+                    input.value = id;
+                    form.appendChild(input);
+                });
+                
+                // Disable filters when specific items are selected
+                const filterInputs = form.querySelectorAll('select, input[type="text"]');
+                filterInputs.forEach(input => input.disabled = true);
+                
+                // Show a notice
+                let notice = form.querySelector('.selection-notice');
+                if (!notice) {
+                    notice = document.createElement('div');
+                    notice.className = 'alert alert-info selection-notice mb-3 small py-2';
+                    notice.innerHTML = `<i class="bi bi-info-circle-fill me-2"></i> Exportando <strong>${ids.size}</strong> usuário(s) selecionado(s). Filtros ignorados.`;
+                    form.insertBefore(notice, form.firstChild);
+                }
+            } else {
+                // Re-enable filters
+                const filterInputs = form.querySelectorAll('select, input[type="text"]');
+                filterInputs.forEach(input => input.disabled = false);
+                
+                // Remove notice
+                const notice = form.querySelector('.selection-notice');
+                if (notice) notice.remove();
+            }
+        });
     }
 </script>
 @endpush

@@ -9,7 +9,7 @@
             margin: 100px 25px;
         }
         body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-family: 'DejaVu Sans', sans-serif;
             font-size: 10pt;
             color: #333;
             line-height: 1.4;
@@ -163,11 +163,9 @@
     <footer>
         <div class="footer-content">
             <div class="copyright">
-                &copy; {{ date('Y') }} Sacratech Softwares Ltda. Todos os direitos reservados.
+                &copy; {{ date('Y') }} Sacratech Softwares LTDA. Todos os direitos reservados.
                 <br>
-                <span style="font-size: 7pt; color: #999;">Integer é um serviço oferecido pela Sacratech Softwares.</span>
-                <br>
-                <span style="font-size: 7pt; color: #999;">Confidencialidade garantida nos termos da Lei 13.709/2018 (LGPD).</span>
+                <span style="font-size: 7pt; color: #999;">O Integer é um serviço interno disponibilizado pela Sacratech Softwares.</span>
             </div>
             <div class="page-number"></div>
         </div>

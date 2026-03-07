@@ -234,10 +234,11 @@ class SisMatrizMainUserController extends Controller
         return back()->with('error', 'Ação inválida.');
     }
 
-    public function generatePdf(Request $request)
+    public function export(Request $request)
     {
         $query = SisMatrizMainUser::query()->with('paroquia');
 
+        // Apply filters
         if ($request->has('selected') && is_array($request->selected)) {
             $query->whereIn('id', $request->selected);
         } else {
@@ -249,13 +250,103 @@ class SisMatrizMainUserController extends Controller
                       ->orWhere('user', 'like', "%{$search}%");
                 });
             }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            if ($request->filled('is_pass_change')) {
+                $query->where('is_pass_change', $request->is_pass_change);
+            }
+
+            if ($request->filled('paroquia_id')) {
+                $query->where('paroquia_id', $request->paroquia_id);
+            }
+
+            if ($request->filled('role')) {
+                $roleId = $request->role;
+                $query->whereRaw("FIND_IN_SET(?, rule)", [$roleId]);
+            }
+        }
+
+        // Check if it's a verification request (AJAX/JSON)
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['count' => $query->count()]);
         }
 
         $users = $query->latest()->get();
+        
+        if ($users->isEmpty()) {
+            // Se for CSV ou PDF, redireciona de volta com erro
+            return redirect()->back()->with('error', 'Nenhum usuário encontrado para exportação com os filtros selecionados.');
+        }
+
         $rolesMap = self::ROLES;
         
         // Default columns if not provided
-        $columns = $request->input('columns', ['name', 'user', 'email']);
+        $columns = $request->input('columns', ['name', 'user', 'email', 'paroquia', 'roles', 'status']);
+        $format = $request->input('format', 'pdf');
+
+        if ($format === 'csv') {
+            $headers = [
+                "Content-type"        => "text/csv",
+                "Content-Disposition" => "attachment; filename=Relacao_de_Usuarios_SisMatriz_Principal_" . date('Y-m-d_H-i') . ".csv",
+                "Pragma"              => "no-cache",
+                "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                "Expires"             => "0"
+            ];
+
+            $callback = function() use ($users, $columns, $rolesMap) {
+                $file = fopen('php://output', 'w');
+                
+                // Add BOM for Excel
+                fputs($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+                // Headers
+                $csvHeaders = [];
+                if (in_array('id', $columns)) $csvHeaders[] = 'ID';
+                if (in_array('name', $columns)) $csvHeaders[] = 'Nome';
+                if (in_array('user', $columns)) $csvHeaders[] = 'Login';
+                if (in_array('email', $columns)) $csvHeaders[] = 'Email';
+                if (in_array('paroquia', $columns)) $csvHeaders[] = 'Paróquia';
+                if (in_array('roles', $columns)) $csvHeaders[] = 'Cargos';
+                if (in_array('status', $columns)) $csvHeaders[] = 'Status';
+                if (in_array('is_pass_change', $columns)) $csvHeaders[] = 'Status da Senha';
+                if (in_array('created_at', $columns)) $csvHeaders[] = 'Data de Cadastro';
+
+                fputcsv($file, $csvHeaders, ';');
+
+                foreach ($users as $user) {
+                    $row = [];
+                    if (in_array('id', $columns)) $row[] = $user->id;
+                    if (in_array('name', $columns)) $row[] = $user->name;
+                    if (in_array('user', $columns)) $row[] = $user->user;
+                    if (in_array('email', $columns)) $row[] = $user->email;
+                    if (in_array('paroquia', $columns)) $row[] = $user->paroquia ? $user->paroquia->name : '-';
+                    
+                    if (in_array('roles', $columns)) {
+                        $userRoleIds = $user->rule ? explode(',', $user->rule) : [];
+                        $userRoleNames = [];
+                        foreach($userRoleIds as $rid) {
+                            if(isset($rolesMap[$rid])) {
+                                $userRoleNames[] = $rolesMap[$rid];
+                            }
+                        }
+                        $row[] = implode(', ', $userRoleNames);
+                    }
+
+                    if (in_array('status', $columns)) $row[] = $user->status == 0 ? 'Ativo' : 'Inativo';
+                    if (in_array('is_pass_change', $columns)) $row[] = $user->is_pass_change == 1 ? 'Alterada' : 'Padrão';
+                    if (in_array('created_at', $columns)) $row[] = $user->created_at ? $user->created_at->format('d/m/Y H:i') : '-';
+
+                    fputcsv($file, $row, ';');
+                }
+
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
 
         $pdf = Pdf::loadView('sismatriz_main.pdf', compact('users', 'rolesMap', 'columns'));
         return $pdf->download('Relacao_de_Usuarios_SisMatriz_Principal_' . date('Y-m-d_H-i') . '.pdf');

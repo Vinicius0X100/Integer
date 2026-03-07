@@ -51,7 +51,7 @@ Route::middleware('auth')->group(function () {
 
     // Rotas de SisMatriz Principal
     Route::post('sismatriz-main/bulk-action', [\App\Http\Controllers\SisMatrizMainUserController::class, 'bulkAction'])->name('sismatriz-main.bulk_action');
-    Route::post('sismatriz-main/generate-pdf', [\App\Http\Controllers\SisMatrizMainUserController::class, 'generatePdf'])->name('sismatriz-main.pdf');
+    Route::any('sismatriz-main/export', [\App\Http\Controllers\SisMatrizMainUserController::class, 'export'])->name('sismatriz-main.export');
     Route::resource('sismatriz-main', \App\Http\Controllers\SisMatrizMainUserController::class);
 
     // Rotas de Paróquias
