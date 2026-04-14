@@ -45,6 +45,20 @@ class SisMatrizMetricsController extends Controller
 
         $usersCount = $usersQuery->count();
 
+        $usersBaseQuery = SisMatrizMainUser::query();
+        if ($paroquiaId) {
+            $usersBaseQuery->where('paroquia_id', $paroquiaId);
+        }
+        if ($roleId) {
+            $usersBaseQuery->whereRaw('FIND_IN_SET(?, rule)', [$roleId]);
+        }
+
+        $usersTotal = (clone $usersBaseQuery)->count();
+        $usersActiveCount = (clone $usersBaseQuery)->where('status', 0)->count();
+        $usersInactiveCount = (clone $usersBaseQuery)->where('status', 1)->count();
+        $usersPasswordChangedCount = (clone $usersBaseQuery)->where('is_pass_change', 1)->count();
+        $usersPasswordDefaultCount = (clone $usersBaseQuery)->where('is_pass_change', 0)->count();
+
         // Accesses (Filtered by Date Range if provided)
         $accessQuery = SisMatrizUserAccess::query();
 
@@ -186,6 +200,11 @@ class SisMatrizMetricsController extends Controller
 
         return view('sismatriz_main.metrics', [
             'usersCount' => $usersCount,
+            'usersTotal' => $usersTotal,
+            'usersActiveCount' => $usersActiveCount,
+            'usersInactiveCount' => $usersInactiveCount,
+            'usersPasswordChangedCount' => $usersPasswordChangedCount,
+            'usersPasswordDefaultCount' => $usersPasswordDefaultCount,
             'totalAccesses' => $totalAccesses,
             'webAccesses' => $webAccesses,
             'androidAccesses' => $androidAccesses,

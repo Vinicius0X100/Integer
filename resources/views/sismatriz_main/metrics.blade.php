@@ -144,6 +144,86 @@
         </div>
     </div>
 
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                <div class="card-body p-4 position-relative">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold mb-1 d-flex align-items-center gap-1">
+                                Usuários ativos
+                                <i class="bi bi-question-circle-fill text-muted opacity-50" data-bs-toggle="tooltip" title="Total de usuários ativos (status = 0) considerando os filtros selecionados."></i>
+                            </h6>
+                            <h2 class="display-5 fw-bold mb-0 text-success">{{ number_format($usersActiveCount, 0, ',', '.') }}</h2>
+                            <div class="small text-muted mt-2">Total: {{ number_format($usersTotal, 0, ',', '.') }}</div>
+                        </div>
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3">
+                            <i class="bi bi-person-check-fill fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                <div class="card-body p-4 position-relative">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold mb-1 d-flex align-items-center gap-1">
+                                Usuários inativos
+                                <i class="bi bi-question-circle-fill text-muted opacity-50" data-bs-toggle="tooltip" title="Total de usuários inativos (status = 1) considerando os filtros selecionados."></i>
+                            </h6>
+                            <h2 class="display-5 fw-bold mb-0 text-danger">{{ number_format($usersInactiveCount, 0, ',', '.') }}</h2>
+                            <div class="small text-muted mt-2">Total: {{ number_format($usersTotal, 0, ',', '.') }}</div>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3">
+                            <i class="bi bi-person-x-fill fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                <div class="card-body p-4 position-relative">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold mb-1 d-flex align-items-center gap-1">
+                                Senha alterada
+                                <i class="bi bi-question-circle-fill text-muted opacity-50" data-bs-toggle="tooltip" title="Usuários que já alteraram a senha (is_pass_change = 1) considerando os filtros selecionados."></i>
+                            </h6>
+                            <h2 class="display-5 fw-bold mb-0 text-primary">{{ number_format($usersPasswordChangedCount, 0, ',', '.') }}</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3">
+                            <i class="bi bi-shield-lock-fill fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                <div class="card-body p-4 position-relative">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
+                        <div>
+                            <h6 class="text-uppercase text-muted small fw-bold mb-1 d-flex align-items-center gap-1">
+                                Senha padrão
+                                <i class="bi bi-question-circle-fill text-muted opacity-50" data-bs-toggle="tooltip" title="Usuários que ainda não alteraram a senha (is_pass_change = 0) considerando os filtros selecionados."></i>
+                            </h6>
+                            <h2 class="display-5 fw-bold mb-0 text-warning">{{ number_format($usersPasswordDefaultCount, 0, ',', '.') }}</h2>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3">
+                            <i class="bi bi-key-fill fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Section: Registros e Sacramentos -->
     <h6 class="text-uppercase text-muted fw-bold mb-3 ps-2 border-start border-4 border-warning mt-4">Registros e Sacramentos</h6>
     <!-- New Metrics Row (Registers, Watcheds, Batismos) -->
