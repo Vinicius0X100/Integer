@@ -313,6 +313,11 @@
                             <i class="bi bi-briefcase-fill"></i> Serviços
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('services_automations.index') }}" class="{{ request()->routeIs('services_automations.*') ? 'active' : '' }}">
+                            <i class="bi bi-robot"></i> Serviços e Automações
+                        </a>
+                    </li>
                     <li class="mt-2">
                         <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Gerenciamento</span>
                     </li>
@@ -372,6 +377,11 @@
                     <li class="mt-1">
                         <a href="{{ route('system_health.index') }}" class="{{ request()->routeIs('system_health.*') ? 'active' : '' }}">
                             <i class="bi bi-activity"></i> Saúde dos Sistemas
+                        </a>
+                    </li>
+                    <li class="mt-1">
+                        <a href="{{ route('system_logs.index') }}" class="{{ request()->routeIs('system_logs.*') ? 'active' : '' }}">
+                            <i class="bi bi-journal-text"></i> Relatórios do Sistema (LOGS)
                         </a>
                     </li>
                     <!-- Add more menu items here -->

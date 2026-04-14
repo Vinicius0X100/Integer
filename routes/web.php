@@ -9,6 +9,8 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ServicoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ParoquiaController;
+use App\Http\Controllers\ServicesAutomationsController;
+use App\Http\Controllers\AutomationAuditLogController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 
 Route::get('/', function () {
@@ -60,6 +62,11 @@ Route::middleware('auth')->group(function () {
 
     // Rotas de Clientes (Protegidas)
     Route::middleware([EnsureUserIsAdmin::class])->group(function () {
+        Route::get('system-logs', [AutomationAuditLogController::class, 'index'])->name('system_logs.index');
+
+        Route::get('services-automations', [ServicesAutomationsController::class, 'index'])->name('services_automations.index');
+        Route::post('services-automations', [ServicesAutomationsController::class, 'update'])->name('services_automations.update');
+
         Route::post('clientes/bulk-action', [ClienteController::class, 'bulkAction'])->name('clientes.bulk_action');
         Route::any('clientes/generate-pdf', [ClienteController::class, 'generatePdf'])->name('clientes.pdf');
         Route::resource('clientes', ClienteController::class);

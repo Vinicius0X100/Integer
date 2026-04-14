@@ -3,6 +3,15 @@
 @section('page-title', 'Usuários - SisMatriz Principal')
 
 @section('content')
+<style>
+    @keyframes sismatrizPulseDanger {
+        0%, 100% { opacity: 0.35; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.06); }
+    }
+    .sismatriz-blink-danger {
+        animation: sismatrizPulseDanger 1.15s infinite;
+    }
+</style>
 <div class="container-fluid py-4">
     <!-- Feedback Messages -->
     @if(session('success'))
@@ -121,6 +130,7 @@
                                 @endif
                             </a>
                         </th>
+                        <th class="py-3 text-uppercase text-muted small fw-bold text-center">Último login</th>
                         <th class="py-3 text-uppercase text-muted small fw-bold text-end pe-4">Ações</th>
                     </tr>
                 </thead>
@@ -195,6 +205,16 @@
                                     <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Inativo</span>
                                 @endif
                             </td>
+                            <td class="text-center">
+                                <div class="d-flex align-items-center justify-content-center gap-2">
+                                    <span class="small text-muted">{{ $user->formatted_last_login ?? 'Nunca acessou' }}</span>
+                                    @if(!empty($user->inactive_alert))
+                                        <i class="bi bi-exclamation-triangle-fill text-danger sismatriz-blink-danger"
+                                           data-bs-toggle="tooltip"
+                                           title="Sem acesso há {{ number_format((int) $user->inactive_days, 0, ',', '.') }} dias. Ideal inativar o usuário."></i>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="text-end pe-4">
                                 <div class="d-flex justify-content-end gap-2">
                                     <button type="button" class="btn btn-sm btn-light rounded-circle" onclick="showUserDetails({{ $user->id }})" title="Detalhes">
@@ -211,7 +231,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5">
+                            <td colspan="8" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center justify-content-center text-muted">
                                     <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
                                     <p class="mb-0">Nenhum usuário encontrado.</p>
@@ -750,6 +770,16 @@
                         <h4 class="fw-bold mb-1">${user.name}</h4>
                         <p class="text-muted mb-0">${user.email}</p>
                     </div>
+
+                    ${user.inactive_alert ? `
+                        <div class="alert alert-danger border-0 rounded-4 shadow-sm mb-4 d-flex align-items-center gap-2">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <div>
+                                <div class="fw-bold">Usuário com risco de inativação</div>
+                                <div class="small">Sem acessar há ${Number.parseInt(user.inactive_days, 10).toLocaleString('pt-BR')} dias. Ideal inativar o usuário.</div>
+                            </div>
+                        </div>
+                    ` : ''}
                     
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -777,7 +807,7 @@
                                 <small class="text-uppercase text-muted fw-bold d-block mb-2">Auditoria</small>
                                 <div class="row small">
                                     <div class="col-md-6"><strong>Criado em:</strong> ${user.formatted_created_at}</div>
-                                    <div class="col-md-6"><strong>Último acesso:</strong> ${user.formatted_last_attempt}</div>
+                                    <div class="col-md-6"><strong>Último login:</strong> ${user.formatted_last_login}</div>
                                 </div>
                             </div>
                         </div>

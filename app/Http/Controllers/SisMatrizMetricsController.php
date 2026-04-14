@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SisMatrizBatismo;
 use App\Models\SisMatrizMainUser;
-use App\Models\SisMatrizUserAccess;
 use App\Models\SisMatrizParoquia;
 use App\Models\SisMatrizRegister;
+use App\Models\SisMatrizUserAccess;
 use App\Models\SisMatrizVinWatched;
-use App\Models\SisMatrizBatismo;
-use App\Http\Controllers\SisMatrizMainUserController;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SisMatrizMetricsController extends Controller
@@ -20,7 +19,7 @@ class SisMatrizMetricsController extends Controller
         // Filters
         $paroquiaId = $request->input('paroquia_id');
         $roleId = $request->input('role');
-        
+
         // Date Filter (No default dates, unless specified)
         $startDateInput = $request->input('start_date');
         $endDateInput = $request->input('end_date');
@@ -32,18 +31,18 @@ class SisMatrizMetricsController extends Controller
 
         // Fixed KPI: Users Count (Defaults to Acolytes (8) if no role selected, or specific role if filtered)
         $usersQuery = SisMatrizMainUser::query();
-        
+
         if ($paroquiaId) {
             $usersQuery->where('paroquia_id', $paroquiaId);
         }
 
         if ($roleId) {
-            $usersQuery->whereRaw("FIND_IN_SET(?, rule)", [$roleId]);
+            $usersQuery->whereRaw('FIND_IN_SET(?, rule)', [$roleId]);
         } else {
             // Default to Acolytes (8)
             $usersQuery->whereRaw("FIND_IN_SET('8', rule)");
         }
-        
+
         $usersCount = $usersQuery->count();
 
         // Accesses (Filtered by Date Range if provided)
@@ -58,21 +57,21 @@ class SisMatrizMetricsController extends Controller
 
         // Filter accesses by Parish/Role (requires join)
         if ($paroquiaId || $roleId) {
-            $accessQuery->whereHas('user', function($q) use ($paroquiaId, $roleId) {
+            $accessQuery->whereHas('user', function ($q) use ($paroquiaId, $roleId) {
                 if ($paroquiaId) {
                     $q->where('paroquia_id', $paroquiaId);
                 }
                 if ($roleId) {
-                    $q->whereRaw("FIND_IN_SET(?, rule)", [$roleId]);
+                    $q->whereRaw('FIND_IN_SET(?, rule)', [$roleId]);
                 }
             });
         }
 
         $totalAccesses = $accessQuery->count();
-        
+
         // --- New Metrics (Registers, Watcheds, Batismos) ---
         // Filter only by Paroquia as requested AND Date Range (assuming created_at exists)
-        
+
         // Registers
         $registersQuery = SisMatrizRegister::query();
         if ($paroquiaId) {
@@ -112,7 +111,6 @@ class SisMatrizMetricsController extends Controller
         }
         $batismosCount = $batismosQuery->count();
 
-
         // Breakdown by Device
         // Clone query for each device type to respect filters
         $webAccesses = (clone $accessQuery)->where('device_type', 1)->count();
@@ -139,7 +137,7 @@ class SisMatrizMetricsController extends Controller
         } elseif ($endDate) {
             // If end date is set but start date is not, use data min or default
             $minDate = $dailyAccesses->min('access_date');
-            $periodStart = $minDate ? Carbon::parse($minDate) : Carbon::parse($endDate)->subDays(30); 
+            $periodStart = $minDate ? Carbon::parse($minDate) : Carbon::parse($endDate)->subDays(30);
             $periodEnd = $endDate;
         } else {
             // No dates provided, use data range
@@ -167,13 +165,19 @@ class SisMatrizMetricsController extends Controller
             $dateKey = $access->access_date->format('Y-m-d'); // Access date is already cast to date
             // Handle string date if cast failed
             if (is_string($access->access_date)) {
-                 $dateKey = substr($access->access_date, 0, 10);
+                $dateKey = substr($access->access_date, 0, 10);
             }
-            
+
             if (isset($dataWeb[$dateKey])) {
-                if ($access->device_type == 1) $dataWeb[$dateKey] += $access->total;
-                if ($access->device_type == 2) $dataAndroid[$dateKey] += $access->total;
-                if ($access->device_type == 3) $dataIOS[$dateKey] += $access->total;
+                if ($access->device_type == 1) {
+                    $dataWeb[$dateKey] += $access->total;
+                }
+                if ($access->device_type == 2) {
+                    $dataAndroid[$dateKey] += $access->total;
+                }
+                if ($access->device_type == 3) {
+                    $dataIOS[$dateKey] += $access->total;
+                }
             }
         }
 
