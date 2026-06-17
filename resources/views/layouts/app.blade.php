@@ -384,6 +384,14 @@
                             <i class="bi bi-journal-text"></i> Relatórios do Sistema (LOGS)
                         </a>
                     </li>
+                    <li class="mt-2">
+                        <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Marketing</span>
+                    </li>
+                    <li class="mt-1">
+                        <a href="{{ route('campanhas_email.index') }}" class="{{ request()->routeIs('campanhas_email.*') ? 'active' : '' }}">
+                            <i class="bi bi-envelope-paper-fill"></i> Campanhas de Email
+                        </a>
+                    </li>
                     <!-- Add more menu items here -->
                 </ul>
             </nav>

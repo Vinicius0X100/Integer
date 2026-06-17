@@ -12,6 +12,7 @@ use App\Http\Controllers\ParoquiaController;
 use App\Http\Controllers\ServicesAutomationsController;
 use App\Http\Controllers\AutomationAuditLogController;
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Controllers\CampanhaEmailController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -59,6 +60,13 @@ Route::middleware('auth')->group(function () {
 
     // Rotas de Paróquias
     Route::resource('paroquias', ParoquiaController::class);
+
+    // Campanhas de Email (Marketing)
+    Route::get('campanhas-email/usuarios', [CampanhaEmailController::class, 'getUsuarios'])->name('campanhas_email.usuarios');
+    Route::post('campanhas-email/{campanhasEmail}/reenviar', [CampanhaEmailController::class, 'reenviar'])->name('campanhas_email.reenviar');
+    Route::resource('campanhas-email', CampanhaEmailController::class)->parameters([
+        'campanhas-email' => 'campanhasEmail'
+    ])->names('campanhas_email')->only(['index', 'create', 'store', 'show', 'destroy']);
 
     // Rotas de Clientes (Protegidas)
     Route::middleware([EnsureUserIsAdmin::class])->group(function () {
