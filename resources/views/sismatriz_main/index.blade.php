@@ -45,44 +45,46 @@
                         <small class="text-muted">Administre os acessos do SisMatriz Principal</small>
                     </div>
                 </div>
-                <div class="d-flex gap-2 w-100 w-md-auto align-items-center">
-                    <form action="{{ route('sismatriz-main.index') }}" method="GET" class="d-flex flex-column flex-md-row gap-2 flex-grow-1">
+                <div class="d-flex flex-column flex-md-row gap-2 w-100 align-items-md-center">
+                    <form action="{{ route('sismatriz-main.index') }}" method="GET" class="d-flex flex-column flex-md-row gap-2 flex-grow-1 w-100" id="mainSearchForm">
                         
-                        <select name="status" class="form-select bg-light border-0 rounded-pill" style="min-width: 120px;" onchange="this.form.submit()">
+                        <select name="status" class="form-select bg-light border-0 rounded-pill w-100 w-md-auto" style="min-width: 120px;" onchange="this.form.submit()">
                             <option value="">Status: Todos</option>
                             <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Ativo</option>
                             <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Inativo</option>
                         </select>
 
-                        <select name="paroquia_id" class="form-select bg-light border-0 rounded-pill" style="min-width: 150px; max-width: 200px;" onchange="this.form.submit()">
+                        <select name="paroquia_id" class="form-select bg-light border-0 rounded-pill w-100 w-md-auto" style="min-width: 150px; max-width: 200px;" onchange="this.form.submit()">
                             <option value="">Paróquia: Todas</option>
                             @foreach($paroquias as $p)
                                 <option value="{{ $p->id }}" {{ request('paroquia_id') == $p->id ? 'selected' : '' }}>{{ \Illuminate\Support\Str::limit($p->name, 20) }}</option>
                             @endforeach
                         </select>
 
-                        <select name="role" class="form-select bg-light border-0 rounded-pill" style="min-width: 140px; max-width: 250px;" onchange="this.form.submit()">
+                        <select name="role" class="form-select bg-light border-0 rounded-pill w-100 w-md-auto" style="min-width: 140px; max-width: 250px;" onchange="this.form.submit()">
                             <option value="">Cargo: Todos</option>
                             @foreach($rolesMap as $id => $roleName)
                                 <option value="{{ $id }}" {{ request('role') == $id ? 'selected' : '' }}>{{ $roleName }}</option>
                             @endforeach
                         </select>
 
-                        <div class="input-group">
+                        <div class="input-group w-100">
                             <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3 border-0">
                                 <i class="bi bi-search text-muted"></i>
                             </span>
-                            <input type="text" name="search" class="form-control bg-light border-start-0 rounded-end-pill border-0" placeholder="Buscar..." value="{{ request('search') }}">
+                            <input type="text" id="mainSearchInput" name="search" class="form-control bg-light border-start-0 rounded-end-pill border-0" placeholder="Buscar..." value="{{ request('search') }}">
                         </div>
                     </form>
-                    <button type="button" class="btn btn-light rounded-pill px-3 d-flex align-items-center gap-2 fw-medium whitespace-nowrap border" data-bs-toggle="modal" data-bs-target="#exportModal">
-                        <i class="bi bi-download text-muted"></i>
-                        <span class="d-none d-lg-inline text-muted">Exportar</span>
-                    </button>
-                    <a href="{{ route('sismatriz-main.create') }}" class="btn btn-primary rounded-pill px-3 d-flex align-items-center gap-2 fw-medium whitespace-nowrap">
-                        <i class="bi bi-plus-lg"></i>
-                        <span class="d-none d-lg-inline">Novo</span>
-                    </a>
+                    <div class="d-flex gap-2 w-100 w-md-auto justify-content-end mt-2 mt-md-0">
+                        <button type="button" class="btn btn-light rounded-pill px-3 d-flex align-items-center gap-2 fw-medium whitespace-nowrap border flex-grow-1 flex-md-grow-0 justify-content-center" data-bs-toggle="modal" data-bs-target="#exportModal">
+                            <i class="bi bi-download text-muted"></i>
+                            <span class="d-inline d-lg-inline text-muted">Exportar</span>
+                        </button>
+                        <a href="{{ route('sismatriz-main.create') }}" class="btn btn-primary rounded-pill px-3 d-flex align-items-center gap-2 fw-medium whitespace-nowrap flex-grow-1 flex-md-grow-0 justify-content-center">
+                            <i class="bi bi-plus-lg"></i>
+                            <span class="d-inline d-lg-inline">Novo</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -418,6 +420,13 @@
 
                         <div class="col-12">
                             <hr class="border-secondary border-opacity-10 my-0">
+                            <div id="exportPreview" class="alert py-2 small d-none mt-3 mb-0 border-0 bg-primary bg-opacity-10 text-primary">
+                                <div class="fw-bold d-flex align-items-center gap-2">
+                                    <i class="bi bi-people-fill"></i> 
+                                    <span><span id="exportPreviewCount">0</span> usuários encontrados</span>
+                                </div>
+                                <div id="exportPreviewNames" class="mt-1 opacity-75 fw-medium"></div>
+                            </div>
                         </div>
 
                         <div class="col-md-7">
@@ -948,6 +957,7 @@
                     notice.innerHTML = `<i class="bi bi-info-circle-fill me-2"></i> Exportando <strong>${ids.size}</strong> usuário(s) selecionado(s). Filtros ignorados.`;
                     form.insertBefore(notice, form.firstChild);
                 }
+                document.getElementById('exportPreview')?.classList.add('d-none');
             } else {
                 // Re-enable filters
                 const filterInputs = form.querySelectorAll('select, input[type="text"]');
@@ -956,8 +966,89 @@
                 // Remove notice
                 const notice = form.querySelector('.selection-notice');
                 if (notice) notice.remove();
+                
+                // Trigger preview
+                updateExportPreview();
             }
         });
+        
+        // Export Live Preview Logic
+        let exportPreviewTimeout;
+        const exportFormInputs = exportModalEl.querySelectorAll('select, input[type="text"]');
+        
+        function updateExportPreview() {
+            if(getSelectedIds().size > 0) return; // Ignore if specific items selected
+            
+            const form = document.getElementById('exportForm');
+            if(!form) return;
+            
+            const formData = new FormData(form);
+            const previewEl = document.getElementById('exportPreview');
+            const countEl = document.getElementById('exportPreviewCount');
+            const namesEl = document.getElementById('exportPreviewNames');
+            
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(previewEl) {
+                    previewEl.classList.remove('d-none');
+                    if(data.count === 0) {
+                        previewEl.classList.remove('bg-primary', 'text-primary');
+                        previewEl.classList.add('bg-danger', 'text-danger');
+                    } else {
+                        previewEl.classList.remove('bg-danger', 'text-danger');
+                        previewEl.classList.add('bg-primary', 'text-primary');
+                    }
+                }
+                if(countEl) countEl.textContent = data.count;
+                if(namesEl && data.preview) {
+                    if(data.count > data.preview.length) {
+                        namesEl.innerHTML = data.preview.join(', ') + '...';
+                    } else {
+                        namesEl.innerHTML = data.preview.join(', ');
+                    }
+                }
+            })
+            .catch(err => console.error('Preview error', err));
+        }
+        
+        exportFormInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                clearTimeout(exportPreviewTimeout);
+                exportPreviewTimeout = setTimeout(updateExportPreview, 500);
+            });
+            input.addEventListener('change', function() {
+                clearTimeout(exportPreviewTimeout);
+                exportPreviewTimeout = setTimeout(updateExportPreview, 500);
+            });
+        });
+    }
+
+    // Main Table Live Search
+    let mainSearchTimeout;
+    const mainSearchInput = document.getElementById('mainSearchInput');
+    if(mainSearchInput) {
+        mainSearchInput.addEventListener('input', function() {
+            clearTimeout(mainSearchTimeout);
+            mainSearchTimeout = setTimeout(() => {
+                document.getElementById('mainSearchForm').submit();
+            }, 600);
+        });
+        
+        // Put cursor at the end of input if there's text
+        const val = mainSearchInput.value;
+        if(val) {
+            mainSearchInput.focus();
+            mainSearchInput.setSelectionRange(val.length, val.length);
+        }
     }
 </script>
 @endpush
