@@ -97,6 +97,16 @@ class SisMatrizMainUserController extends Controller
         $rolesMap = self::ROLES;
         $paroquias = SisMatrizParoquia::orderBy('name')->get();
 
+        if ($request->ajax()) {
+            $tableHtml = view('sismatriz_main.partials.table', compact('users', 'rolesMap'))->render();
+            $paginationHtml = view('sismatriz_main.partials.pagination', compact('users'))->render();
+            
+            return response()->json([
+                'table' => $tableHtml,
+                'pagination' => $paginationHtml
+            ]);
+        }
+
         return view('sismatriz_main.index', compact('users', 'rolesMap', 'paroquias'));
     }
 

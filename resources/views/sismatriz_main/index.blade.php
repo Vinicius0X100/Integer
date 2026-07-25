@@ -11,6 +11,22 @@
     .sismatriz-blink-danger {
         animation: sismatrizPulseDanger 1.15s infinite;
     }
+    @keyframes sismatrizShimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    .shimmer-loading {
+        animation: sismatrizShimmer 2s infinite linear;
+        background: linear-gradient(to right, #eff1f3 4%, #e2e2e2 25%, #eff1f3 36%);
+        background-size: 1000px 100%;
+        opacity: 0.5;
+        border-radius: 4px;
+        color: transparent !important;
+        pointer-events: none;
+    }
+    .shimmer-loading * {
+        visibility: hidden;
+    }
 </style>
 <div class="container-fluid py-4">
     <!-- Feedback Messages -->
@@ -30,7 +46,7 @@
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-header bg-white border-bottom p-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
                 <div class="d-flex align-items-center gap-3">
                     <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary position-relative">
                         @if(file_exists(public_path('img/sismatriz-logo.png')))
@@ -45,48 +61,53 @@
                         <small class="text-muted">Administre os acessos do SisMatriz Principal</small>
                     </div>
                 </div>
-                <div class="d-flex flex-column flex-md-row gap-2 w-100 align-items-md-center">
-                    <form action="{{ route('sismatriz-main.index') }}" method="GET" class="d-flex flex-column flex-md-row gap-2 flex-grow-1 w-100" id="mainSearchForm">
-                        
-                        <select name="status" class="form-select bg-light border-0 rounded-pill w-100 w-md-auto" style="min-width: 120px;" onchange="this.form.submit()">
-                            <option value="">Status: Todos</option>
-                            <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Ativo</option>
-                            <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Inativo</option>
-                        </select>
-
-                        <select name="paroquia_id" class="form-select bg-light border-0 rounded-pill w-100 w-md-auto" style="min-width: 150px; max-width: 200px;" onchange="this.form.submit()">
-                            <option value="">Paróquia: Todas</option>
-                            @foreach($paroquias as $p)
-                                <option value="{{ $p->id }}" {{ request('paroquia_id') == $p->id ? 'selected' : '' }}>{{ \Illuminate\Support\Str::limit($p->name, 20) }}</option>
-                            @endforeach
-                        </select>
-
-                        <select name="role" class="form-select bg-light border-0 rounded-pill w-100 w-md-auto" style="min-width: 140px; max-width: 250px;" onchange="this.form.submit()">
-                            <option value="">Cargo: Todos</option>
-                            @foreach($rolesMap as $id => $roleName)
-                                <option value="{{ $id }}" {{ request('role') == $id ? 'selected' : '' }}>{{ $roleName }}</option>
-                            @endforeach
-                        </select>
-
-                        <div class="input-group w-100">
-                            <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3 border-0">
-                                <i class="bi bi-search text-muted"></i>
-                            </span>
-                            <input type="text" id="mainSearchInput" name="search" class="form-control bg-light border-start-0 rounded-end-pill border-0" placeholder="Buscar..." value="{{ request('search') }}">
-                        </div>
-                    </form>
-                    <div class="d-flex gap-2 w-100 w-md-auto justify-content-end mt-2 mt-md-0">
-                        <button type="button" class="btn btn-light rounded-pill px-3 d-flex align-items-center gap-2 fw-medium whitespace-nowrap border flex-grow-1 flex-md-grow-0 justify-content-center" data-bs-toggle="modal" data-bs-target="#exportModal">
-                            <i class="bi bi-download text-muted"></i>
-                            <span class="d-inline d-lg-inline text-muted">Exportar</span>
-                        </button>
-                        <a href="{{ route('sismatriz-main.create') }}" class="btn btn-primary rounded-pill px-3 d-flex align-items-center gap-2 fw-medium whitespace-nowrap flex-grow-1 flex-md-grow-0 justify-content-center">
-                            <i class="bi bi-plus-lg"></i>
-                            <span class="d-inline d-lg-inline">Novo</span>
-                        </a>
-                    </div>
+                <div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
+                    <button type="button" class="btn btn-light rounded-pill px-4 d-flex align-items-center gap-2 fw-medium border flex-grow-1 flex-md-grow-0 justify-content-center" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="bi bi-download text-muted"></i>
+                        <span class="text-muted">Exportar</span>
+                    </button>
+                    <a href="{{ route('sismatriz-main.create') }}" class="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2 fw-medium flex-grow-1 flex-md-grow-0 justify-content-center">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Novo Usuário</span>
+                    </a>
                 </div>
             </div>
+
+            <form action="{{ route('sismatriz-main.index') }}" method="GET" id="mainSearchForm" class="d-flex flex-column gap-3">
+                <!-- Linha 1: Filtros -->
+                <div class="d-flex flex-column flex-md-row gap-2">
+                    <select name="status" class="form-select bg-light border-0 rounded-pill filter-input" style="min-width: 140px; flex: 1;">
+                        <option value="">Status: Todos</option>
+                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Ativo</option>
+                        <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Inativo</option>
+                    </select>
+
+                    <select name="paroquia_id" class="form-select bg-light border-0 rounded-pill filter-input" style="min-width: 180px; flex: 2;">
+                        <option value="">Paróquia: Todas</option>
+                        @foreach($paroquias as $p)
+                            <option value="{{ $p->id }}" {{ request('paroquia_id') == $p->id ? 'selected' : '' }}>{{ \Illuminate\Support\Str::limit($p->name, 40) }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="role" class="form-select bg-light border-0 rounded-pill filter-input" style="min-width: 180px; flex: 2;">
+                        <option value="">Cargo: Todos</option>
+                        @foreach($rolesMap as $id => $roleName)
+                            <option value="{{ $id }}" {{ request('role') == $id ? 'selected' : '' }}>{{ $roleName }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Linha 2: Busca Grande -->
+                <div class="input-group input-group-lg bg-light rounded-pill overflow-hidden border border-light shadow-sm">
+                    <span class="input-group-text bg-transparent border-0 ps-4">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" id="mainSearchInput" name="search" class="form-control bg-transparent border-0 shadow-none fs-6 filter-input" placeholder="Buscar por nome, email ou login..." value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary px-4 fw-bold fs-6 border-0">
+                        Pesquisar
+                    </button>
+                </div>
+            </form>
         </div>
 
         <div class="table-responsive">
@@ -136,120 +157,13 @@
                         <th class="py-3 text-uppercase text-muted small fw-bold text-end pe-4">Ações</th>
                     </tr>
                 </thead>
-                <tbody class="border-top-0">
-                    @forelse($users as $user)
-                        <tr>
-                            <td class="ps-4">
-                                <div class="form-check">
-                                    <input class="form-check-input user-checkbox" type="checkbox" name="selected[]" value="{{ $user->id }}">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    @if($user->avatar && $user->avatar !== 'unknow_user.png')
-                                        <img src="https://central.sismatriz.online/storage/uploads/avatars/{{ $user->avatar }}" alt="{{ $user->name }}" class="rounded-circle me-3 border" style="width: 40px; height: 40px; object-fit: cover;">
-                                    @else
-                                        <div class="avatar-initial rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold me-3" style="width: 40px; height: 40px;">
-                                            {{ substr($user->name, 0, 1) }}
-                                        </div>
-                                    @endif
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ $user->name }}</div>
-                                        <div class="small text-muted">ID: {{ $user->id }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-medium">{{ $user->user }}</span>
-                                    <span class="small text-muted">{{ $user->email }}</span>
-                                </div>
-                            </td>
-                            <td>
-                                @php
-                                    $userRoleIds = $user->rule ? explode(',', $user->rule) : [];
-                                    $userRoleNames = [];
-                                    foreach($userRoleIds as $rid) {
-                                        if(isset($rolesMap[$rid])) {
-                                            $userRoleNames[] = $rolesMap[$rid];
-                                        }
-                                    }
-                                @endphp
-                                @if(count($userRoleNames) > 0)
-                                    <span class="badge bg-info bg-opacity-10 text-info rounded-pill mb-1" title="{{ implode(', ', $userRoleNames) }}">
-                                        {{ count($userRoleNames) }} Cargo(s)
-                                    </span>
-                                    <div class="small text-muted text-truncate" style="max-width: 200px;">
-                                        {{ implode(', ', $userRoleNames) }}
-                                    </div>
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($user->paroquia && $user->paroquia->foto)
-                                    <img src="https://central.sismatriz.online/storage/uploads/paroquias/{{ $user->paroquia->foto }}" alt="{{ $user->paroquia->name }}" title="{{ $user->paroquia->name }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" data-bs-toggle="tooltip">
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                @if($user->is_pass_change == 1)
-                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill">Alterada</span>
-                                @else
-                                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill">Padrão</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                @if($user->status == 0)
-                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Ativo</span>
-                                @else
-                                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Inativo</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <div class="d-flex align-items-center justify-content-center gap-2">
-                                    <span class="small text-muted">{{ $user->formatted_last_login ?? 'Nunca acessou' }}</span>
-                                    @if(!empty($user->inactive_alert))
-                                        <i class="bi bi-exclamation-triangle-fill text-danger sismatriz-blink-danger"
-                                           data-bs-toggle="tooltip"
-                                           title="Sem acesso há {{ number_format((int) $user->inactive_days, 0, ',', '.') }} dias. Ideal inativar o usuário."></i>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button type="button" class="btn btn-sm btn-light rounded-circle" onclick="showUserDetails({{ $user->id }})" title="Detalhes">
-                                        <i class="bi bi-eye text-primary"></i>
-                                    </button>
-                                    <a href="{{ route('sismatriz-main.edit', $user->id) }}" class="btn btn-sm btn-light rounded-circle" title="Editar">
-                                        <i class="bi bi-pencil text-primary"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-light rounded-circle" onclick='confirmDelete({{ $user->id }}, @json($user->name))' title="Excluir">
-                                        <i class="bi bi-trash text-danger"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-5">
-                                <div class="d-flex flex-column align-items-center justify-content-center text-muted">
-                                    <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
-                                    <p class="mb-0">Nenhum usuário encontrado.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
+                @include('sismatriz_main.partials.table')
             </table>
         </div>
 
-        @if($users->hasPages())
-            <div class="card-footer bg-white border-top p-4">
-                {{ $users->appends(request()->query())->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top p-4 {{ $users->hasPages() ? '' : 'd-none' }}" id="paginationContainer">
+            @include('sismatriz_main.partials.pagination')
+        </div>
     </div>
 </div>
 
@@ -1032,23 +946,113 @@
         });
     }
 
-    // Main Table Live Search
+    // Main Table Live Search (AJAX)
     let mainSearchTimeout;
-    const mainSearchInput = document.getElementById('mainSearchInput');
-    if(mainSearchInput) {
-        mainSearchInput.addEventListener('input', function() {
-            clearTimeout(mainSearchTimeout);
-            mainSearchTimeout = setTimeout(() => {
-                document.getElementById('mainSearchForm').submit();
-            }, 600);
-        });
-        
-        // Put cursor at the end of input if there's text
-        const val = mainSearchInput.value;
-        if(val) {
-            mainSearchInput.focus();
-            mainSearchInput.setSelectionRange(val.length, val.length);
+    const mainSearchForm = document.getElementById('mainSearchForm');
+    const filterInputs = document.querySelectorAll('.filter-input');
+    const paginationContainer = document.getElementById('paginationContainer');
+    
+    function applyShimmer() {
+        const tableBody = document.getElementById('usersTableBody');
+        if(tableBody) {
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => {
+                    cell.classList.add('shimmer-loading');
+                });
+            });
         }
+    }
+    
+    function performSearch(url = null) {
+        applyShimmer();
+        
+        let fetchUrl = url;
+        if (!fetchUrl) {
+            const formData = new FormData(mainSearchForm);
+            const params = new URLSearchParams(formData);
+            fetchUrl = `${mainSearchForm.action}?${params.toString()}`;
+        }
+        
+        window.history.replaceState({}, '', fetchUrl);
+        
+        fetch(fetchUrl, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.table) {
+                const tableBody = document.getElementById('usersTableBody');
+                if (tableBody) tableBody.outerHTML = data.table;
+                bindTableCheckboxes(); // Re-bind checkboxes logic
+            }
+            if(paginationContainer && data.pagination !== undefined) {
+                paginationContainer.innerHTML = data.pagination;
+                if(data.pagination.trim() === '') {
+                    paginationContainer.classList.add('d-none');
+                } else {
+                    paginationContainer.classList.remove('d-none');
+                }
+                bindAjaxLinks();
+            }
+            bindAjaxLinks(); // Re-bind for table headers too
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }
+    
+    filterInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            clearTimeout(mainSearchTimeout);
+            mainSearchTimeout = setTimeout(() => performSearch(), 600);
+        });
+        if(input.tagName === 'SELECT') {
+            input.addEventListener('change', function() {
+                clearTimeout(mainSearchTimeout);
+                performSearch();
+            });
+        }
+    });
+    
+    if (mainSearchForm) {
+        mainSearchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearTimeout(mainSearchTimeout);
+            performSearch();
+        });
+    }
+    
+    function bindAjaxLinks() {
+        // Pagination Links
+        const pagLinks = paginationContainer ? paginationContainer.querySelectorAll('.pagination a') : [];
+        // Header Sort Links
+        const sortLinks = document.querySelectorAll('thead th a');
+        
+        const allLinks = [...pagLinks, ...sortLinks];
+        
+        allLinks.forEach(link => {
+            // Remove existing listener to prevent duplicates
+            const newLink = link.cloneNode(true);
+            link.parentNode.replaceChild(newLink, link);
+            
+            newLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+                if (url) performSearch(url);
+            });
+        });
+    }
+    
+    // Initial Bind
+    bindAjaxLinks();
+
+    const mainSearchInput = document.getElementById('mainSearchInput');
+    if(mainSearchInput && mainSearchInput.value) {
+        mainSearchInput.focus();
+        mainSearchInput.setSelectionRange(mainSearchInput.value.length, mainSearchInput.value.length);
     }
 </script>
 @endpush
