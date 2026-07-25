@@ -95,14 +95,11 @@
                 </div>
 
                 <!-- Linha 2: Busca Grande -->
-                <div class="input-group input-group-lg bg-light rounded-pill overflow-hidden border border-light shadow-sm">
-                    <span class="input-group-text bg-transparent border-0 ps-4">
+                <div class="input-group input-group-lg bg-light rounded-pill overflow-hidden shadow-sm border-0">
+                    <span class="input-group-text bg-transparent border-0 ps-4 pe-2">
                         <i class="bi bi-search text-muted"></i>
                     </span>
-                    <input type="text" id="mainSearchInput" name="search" class="form-control bg-transparent border-0 shadow-none fs-6 filter-input" placeholder="Buscar por nome, email ou login..." value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary px-4 fw-bold fs-6 border-0">
-                        Pesquisar
-                    </button>
+                    <input type="text" id="mainSearchInput" name="search" class="form-control bg-transparent border-0 shadow-none fs-6 filter-input py-3" placeholder="Buscar por nome, email ou login..." value="{{ request('search') }}">
                 </div>
             </form>
         </div>
