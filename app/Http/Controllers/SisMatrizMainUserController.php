@@ -95,8 +95,6 @@ class SisMatrizMainUserController extends Controller
             return $user;
         });
         $rolesMap = self::ROLES;
-        $paroquias = SisMatrizParoquia::orderBy('name')->get();
-
         if ($request->ajax()) {
             $tableHtml = view('sismatriz_main.partials.table', compact('users', 'rolesMap'))->render();
             $paginationHtml = view('sismatriz_main.partials.pagination', compact('users'))->render();
@@ -106,6 +104,8 @@ class SisMatrizMainUserController extends Controller
                 'pagination' => $paginationHtml
             ]);
         }
+
+        $paroquias = SisMatrizParoquia::orderBy('name')->get();
 
         return view('sismatriz_main.index', compact('users', 'rolesMap', 'paroquias'));
     }

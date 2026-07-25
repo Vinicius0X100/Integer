@@ -11,21 +11,18 @@
     .sismatriz-blink-danger {
         animation: sismatrizPulseDanger 1.15s infinite;
     }
-    @keyframes sismatrizShimmer {
-        0% { background-position: -1000px 0; }
-        100% { background-position: 1000px 0; }
+    @keyframes sismatrizTablePulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.35; }
+        100% { opacity: 1; }
     }
-    .shimmer-loading {
-        animation: sismatrizShimmer 2s infinite linear;
-        background: linear-gradient(to right, #eff1f3 4%, #e2e2e2 25%, #eff1f3 36%);
-        background-size: 1000px 100%;
-        opacity: 0.5;
-        border-radius: 4px;
-        color: transparent !important;
+    .table-loading-pulse {
+        animation: sismatrizTablePulse 1.2s ease-in-out infinite;
         pointer-events: none;
+        user-select: none;
     }
-    .shimmer-loading * {
-        visibility: hidden;
+    .table-loading-pulse td {
+        border-color: rgba(0,0,0,0.02) !important;
     }
 </style>
 <div class="container-fluid py-4">
@@ -955,13 +952,7 @@
     function applyShimmer() {
         const tableBody = document.getElementById('usersTableBody');
         if(tableBody) {
-            const rows = tableBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                cells.forEach(cell => {
-                    cell.classList.add('shimmer-loading');
-                });
-            });
+            tableBody.classList.add('table-loading-pulse');
         }
     }
     
@@ -1001,13 +992,17 @@
             }
             bindAjaxLinks(); // Re-bind for table headers too
         })
-        .catch(error => console.error('Error fetching data:', error));
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            const tableBody = document.getElementById('usersTableBody');
+            if(tableBody) tableBody.classList.remove('table-loading-pulse');
+        });
     }
     
     filterInputs.forEach(input => {
         input.addEventListener('input', function() {
             clearTimeout(mainSearchTimeout);
-            mainSearchTimeout = setTimeout(() => performSearch(), 600);
+            mainSearchTimeout = setTimeout(() => performSearch(), 300);
         });
         if(input.tagName === 'SELECT') {
             input.addEventListener('change', function() {
@@ -1042,6 +1037,48 @@
                 e.preventDefault();
                 const url = this.getAttribute('href');
                 if (url) performSearch(url);
+            });
+        });
+    }
+
+    // Helper to re-bind checkboxes after AJAX
+    function bindTableCheckboxes() {
+        const newCheckboxes = document.querySelectorAll('.user-checkbox');
+        const ids = typeof getSelectedIds === 'function' ? getSelectedIds() : new Set();
+        
+        newCheckboxes.forEach(cb => {
+            if (ids.has(cb.value)) {
+                cb.checked = true;
+                const tr = cb.closest('tr');
+                if(tr) {
+                    tr.classList.add('table-active');
+                    tr.style.backgroundColor = 'var(--bs-primary-bg-subtle)';
+                }
+            }
+            
+            cb.addEventListener('change', function() {
+                const tr = this.closest('tr');
+                if (this.checked) {
+                    ids.add(this.value);
+                    if(tr) {
+                        tr.classList.add('table-active');
+                        tr.style.backgroundColor = 'var(--bs-primary-bg-subtle)';
+                    }
+                } else {
+                    ids.delete(this.value);
+                    if(tr) {
+                        tr.classList.remove('table-active');
+                        tr.style.removeProperty('background-color');
+                    }
+                }
+                if(typeof saveSelectedIds === 'function') saveSelectedIds(ids);
+                
+                // Update Select All Checkbox State
+                const selectAll = document.getElementById('selectAll');
+                if (selectAll && newCheckboxes.length > 0) {
+                    const allVisibleSelected = Array.from(newCheckboxes).every(c => ids.has(c.value));
+                    selectAll.checked = allVisibleSelected;
+                }
             });
         });
     }
