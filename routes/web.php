@@ -13,6 +13,7 @@ use App\Http\Controllers\ServicesAutomationsController;
 use App\Http\Controllers\AutomationAuditLogController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Controllers\CampanhaEmailController;
+use App\Http\Controllers\NodalController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -82,5 +83,10 @@ Route::middleware('auth')->group(function () {
         Route::post('servicos/bulk-action', [ServicoController::class, 'bulkAction'])->name('servicos.bulk_action');
         Route::any('servicos/generate-pdf', [ServicoController::class, 'generatePdf'])->name('servicos.pdf');
         Route::resource('servicos', ServicoController::class);
+
+        // Rotas Nodal
+        Route::get('nodal/settings', [NodalController::class, 'settings'])->name('nodal.settings');
+        Route::put('nodal/settings', [NodalController::class, 'saveSettings'])->name('nodal.save-settings');
+        Route::resource('nodal', NodalController::class)->only(['index', 'create', 'store']);
     });
 });

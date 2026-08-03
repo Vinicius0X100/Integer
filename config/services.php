@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'nodal' => [
+        'api_key'  => env('NODAL_SYSTEM_API_KEY'),
+        'base_url' => env('NODAL_BASE_URL', 'http://nodal.test'),
+    ],
+
 ];

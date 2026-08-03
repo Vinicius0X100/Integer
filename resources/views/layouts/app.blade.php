@@ -150,6 +150,23 @@
             position: fixed;
             height: 100vh;
             z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar sutil da sidebar */
+        #sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        #sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(128, 128, 128, 0.25);
+            border-radius: 4px;
+        }
+        #sidebar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(128, 128, 128, 0.45);
         }
 
         #sidebar.active {
@@ -392,7 +409,35 @@
                             <i class="bi bi-envelope-paper-fill"></i> Campanhas de Email
                         </a>
                     </li>
+                    @if(Auth::user()->papel === 'admin')
+                    <li class="mt-2">
+                        <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Integrações</span>
+                    </li>
+                    <li class="mt-1">
+                        <a href="#nodalSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('nodal.*') ? 'true' : 'false' }}" class="dropdown-toggle d-flex align-items-center">
+                            @if(file_exists(public_path('img/Nodal-Icon.png')))
+                                <img src="{{ asset('img/Nodal-Icon.png') }}" alt="Nodal" style="width: 20px; height: 20px; object-fit: contain; margin-right: 10px;">
+                            @else
+                                <i class="bi bi-building-check"></i>
+                            @endif
+                            Nodal
+                        </a>
+                        <ul class="collapse list-unstyled {{ request()->routeIs('nodal.*') ? 'show' : '' }}" id="nodalSubmenu" style="background-color: rgba(0,0,0,0.05); border-radius: 12px; margin: 5px 10px;">
+                            <li>
+                                <a href="{{ route('nodal.index') }}" class="{{ request()->routeIs('nodal.index') || request()->routeIs('nodal.create') || request()->routeIs('nodal.store') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                    Empresas
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('nodal.settings') }}" class="{{ request()->routeIs('nodal.settings') || request()->routeIs('nodal.save-settings') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                    Configurações
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endif
                     <!-- Add more menu items here -->
+
                 </ul>
             </nav>
 
