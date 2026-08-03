@@ -6,7 +6,6 @@ use App\Models\NodalOrganization;
 use App\Services\NodalProvisioningService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class NodalController extends Controller
 {
@@ -53,19 +52,19 @@ class NodalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nome'          => 'required|string|max:255',
-            'slug'          => 'nullable|string|max:100|regex:/^[a-z0-9-]+$/',
-            'owner_name'    => 'required|string|max:255',
-            'owner_email'   => 'required|email|max:255',
+            'nome'           => 'required|string|max:255',
+            'slug'           => 'nullable|string|max:100|regex:/^[a-z0-9-]+$/',
+            'owner_name'     => 'required|string|max:255',
+            'owner_email'    => 'required|email|max:255',
             'owner_password' => 'required|string|min:8',
         ], [
-            'nome.required'          => 'O nome da organização é obrigatório.',
-            'owner_name.required'    => 'O nome do responsável é obrigatório.',
-            'owner_email.required'   => 'O e-mail do responsável é obrigatório.',
-            'owner_email.email'      => 'O e-mail informado não é válido.',
+            'nome.required'           => 'O nome da organização é obrigatório.',
+            'owner_name.required'     => 'O nome do responsável é obrigatório.',
+            'owner_email.required'    => 'O e-mail do responsável é obrigatório.',
+            'owner_email.email'       => 'O e-mail informado não é válido.',
             'owner_password.required' => 'A senha inicial é obrigatória.',
-            'owner_password.min'     => 'A senha deve ter no mínimo 8 caracteres.',
-            'slug.regex'             => 'O slug deve conter apenas letras minúsculas, números e hífens.',
+            'owner_password.min'      => 'A senha deve ter no mínimo 8 caracteres.',
+            'slug.regex'              => 'O slug deve conter apenas letras minúsculas, números e hífens.',
         ]);
 
         try {
@@ -82,15 +81,15 @@ class NodalController extends Controller
             );
 
             NodalOrganization::create([
-                'nome'                 => $validated['nome'],
-                'slug'                 => $validated['slug'] ?? null,
+                'nome'                  => $validated['nome'],
+                'slug'                  => $validated['slug'] ?? null,
                 'nodal_organization_id' => $result['organization_id'] ?? null,
-                'nodal_user_id'        => $result['user_id'] ?? null,
-                'owner_name'           => $validated['owner_name'],
-                'owner_email'          => $validated['owner_email'],
-                'nodal_login_url'      => $result['login_url'] ?? null,
-                'status'               => 'active',
-                'provisionado_em'      => now(),
+                'nodal_user_id'         => $result['user_id'] ?? null,
+                'owner_name'            => $validated['owner_name'],
+                'owner_email'           => $validated['owner_email'],
+                'nodal_login_url'       => $result['login_url'] ?? null,
+                'status'                => 'active',
+                'provisionado_em'       => now(),
             ]);
 
             return redirect()->route('nodal.index')
@@ -113,12 +112,12 @@ class NodalController extends Controller
                 $mappedErrors = [];
                 foreach ($errors as $field => $messages) {
                     $localField = match ($field) {
-                        'owner.email'    => 'owner_email',
-                        'owner.name'     => 'owner_name',
-                        'owner.password' => 'owner_password',
+                        'owner.email'       => 'owner_email',
+                        'owner.name'        => 'owner_name',
+                        'owner.password'    => 'owner_password',
                         'organization.name' => 'nome',
                         'organization.slug' => 'slug',
-                        default => $field,
+                        default             => $field,
                     };
                     $mappedErrors[$localField] = $messages;
                 }
@@ -129,7 +128,6 @@ class NodalController extends Controller
                     ->with('error', $body['message'] ?? 'Os dados informados são inválidos.');
             }
 
-            // Outros erros HTTP inesperados
             Log::error('Nodal: Erro inesperado ao provisionar organização.', [
                 'status' => $status,
                 'body'   => $body,
@@ -155,8 +153,8 @@ class NodalController extends Controller
      */
     public function settings()
     {
-        $currentKey    = env('NODAL_SYSTEM_API_KEY', '');
-        $currentUrl    = env('NODAL_BASE_URL', 'http://nodal.test');
+        $currentKey    = config('services.nodal.api_key', '');
+        $currentUrl    = config('services.nodal.base_url', 'http://nodal.test');
         $keyConfigured = !empty($currentKey);
 
         return view('nodal.settings', compact('keyConfigured', 'currentUrl', 'currentKey'));
@@ -167,11 +165,10 @@ class NodalController extends Controller
      */
     public function saveSettings(Request $request)
     {
-        $currentKey = env('NODAL_SYSTEM_API_KEY', '');
-        $keyAlreadyConfigured = !empty($currentKey);
+        $keyAlreadyConfigured = !empty(config('services.nodal.api_key', ''));
 
         $request->validate([
-            // Se já tem chave, o campo pode ficar vazio (mantém a atual)
+            // Se já tem chave configurada, pode deixar em branco para manter
             'nodal_api_key'  => $keyAlreadyConfigured ? 'nullable|string|min:10' : 'required|string|min:10',
             'nodal_base_url' => 'required|url',
         ], [
@@ -182,7 +179,21 @@ class NodalController extends Controller
         ]);
 
         $envPath = base_path('.env');
+
+        // Verificar permissões antes de tentar escrever
+        if (!file_exists($envPath) || !is_writable($envPath)) {
+            return back()
+                ->withInput()
+                ->with('error', 'Não foi possível escrever no arquivo .env. Verifique as permissões do arquivo em: ' . $envPath);
+        }
+
         $envContent = file_get_contents($envPath);
+
+        if ($envContent === false) {
+            return back()
+                ->withInput()
+                ->with('error', 'Não foi possível ler o arquivo .env.');
+        }
 
         // Só atualiza a API Key se o usuário preencheu o campo
         if (!empty($request->nodal_api_key)) {
@@ -192,9 +203,16 @@ class NodalController extends Controller
         // Sempre atualiza a URL
         $envContent = $this->updateEnvValue($envContent, 'NODAL_BASE_URL', $request->nodal_base_url);
 
-        file_put_contents($envPath, $envContent);
+        // Escrever com LOCK_EX para evitar conflitos no Windows
+        $written = file_put_contents($envPath, $envContent, LOCK_EX);
 
-        // Limpar cache de configuração para o Laravel recarregar o .env imediatamente
+        if ($written === false) {
+            return back()
+                ->withInput()
+                ->with('error', 'Falha ao gravar no arquivo .env. O arquivo pode estar bloqueado por outro processo. Tente fechar o VS Code ou editor de texto antes de salvar.');
+        }
+
+        // Limpar cache de configuração para o Laravel recarregar imediatamente
         \Artisan::call('config:clear');
 
         return redirect()->route('nodal.settings')
@@ -202,19 +220,19 @@ class NodalController extends Controller
     }
 
     /**
-     * Atualiza ou adiciona uma variável no conteúdo do .env.
+     * Atualiza ou insere uma variável de ambiente no conteúdo do .env.
      */
     private function updateEnvValue(string $envContent, string $key, string $value): string
     {
-        // Escapar o valor se necessário (strings com espaços precisam de aspas)
-        $escapedValue = Str::contains($value, ' ') ? "\"{$value}\"" : $value;
+        // Valores com espaços precisam de aspas
+        $escapedValue = str_contains($value, ' ') ? "\"{$value}\"" : $value;
 
-        if (preg_match("/^{$key}=.*/m", $envContent)) {
-            // Chave existe: substituir o valor
+        if (preg_match("/^{$key}=/m", $envContent)) {
+            // Chave existe: substituir a linha inteira
             return preg_replace("/^{$key}=.*/m", "{$key}={$escapedValue}", $envContent);
         }
 
         // Chave não existe: adicionar ao final
-        return $envContent . "\n{$key}={$escapedValue}\n";
+        return rtrim($envContent) . "\n{$key}={$escapedValue}\n";
     }
 }
