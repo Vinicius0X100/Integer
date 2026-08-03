@@ -34,6 +34,26 @@
         </div>
     @endif
 
+    {{-- Diagnóstico de permissão do .env --}}
+    @if(!$envWritable || !$envExists)
+        <div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4" role="alert">
+            <strong><i class="bi bi-shield-exclamation me-2"></i>Problema de Permissão detectado</strong><br>
+            O processo PHP (<code>{{ $phpUser }}</code>) <strong>não tem permissão de escrita</strong> no arquivo <code>.env</code>.<br>
+            Execute o comando abaixo no servidor via SSH para corrigir:
+            <pre class="mt-2 mb-1 p-3 rounded-3 bg-dark text-white small">chmod 664 {{ $envPath }}
+# e se necessário:
+chown {{ $phpUser }}:{{ $phpUser }} {{ $envPath }}</pre>
+        </div>
+    @else
+        <div class="alert alert-success rounded-4 border-0 shadow-sm mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-shield-check-fill fs-5 text-success"></i>
+            <div>
+                <strong>Permissões OK</strong> — O processo PHP (<code>{{ $phpUser }}</code>) tem acesso de escrita no <code>.env</code>.
+                Após salvar, o arquivo será atualizado automaticamente.
+            </div>
+        </div>
+    @endif
+
     <div class="row g-4">
         {{-- Card de Status --}}
         <div class="col-md-4">

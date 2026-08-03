@@ -157,7 +157,18 @@ class NodalController extends Controller
         $currentUrl    = config('services.nodal.base_url', 'http://nodal.test');
         $keyConfigured = !empty($currentKey);
 
-        return view('nodal.settings', compact('keyConfigured', 'currentUrl', 'currentKey'));
+        // Diagnóstico de permissão do .env
+        $envPath       = base_path('.env');
+        $envWritable   = is_writable($envPath);
+        $envExists     = file_exists($envPath);
+        $phpUser       = function_exists('posix_getpwuid') && function_exists('posix_geteuid')
+                         ? (posix_getpwuid(posix_geteuid())['name'] ?? exec('whoami'))
+                         : exec('whoami');
+
+        return view('nodal.settings', compact(
+            'keyConfigured', 'currentUrl', 'currentKey',
+            'envPath', 'envWritable', 'envExists', 'phpUser'
+        ));
     }
 
     /**
