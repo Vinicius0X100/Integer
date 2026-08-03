@@ -167,8 +167,12 @@ class NodalController extends Controller
      */
     public function saveSettings(Request $request)
     {
+        $currentKey = env('NODAL_SYSTEM_API_KEY', '');
+        $keyAlreadyConfigured = !empty($currentKey);
+
         $request->validate([
-            'nodal_api_key'  => 'required|string|min:10',
+            // Se já tem chave, o campo pode ficar vazio (mantém a atual)
+            'nodal_api_key'  => $keyAlreadyConfigured ? 'nullable|string|min:10' : 'required|string|min:10',
             'nodal_base_url' => 'required|url',
         ], [
             'nodal_api_key.required'  => 'A API Key é obrigatória.',
@@ -180,13 +184,18 @@ class NodalController extends Controller
         $envPath = base_path('.env');
         $envContent = file_get_contents($envPath);
 
-        // Atualizar ou adicionar NODAL_SYSTEM_API_KEY
-        $envContent = $this->updateEnvValue($envContent, 'NODAL_SYSTEM_API_KEY', $request->nodal_api_key);
+        // Só atualiza a API Key se o usuário preencheu o campo
+        if (!empty($request->nodal_api_key)) {
+            $envContent = $this->updateEnvValue($envContent, 'NODAL_SYSTEM_API_KEY', $request->nodal_api_key);
+        }
 
-        // Atualizar ou adicionar NODAL_BASE_URL
+        // Sempre atualiza a URL
         $envContent = $this->updateEnvValue($envContent, 'NODAL_BASE_URL', $request->nodal_base_url);
 
         file_put_contents($envPath, $envContent);
+
+        // Limpar cache de configuração para o Laravel recarregar o .env imediatamente
+        \Artisan::call('config:clear');
 
         return redirect()->route('nodal.settings')
             ->with('success', 'Configurações do Nodal salvas com sucesso!');
