@@ -143,13 +143,9 @@
                                         <a href="{{ route('nodal.edit', $org->id) }}" class="btn btn-sm btn-outline-light rounded-pill px-3" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <form action="{{ route('nodal.destroy', $org->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta organização permanentemente? Esta ação não pode ser desfeita.');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Excluir">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Excluir" data-bs-toggle="modal" data-bs-target="#modalExcluir-{{ $org->id }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -182,4 +178,34 @@
         @endif
     </div>
 </div>
+
+{{-- Modais de Exclusão --}}
+@foreach($organizations as $org)
+    <div class="modal fade" id="modalExcluir-{{ $org->id }}" tabindex="-1" aria-labelledby="modalExcluirLabel-{{ $org->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4 text-start">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-danger" id="modalExcluirLabel-{{ $org->id }}">Excluir Organização</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-trash3-fill text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="mb-2">Deseja excluir a organização <strong>{{ $org->nome }}</strong>?</h5>
+                    <p class="text-muted small mb-0">Esta ação excluirá permanentemente a empresa do Nodal e do banco de dados local. Não poderá ser desfeita.</p>
+                </div>
+                <div class="modal-footer border-top-0 d-flex justify-content-center pt-0 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <form method="POST" action="{{ route('nodal.destroy', $org->id) }}" onsubmit="let btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<span class=\'spinner-border spinner-border-sm me-2\' role=\'status\' aria-hidden=\'true\'></span>Excluindo...';">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Sim, Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endforeach
+
 @endsection
