@@ -87,6 +87,6 @@ Route::middleware('auth')->group(function () {
         // Rotas Nodal
         Route::get('nodal/settings', [NodalController::class, 'settings'])->name('nodal.settings');
         Route::put('nodal/settings', [NodalController::class, 'saveSettings'])->name('nodal.save-settings');
-        Route::resource('nodal', NodalController::class)->only(['index', 'create', 'store']);
+        Route::resource('nodal', NodalController::class)->except(['show']);
     });
 });

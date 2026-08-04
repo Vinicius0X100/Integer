@@ -12,6 +12,9 @@ class NodalOrganization extends Model
     protected $fillable = [
         'nome',
         'slug',
+        'cnpj',
+        'address',
+        'industry',
         'nodal_organization_id',
         'nodal_user_id',
         'owner_name',

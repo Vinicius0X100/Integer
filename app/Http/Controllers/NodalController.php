@@ -54,6 +54,9 @@ class NodalController extends Controller
         $validated = $request->validate([
             'nome'           => 'required|string|max:255',
             'slug'           => 'nullable|string|max:100|regex:/^[a-z0-9-]+$/',
+            'cnpj'           => 'nullable|string|max:20',
+            'address'        => 'nullable|string|max:255',
+            'industry'       => 'nullable|string|max:100',
             'owner_name'     => 'required|string|max:255',
             'owner_email'    => 'required|email|max:255',
             'owner_password' => 'required|string|min:8',
@@ -70,8 +73,11 @@ class NodalController extends Controller
         try {
             $result = $this->nodalService->provisionCompany(
                 [
-                    'name' => $validated['nome'],
-                    'slug' => $validated['slug'] ?? null,
+                    'name'     => $validated['nome'],
+                    'slug'     => $validated['slug'] ?? null,
+                    'cnpj'     => $validated['cnpj'] ?? null,
+                    'address'  => $validated['address'] ?? null,
+                    'industry' => $validated['industry'] ?? null,
                 ],
                 [
                     'name'     => $validated['owner_name'],
@@ -83,6 +89,9 @@ class NodalController extends Controller
             NodalOrganization::create([
                 'nome'                  => $validated['nome'],
                 'slug'                  => $validated['slug'] ?? null,
+                'cnpj'                  => $validated['cnpj'] ?? null,
+                'address'               => $validated['address'] ?? null,
+                'industry'              => $validated['industry'] ?? null,
                 'nodal_organization_id' => $result['organization_id'] ?? null,
                 'nodal_user_id'         => $result['user_id'] ?? null,
                 'owner_name'            => $validated['owner_name'],
@@ -145,6 +154,109 @@ class NodalController extends Controller
             return back()
                 ->withInput()
                 ->with('error', 'Não foi possível conectar ao Nodal. Verifique a URL configurada e a conectividade.');
+        }
+    }
+
+    /**
+     * Exibe o formulário de edição de uma organização provisionada.
+     */
+    public function edit($id)
+    {
+        $organization = NodalOrganization::findOrFail($id);
+        return view('nodal.edit', compact('organization'));
+    }
+
+    /**
+     * Atualiza uma organização no Nodal e localmente.
+     */
+    public function update(Request $request, $id)
+    {
+        $organization = NodalOrganization::findOrFail($id);
+
+        if (!$organization->nodal_organization_id) {
+            return back()->with('error', 'Esta organização não possui vínculo (ID) com o Nodal para ser atualizada.');
+        }
+
+        $validated = $request->validate([
+            'nome'           => 'required|string|max:255',
+            'cnpj'           => 'nullable|string|max:20',
+            'address'        => 'nullable|string|max:255',
+            'industry'       => 'nullable|string|max:100',
+            'owner_name'     => 'required|string|max:255',
+            'owner_email'    => 'required|email|max:255',
+            'owner_password' => 'nullable|string|min:8', // Opcional na edição
+        ]);
+
+        try {
+            $orgData = [
+                'name'     => $validated['nome'],
+                'cnpj'     => $validated['cnpj'] ?? null,
+                'address'  => $validated['address'] ?? null,
+                'industry' => $validated['industry'] ?? null,
+            ];
+
+            $ownerData = [
+                'name'     => $validated['owner_name'],
+                'email'    => $validated['owner_email'],
+                'password' => $validated['owner_password'] ?? null,
+            ];
+
+            $this->nodalService->updateCompany($organization->nodal_organization_id, $orgData, $ownerData);
+
+            $organization->update([
+                'nome'        => $validated['nome'],
+                'cnpj'        => $validated['cnpj'] ?? null,
+                'address'     => $validated['address'] ?? null,
+                'industry'    => $validated['industry'] ?? null,
+                'owner_name'  => $validated['owner_name'],
+                'owner_email' => $validated['owner_email'],
+            ]);
+
+            return redirect()->route('nodal.index')
+                ->with('success', 'Organização atualizada com sucesso no Nodal!');
+
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            $status = $e->response->status();
+            $body   = $e->response->json();
+
+            if ($status === 422) {
+                return back()
+                    ->withInput()
+                    ->with('error', $body['message'] ?? 'Os dados informados são inválidos (Verifique se o e-mail não está em uso por outro usuário no Nodal).');
+            }
+
+            return back()
+                ->withInput()
+                ->with('error', 'Erro da API do Nodal ao atualizar: ' . ($body['message'] ?? 'Erro desconhecido.'));
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Não foi possível conectar ao Nodal para atualizar.');
+        }
+    }
+
+    /**
+     * Exclui uma organização no Nodal e localmente.
+     */
+    public function destroy($id)
+    {
+        $organization = NodalOrganization::findOrFail($id);
+
+        try {
+            if ($organization->nodal_organization_id) {
+                $this->nodalService->deleteCompany($organization->nodal_organization_id);
+            }
+
+            // Exclusão local (Hard Delete)
+            $organization->delete();
+
+            return redirect()->route('nodal.index')
+                ->with('success', 'Organização excluída permanentemente no Nodal e no sistema local.');
+
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            return back()->with('error', 'Erro da API do Nodal ao excluir. Verifique a conectividade.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Não foi possível conectar ao Nodal para excluir.');
         }
     }
 

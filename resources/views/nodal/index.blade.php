@@ -134,11 +134,23 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 border-bottom-0 text-end">
-                                    @if($org->nodal_login_url)
-                                        <a href="{{ $org->nodal_login_url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3" title="Acessar Nodal">
-                                            <i class="bi bi-box-arrow-up-right me-1"></i> Acessar
+                                    <div class="d-flex justify-content-end gap-2">
+                                        @if($org->nodal_login_url)
+                                            <a href="{{ $org->nodal_login_url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3" title="Acessar Nodal">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                        @endif
+                                        <a href="{{ route('nodal.edit', $org->id) }}" class="btn btn-sm btn-outline-light rounded-pill px-3" title="Editar">
+                                            <i class="bi bi-pencil"></i>
                                         </a>
-                                    @endif
+                                        <form action="{{ route('nodal.destroy', $org->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta organização permanentemente? Esta ação não pode ser desfeita.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
