@@ -65,8 +65,19 @@
                                         </div>
                                     </div>
                                 </td>
+                                @php
+                                    $docLabels = [
+                                        'SOCIAL_CONTRACT' => 'Contrato Social',
+                                        'COMPANY_DOCUMENT' => 'Documento da Empresa',
+                                        'IDENTITY_DOCUMENT' => 'Documento de Identidade',
+                                        'ADDRESS_PROOF' => 'Comprovante de Endereço',
+                                        'CNPJ_CARD' => 'Cartão CNPJ'
+                                    ];
+                                    $rawType = $ver['document_type'] ?? 'DOCUMENTO';
+                                    $docLabel = $docLabels[$rawType] ?? str_replace('_', ' ', $rawType);
+                                @endphp
                                 <td class="px-4 py-3 border-bottom-0">
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">{{ strtoupper($ver['document_type'] ?? 'DOCUMENTO') }}</span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">{{ mb_strtoupper($docLabel, 'UTF-8') }}</span>
                                 </td>
                                 <td class="px-4 py-3 border-bottom-0">
                                     <span class="text-muted small">

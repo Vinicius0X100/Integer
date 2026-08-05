@@ -31,7 +31,18 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-header bg-transparent border-bottom border-secondary border-opacity-10 py-3">
-                    <h5 class="mb-0 fw-semibold"><i class="bi bi-file-earmark-text me-2"></i> Documento Analisado ({{ strtoupper($verification['document_type'] ?? 'DOCUMENTO') }})</h5>
+                    @php
+                        $docLabels = [
+                            'SOCIAL_CONTRACT' => 'Contrato Social',
+                            'COMPANY_DOCUMENT' => 'Documento da Empresa',
+                            'IDENTITY_DOCUMENT' => 'Documento de Identidade',
+                            'ADDRESS_PROOF' => 'Comprovante de Endereço',
+                            'CNPJ_CARD' => 'Cartão CNPJ'
+                        ];
+                        $rawType = $verification['document_type'] ?? 'DOCUMENTO';
+                        $docLabel = $docLabels[$rawType] ?? str_replace('_', ' ', $rawType);
+                    @endphp
+                    <h5 class="mb-0 fw-semibold"><i class="bi bi-file-earmark-text me-2"></i> Documento Analisado ({{ $docLabel }})</h5>
                 </div>
                 <div class="card-body p-0 text-center" style="min-height: 500px; background-color: #f8f9fa;">
                     @if(!empty($verification['document_url']))
@@ -55,7 +66,7 @@
                 <div class="card-body">
                     <p class="text-muted small mb-4">Revise o documento ao lado e ateste se os dados condizem com o cadastro da empresa. Após aprovar, a empresa será notificada e liberada no Nodal.</p>
                     
-                    @if(($verification['status'] ?? 'pending') === 'pending')
+                    @if(($verification['status'] ?? 'under_review') === 'under_review')
                         <div class="d-grid gap-3">
                             <button type="button" class="btn btn-success rounded-pill py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAprovar">
                                 <i class="bi bi-check-lg me-1"></i> Aprovar Documento
@@ -67,7 +78,7 @@
                     @else
                         <div class="alert alert-secondary border-0 rounded-3 text-center">
                             Esta solicitação já foi processada. <br>
-                            Status atual: <strong>{{ strtoupper($verification['status']) }}</strong>
+                            Status atual: <strong>{{ $verification['status'] === 'verified' ? 'Aprovado' : ($verification['status'] === 'rejected' ? 'Rejeitado' : 'Em Análise') }}</strong>
                         </div>
                     @endif
                 </div>
