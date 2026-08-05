@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\NodalVerification;
 use App\Services\NodalProvisioningService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -14,66 +13,53 @@ class NodalVerificationController extends Controller
     ) {}
 
     /**
-     * Lista as verificações pendentes.
+     * Lista as verificações pendentes consumindo direto da API do Nodal em tempo real.
      */
     public function index()
     {
-        // Lista apenas as pendentes, ou talvez todas com filtro. 
-        // Vamos listar todas, ordenadas por mais recentes.
-        $verifications = NodalVerification::latest()->paginate(15);
+        try {
+            $response = $this->nodalService->getPendingVerifications();
+            $verifications = $response['data'] ?? [];
+        } catch (\Exception $e) {
+            $verifications = [];
+            Log::error('Nodal KYC: Falha ao buscar verificações pendentes.', ['error' => $e->getMessage()]);
+            session()->flash('error', 'Não foi possível conectar ao Nodal para buscar os documentos.');
+        }
 
         return view('nodal_verifications.index', compact('verifications'));
     }
 
     /**
-     * Exibe os detalhes de uma verificação e o documento para análise.
+     * Exibe os detalhes de uma verificação direto da API.
      */
-    public function show($id)
+    public function show($uuid)
     {
-        $verification = NodalVerification::findOrFail($id);
-
-        if ($verification->status === 'pending' && empty($verification->document_url)) {
-            try {
-                $details = $this->nodalService->getVerificationDetails($verification->uuid);
-                
-                if (!empty($details['document_url'])) {
-                    $verification->update([
-                        'document_url' => $details['document_url'],
-                        // Se houver mais detalhes, podemos atualizar aqui.
-                    ]);
-                }
-            } catch (\Exception $e) {
-                Log::error('Nodal KYC: Falha ao buscar detalhes da verificação.', [
-                    'uuid' => $verification->uuid,
-                    'error' => $e->getMessage(),
-                ]);
-                
-                return back()->with('error', 'Não foi possível carregar os detalhes do documento no Nodal.');
-            }
+        try {
+            $verification = $this->nodalService->getVerificationDetails($uuid);
+            return view('nodal_verifications.show', compact('verification'));
+        } catch (\Exception $e) {
+            Log::error('Nodal KYC: Falha ao buscar detalhes da verificação.', [
+                'uuid' => $uuid,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return redirect()->route('nodal-verifications.index')->with('error', 'Não foi possível carregar os detalhes do documento no Nodal.');
         }
-
-        return view('nodal_verifications.show', compact('verification'));
     }
 
     /**
      * Aprova a verificação no Nodal.
      */
-    public function approve(Request $request, $id)
+    public function approve(Request $request, $uuid)
     {
-        $verification = NodalVerification::findOrFail($id);
-        
         $request->validate([
             'notes' => 'nullable|string|max:500'
         ]);
 
         try {
-            $this->nodalService->approveVerification($verification->uuid, $request->notes);
-
-            $verification->update(['status' => 'approved']);
-
+            $this->nodalService->approveVerification($uuid, $request->notes);
             return redirect()->route('nodal-verifications.index')
-                ->with('success', "Verificação da empresa {$verification->organization_name} APROVADA com sucesso no Nodal.");
-
+                ->with('success', "A verificação foi APROVADA com sucesso no Nodal.");
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao tentar aprovar no Nodal: ' . $e->getMessage());
         }
@@ -82,10 +68,8 @@ class NodalVerificationController extends Controller
     /**
      * Rejeita a verificação no Nodal.
      */
-    public function reject(Request $request, $id)
+    public function reject(Request $request, $uuid)
     {
-        $verification = NodalVerification::findOrFail($id);
-        
         $request->validate([
             'reason' => 'required|string|max:1000'
         ], [
@@ -93,13 +77,9 @@ class NodalVerificationController extends Controller
         ]);
 
         try {
-            $this->nodalService->rejectVerification($verification->uuid, $request->reason);
-
-            $verification->update(['status' => 'rejected']);
-
+            $this->nodalService->rejectVerification($uuid, $request->reason);
             return redirect()->route('nodal-verifications.index')
-                ->with('success', "Verificação da empresa {$verification->organization_name} REJEITADA com sucesso no Nodal.");
-
+                ->with('success', "A verificação foi REJEITADA com sucesso no Nodal.");
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao tentar rejeitar no Nodal: ' . $e->getMessage());
         }

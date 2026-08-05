@@ -12,7 +12,7 @@
                 @endif
                 Verificações de Documentos
             </h2>
-            <p class="text-white-50 mb-0">Listagem de empresas aguardando aprovação KYC.</p>
+            <p class="text-white-50 mb-0">Listagem ao vivo de empresas aguardando aprovação KYC (via API).</p>
         </div>
         <div>
             <form action="{{ route('nodal-verifications.index') }}" method="GET" class="d-inline">
@@ -47,7 +47,6 @@
                         <tr>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Empresa</th>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Documento</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Status</th>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Enviado em</th>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Ações</th>
                         </tr>
@@ -58,40 +57,31 @@
                                 <td class="px-4 py-3 border-bottom-0">
                                     <div class="d-flex align-items-center">
                                         <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center text-primary fw-bold me-3" style="width: 40px; height: 40px; font-size: 1rem;">
-                                            {{ strtoupper(substr($ver->organization_name, 0, 1)) }}
+                                            {{ strtoupper(substr($ver['organization_name'] ?? 'N', 0, 1)) }}
                                         </div>
                                         <div>
-                                            <div class="fw-semibold">{{ $ver->organization_name }}</div>
-                                            <div class="text-muted small">ID Nodal: <span title="{{ $ver->nodal_organization_uuid }}">{{ substr($ver->nodal_organization_uuid, 0, 8) }}...</span></div>
+                                            <div class="fw-semibold">{{ $ver['organization_name'] ?? 'Desconhecida' }}</div>
+                                            <div class="text-muted small">ID Nodal: <span title="{{ $ver['organization_uuid'] ?? '' }}">{{ substr($ver['organization_uuid'] ?? '', 0, 8) }}...</span></div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 border-bottom-0">
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">{{ strtoupper($ver->document_type) }}</span>
-                                </td>
-                                <td class="px-4 py-3 border-bottom-0">
-                                    @if($ver->status === 'approved')
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Aprovado</span>
-                                    @elseif($ver->status === 'rejected')
-                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Rejeitado</span>
-                                    @else
-                                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3">Pendente</span>
-                                    @endif
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">{{ strtoupper($ver['document_type'] ?? 'DOCUMENTO') }}</span>
                                 </td>
                                 <td class="px-4 py-3 border-bottom-0">
                                     <span class="text-muted small">
-                                        {{ $ver->submitted_at ? $ver->submitted_at->format('d/m/Y H:i') : '—' }}
+                                        {{ !empty($ver['submitted_at']) ? \Carbon\Carbon::parse($ver['submitted_at'])->format('d/m/Y H:i') : '—' }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 border-bottom-0 text-end">
-                                    <a href="{{ route('nodal-verifications.show', $ver->id) }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                    <a href="{{ route('nodal-verifications.show', $ver['uuid']) }}" class="btn btn-sm btn-primary rounded-pill px-3">
                                         Verificar <i class="bi bi-arrow-right ms-1"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-5">
+                                <td colspan="4" class="text-center text-muted py-5">
                                     <div class="mb-3">
                                         <i class="bi bi-shield-check fs-1 opacity-25"></i>
                                     </div>
@@ -104,12 +94,6 @@
                 </table>
             </div>
         </div>
-
-        @if($verifications->hasPages())
-            <div class="card-footer bg-transparent border-top border-secondary border-opacity-10 px-4 py-3">
-                {{ $verifications->links() }}
-            </div>
-        @endif
     </div>
 </div>
 @endsection

@@ -8,8 +8,8 @@
         <a href="{{ route('nodal-verifications.index') }}" class="text-decoration-none text-muted mb-3 d-inline-block">
             <i class="bi bi-arrow-left me-1"></i> Voltar para Verificações
         </a>
-        <h2 class="fw-bold text-white mb-1">Empresa: {{ $verification->organization_name }}</h2>
-        <p class="text-white-50 mb-0">Enviado em: {{ $verification->submitted_at ? $verification->submitted_at->format('d/m/Y às H:i') : 'Desconhecido' }}</p>
+        <h2 class="fw-bold text-white mb-1">Empresa: {{ $verification['organization_name'] ?? 'Desconhecida' }}</h2>
+        <p class="text-white-50 mb-0">Enviado em: {{ !empty($verification['submitted_at']) ? \Carbon\Carbon::parse($verification['submitted_at'])->format('d/m/Y às H:i') : 'Desconhecido' }}</p>
     </div>
 
     {{-- Alerts --}}
@@ -31,11 +31,11 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-header bg-transparent border-bottom border-secondary border-opacity-10 py-3">
-                    <h5 class="mb-0 fw-semibold"><i class="bi bi-file-earmark-text me-2"></i> Documento Analisado ({{ strtoupper($verification->document_type) }})</h5>
+                    <h5 class="mb-0 fw-semibold"><i class="bi bi-file-earmark-text me-2"></i> Documento Analisado ({{ strtoupper($verification['document_type'] ?? 'DOCUMENTO') }})</h5>
                 </div>
                 <div class="card-body p-0 text-center" style="min-height: 500px; background-color: #f8f9fa;">
-                    @if($verification->document_url)
-                        <iframe src="{{ $verification->document_url }}" width="100%" height="600px" style="border: none;"></iframe>
+                    @if(!empty($verification['document_url']))
+                        <iframe src="{{ $verification['document_url'] }}" width="100%" height="600px" style="border: none;"></iframe>
                     @else
                         <div class="d-flex flex-column justify-content-center align-items-center h-100 py-5 text-muted">
                             <i class="bi bi-file-earmark-x fs-1 mb-3"></i>
@@ -55,7 +55,7 @@
                 <div class="card-body">
                     <p class="text-muted small mb-4">Revise o documento ao lado e ateste se os dados condizem com o cadastro da empresa. Após aprovar, a empresa será notificada e liberada no Nodal.</p>
                     
-                    @if($verification->status === 'pending')
+                    @if(($verification['status'] ?? 'pending') === 'pending')
                         <div class="d-grid gap-3">
                             <button type="button" class="btn btn-success rounded-pill py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAprovar">
                                 <i class="bi bi-check-lg me-1"></i> Aprovar Documento
@@ -67,7 +67,7 @@
                     @else
                         <div class="alert alert-secondary border-0 rounded-3 text-center">
                             Esta solicitação já foi processada. <br>
-                            Status atual: <strong>{{ strtoupper($verification->status) }}</strong>
+                            Status atual: <strong>{{ strtoupper($verification['status']) }}</strong>
                         </div>
                     @endif
                 </div>
@@ -84,10 +84,10 @@
                 <h5 class="modal-title fw-bold text-success" id="modalAprovarLabel">Confirmar Aprovação</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('nodal-verifications.approve', $verification->id) }}" onsubmit="let btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<span class=\'spinner-border spinner-border-sm me-2\' role=\'status\' aria-hidden=\'true\'></span>Aprovando...';">
+            <form method="POST" action="{{ route('nodal-verifications.approve', $verification['uuid']) }}" onsubmit="let btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<span class=\'spinner-border spinner-border-sm me-2\' role=\'status\' aria-hidden=\'true\'></span>Aprovando...';">
                 @csrf
                 <div class="modal-body py-4">
-                    <p class="mb-3">Você está prestes a <strong>Aprovar</strong> a empresa {{ $verification->organization_name }}.</p>
+                    <p class="mb-3">Você está prestes a <strong>Aprovar</strong> a empresa {{ $verification['organization_name'] ?? '' }}.</p>
                     <div class="mb-3">
                         <label for="notes" class="form-label text-muted small">Notas Internas (Opcional)</label>
                         <textarea name="notes" id="notes" rows="3" class="form-control bg-transparent border-secondary border-opacity-25 text-white" placeholder="Ex: Tudo correto..."></textarea>
@@ -110,7 +110,7 @@
                 <h5 class="modal-title fw-bold text-danger" id="modalRejeitarLabel">Rejeitar Documento</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('nodal-verifications.reject', $verification->id) }}" onsubmit="let btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<span class=\'spinner-border spinner-border-sm me-2\' role=\'status\' aria-hidden=\'true\'></span>Rejeitando...';">
+            <form method="POST" action="{{ route('nodal-verifications.reject', $verification['uuid']) }}" onsubmit="let btn = this.querySelector('button[type=submit]'); btn.disabled = true; btn.innerHTML = '<span class=\'spinner-border spinner-border-sm me-2\' role=\'status\' aria-hidden=\'true\'></span>Rejeitando...';">
                 @csrf
                 <div class="modal-body py-4">
                     <p class="mb-3">Por favor, informe o motivo da rejeição. <strong>A empresa receberá um e-mail com este motivo.</strong></p>
