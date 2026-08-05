@@ -90,16 +90,34 @@
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush rounded-4">
+                        @php
+                            $fieldLabels = [
+                                'organization_name' => 'Nome da Organização (Sistema)',
+                                'company_name' => 'Razão Social',
+                                'trade_name' => 'Nome Fantasia',
+                                'cnpj' => 'CNPJ',
+                                'website' => 'Site / URL',
+                                'linkedin' => 'LinkedIn',
+                                'responsible_name' => 'Nome do Responsável',
+                                'responsible_position' => 'Cargo do Responsável',
+                                'corporate_email' => 'E-mail Corporativo',
+                                'phone' => 'Telefone'
+                            ];
+                        @endphp
                         @foreach($verification as $key => $value)
-                            @if(!in_array($key, ['document_url', 'id', 'uuid', 'document_type', 'status', 'submitted_at', 'updated_at', 'notes', 'reason']) && !empty($value))
+                            @if(!in_array($key, ['document_url', 'id', 'uuid', 'organization_uuid', 'document_type', 'status', 'submitted_at', 'updated_at', 'reviewed_at', 'notes', 'reason']) && !empty($value))
+                                @php
+                                    $label = $fieldLabels[$key] ?? str_replace('_', ' ', $key);
+                                @endphp
                                 @if(is_array($value))
                                     <li class="list-group-item px-4 py-3 bg-transparent">
-                                        <div class="small text-muted text-uppercase fw-bold mb-2">{{ str_replace('_', ' ', $key) }}</div>
+                                        <div class="small text-muted text-uppercase fw-bold mb-2">{{ $label }}</div>
                                         <div class="bg-secondary bg-opacity-10 p-3 rounded-3 small">
                                             @foreach($value as $subKey => $subVal)
                                                 @if(!is_array($subVal))
+                                                    @php $subLabel = $fieldLabels[$subKey] ?? str_replace('_', ' ', $subKey); @endphp
                                                     <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-10 pb-2 mb-2 last-border-none">
-                                                        <span class="text-muted">{{ str_replace('_', ' ', $subKey) }}</span>
+                                                        <span class="text-muted">{{ mb_strtoupper($subLabel, 'UTF-8') }}</span>
                                                         <span class="fw-semibold">{{ $subVal }}</span>
                                                     </div>
                                                 @endif
@@ -108,7 +126,7 @@
                                     </li>
                                 @else
                                     <li class="list-group-item px-4 py-3 bg-transparent d-flex justify-content-between align-items-center">
-                                        <span class="small text-muted text-uppercase fw-bold me-3">{{ str_replace('_', ' ', $key) }}</span>
+                                        <span class="small text-muted text-uppercase fw-bold me-3">{{ $label }}</span>
                                         <span class="fw-medium text-end" style="word-break: break-word;">{{ $value }}</span>
                                     </li>
                                 @endif
