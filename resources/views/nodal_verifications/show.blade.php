@@ -44,15 +44,18 @@
                     @endphp
                     <h5 class="mb-0 fw-semibold"><i class="bi bi-file-earmark-text me-2"></i> Documento Analisado ({{ $docLabel }})</h5>
                 </div>
-                <div class="card-body p-0 text-center" style="min-height: 500px; background-color: #f8f9fa;">
+                <div class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 350px; background-color: #f8f9fa;">
                     @if(!empty($verification['document_url']))
-                        <iframe src="{{ $verification['document_url'] }}" width="100%" height="600px" style="border: none;"></iframe>
+                        <i class="bi bi-file-earmark-pdf text-primary opacity-75 mb-3" style="font-size: 5rem;"></i>
+                        <h5 class="mb-2 fw-semibold text-dark">Documento Disponível</h5>
+                        <p class="text-muted small mb-4">O arquivo anexado está pronto para análise. Você pode visualizá-lo ou baixá-lo no seu dispositivo de forma segura.</p>
+                        <a href="{{ $verification['document_url'] }}" target="_blank" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm fw-semibold">
+                            <i class="bi bi-cloud-download me-2"></i> Abrir / Baixar Documento
+                        </a>
                     @else
-                        <div class="d-flex flex-column justify-content-center align-items-center h-100 py-5 text-muted">
-                            <i class="bi bi-file-earmark-x fs-1 mb-3"></i>
-                            <h5>Documento não disponível</h5>
-                            <p class="small">Não foi possível carregar a pré-visualização deste documento.</p>
-                        </div>
+                        <i class="bi bi-file-earmark-x fs-1 mb-3 text-muted"></i>
+                        <h5 class="text-muted">Documento não disponível</h5>
+                        <p class="small text-muted mb-0">Nenhum arquivo foi anexado ou o link expirou.</p>
                     @endif
                 </div>
             </div>
