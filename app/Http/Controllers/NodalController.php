@@ -92,8 +92,8 @@ class NodalController extends Controller
                 'cnpj'                  => $validated['cnpj'] ?? null,
                 'address'               => $validated['address'] ?? null,
                 'industry'              => $validated['industry'] ?? null,
-                'nodal_organization_id' => $result['organization_id'] ?? null,
-                'nodal_user_id'         => $result['user_id'] ?? null,
+                'nodal_organization_uuid' => $result['organization_uuid'] ?? null,
+                'nodal_user_uuid'         => $result['user_uuid'] ?? null,
                 'owner_name'            => $validated['owner_name'],
                 'owner_email'           => $validated['owner_email'],
                 'nodal_login_url'       => $result['login_url'] ?? null,
@@ -102,7 +102,7 @@ class NodalController extends Controller
             ]);
 
             return redirect()->route('nodal.index')
-                ->with('success', "Organização \"{$validated['nome']}\" provisionada com sucesso no Nodal! ID: {$result['organization_id']}.");
+                ->with('success', "Organização \"{$validated['nome']}\" provisionada com sucesso no Nodal! UUID: {$result['organization_uuid']}.");
 
         } catch (\Illuminate\Http\Client\RequestException $e) {
             $status = $e->response->status();
@@ -173,7 +173,7 @@ class NodalController extends Controller
     {
         $organization = NodalOrganization::findOrFail($id);
 
-        if (!$organization->nodal_organization_id) {
+        if (!$organization->nodal_organization_uuid) {
             return back()->with('error', 'Esta organização não possui vínculo (ID) com o Nodal para ser atualizada.');
         }
 
@@ -201,7 +201,7 @@ class NodalController extends Controller
                 'password' => $validated['owner_password'] ?? null,
             ];
 
-            $this->nodalService->updateCompany($organization->nodal_organization_id, $orgData, $ownerData);
+            $this->nodalService->updateCompany($organization->nodal_organization_uuid, $orgData, $ownerData);
 
             $organization->update([
                 'nome'        => $validated['nome'],
@@ -243,8 +243,8 @@ class NodalController extends Controller
         $organization = NodalOrganization::findOrFail($id);
 
         try {
-            if ($organization->nodal_organization_id) {
-                $this->nodalService->deleteCompany($organization->nodal_organization_id);
+            if ($organization->nodal_organization_uuid) {
+                $this->nodalService->deleteCompany($organization->nodal_organization_uuid);
             }
 
             // Exclusão local (Hard Delete)

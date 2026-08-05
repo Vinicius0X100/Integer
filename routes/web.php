@@ -14,6 +14,7 @@ use App\Http\Controllers\AutomationAuditLogController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Controllers\CampanhaEmailController;
 use App\Http\Controllers\NodalController;
+use App\Http\Controllers\NodalVerificationController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -88,5 +89,10 @@ Route::middleware('auth')->group(function () {
         Route::get('nodal/settings', [NodalController::class, 'settings'])->name('nodal.settings');
         Route::put('nodal/settings', [NodalController::class, 'saveSettings'])->name('nodal.save-settings');
         Route::resource('nodal', NodalController::class)->except(['show']);
+
+        // Rotas Nodal KYC Verifications
+        Route::post('nodal-verifications/{id}/approve', [NodalVerificationController::class, 'approve'])->name('nodal-verifications.approve');
+        Route::post('nodal-verifications/{id}/reject', [NodalVerificationController::class, 'reject'])->name('nodal-verifications.reject');
+        Route::resource('nodal-verifications', NodalVerificationController::class)->only(['index', 'show']);
     });
 });

@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('monitor:systems')->everyFiveMinutes();
+
+// Sincronizar verificações de KYC pendentes a cada 5 minutos
+Schedule::command('nodal:sync-verifications')->everyFiveMinutes();

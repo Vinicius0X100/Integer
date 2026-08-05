@@ -84,7 +84,7 @@
                         <tr>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Organização</th>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Responsável</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Nodal ID</th>
+                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Nodal UUID</th>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Status</th>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Provisionado em</th>
                             <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Ações</th>
@@ -111,8 +111,8 @@
                                     <div class="text-muted small">{{ $org->owner_email }}</div>
                                 </td>
                                 <td class="px-4 py-3 border-bottom-0">
-                                    @if($org->nodal_organization_id)
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">#{{ $org->nodal_organization_id }}</span>
+                                    @if($org->nodal_organization_uuid)
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3" title="{{ $org->nodal_organization_uuid }}">{{ substr($org->nodal_organization_uuid, 0, 8) }}...</span>
                                     @else
                                         <span class="text-muted small">—</span>
                                     @endif

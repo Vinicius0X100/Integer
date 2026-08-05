@@ -414,7 +414,7 @@
                         <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Integrações</span>
                     </li>
                     <li class="mt-1">
-                        <a href="#nodalSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('nodal.*') ? 'true' : 'false' }}" class="dropdown-toggle d-flex align-items-center">
+                        <a href="#nodalSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('nodal.*') || request()->routeIs('nodal-verifications.*') ? 'true' : 'false' }}" class="dropdown-toggle d-flex align-items-center">
                             @if(file_exists(public_path('img/Nodal-Icon.png')))
                                 <img src="{{ asset('img/Nodal-Icon.png') }}" alt="Nodal" style="width: 20px; height: 20px; object-fit: contain; margin-right: 10px;">
                             @else
@@ -422,7 +422,7 @@
                             @endif
                             Nodal
                         </a>
-                        <ul class="collapse list-unstyled {{ request()->routeIs('nodal.*') ? 'show' : '' }}" id="nodalSubmenu" style="background-color: rgba(0,0,0,0.05); border-radius: 12px; margin: 5px 10px;">
+                        <ul class="collapse list-unstyled {{ request()->routeIs('nodal.*') || request()->routeIs('nodal-verifications.*') ? 'show' : '' }}" id="nodalSubmenu" style="background-color: rgba(0,0,0,0.05); border-radius: 12px; margin: 5px 10px;">
                             <li>
                                 <a href="{{ route('nodal.index') }}" class="{{ request()->routeIs('nodal.index') || request()->routeIs('nodal.create') || request()->routeIs('nodal.store') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
                                     Empresas
@@ -431,6 +431,11 @@
                             <li>
                                 <a href="{{ route('nodal.settings') }}" class="{{ request()->routeIs('nodal.settings') || request()->routeIs('nodal.save-settings') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
                                     Configurações
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('nodal-verifications.index') }}" class="{{ request()->routeIs('nodal-verifications.*') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                    Verificações KYC
                                 </a>
                             </li>
                         </ul>
