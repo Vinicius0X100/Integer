@@ -16,6 +16,7 @@ use App\Http\Controllers\CampanhaEmailController;
 use App\Http\Controllers\NodalController;
 use App\Http\Controllers\NodalVerificationController;
 use App\Http\Controllers\NodalBillingController;
+use App\Http\Controllers\NodalBillingPlanController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -95,6 +96,12 @@ Route::middleware('auth')->group(function () {
         Route::post('nodal-verifications/{id}/approve', [NodalVerificationController::class, 'approve'])->name('nodal-verifications.approve');
         Route::post('nodal-verifications/{id}/reject', [NodalVerificationController::class, 'reject'])->name('nodal-verifications.reject');
         Route::resource('nodal-verifications', NodalVerificationController::class)->only(['index', 'show']);
+
+        // Rotas Nodal Billing Plans (Planos de Licenciamento)
+        Route::get('nodal-plans', [NodalBillingPlanController::class, 'index'])->name('nodal-plans.index');
+        Route::post('nodal-plans', [NodalBillingPlanController::class, 'store'])->name('nodal-plans.store');
+        Route::patch('nodal-plans/{uuid}', [NodalBillingPlanController::class, 'update'])->name('nodal-plans.update');
+        Route::patch('nodal-organizations/{uuid}/billing-plan', [NodalBillingPlanController::class, 'assign'])->name('nodal-plans.assign');
 
         // Rotas Nodal Billing (Faturamento)
         Route::get('nodal-billing/export', [NodalBillingController::class, 'export'])->name('nodal-billing.export');

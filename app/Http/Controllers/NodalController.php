@@ -160,10 +160,25 @@ class NodalController extends Controller
     /**
      * Exibe o formulário de edição de uma organização provisionada.
      */
-    public function edit($id)
+    public function edit($id, \App\Services\NodalBillingPlanClient $planClient)
     {
         $organization = NodalOrganization::findOrFail($id);
-        return view('nodal.edit', compact('organization'));
+
+        $plans = [];
+        $currentPlan = null;
+
+        try {
+            $plansResponse = $planClient->listPlans();
+            $plans = $plansResponse['data'] ?? $plansResponse;
+        } catch (\Exception $e) {
+            // Falha silenciosa de conexão com os planos
+        }
+
+        if ($organization->nodal_organization_uuid) {
+            $currentPlan = $planClient->getOrganizationPlan($organization->nodal_organization_uuid);
+        }
+
+        return view('nodal.edit', compact('organization', 'plans', 'currentPlan'));
     }
 
     /**
