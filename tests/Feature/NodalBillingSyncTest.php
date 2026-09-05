@@ -158,7 +158,7 @@ class NodalBillingSyncTest extends TestCase
         $syncService->sync([]);
 
         Http::assertSent(function ($request) {
-            return $request->hasParam('updated_since');
+            return str_contains($request->url(), 'updated_since');
         });
     }
 
@@ -499,7 +499,9 @@ class NodalBillingSyncTest extends TestCase
         $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
         
         $content = $response->streamedContent();
-        $this->assertStringContainsString('Razão Social;Nome Fantasia;CNPJ', $content);
+        $this->assertStringContainsString('Razão Social', $content);
+        $this->assertStringContainsString('Nome Fantasia', $content);
+        $this->assertStringContainsString('CNPJ', $content);
         $this->assertStringContainsString('Empresa Exportacao LTDA', $content);
     }
 

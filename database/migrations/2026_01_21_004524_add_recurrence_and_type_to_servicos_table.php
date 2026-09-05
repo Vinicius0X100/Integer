@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('integer')->table('servicos', function (Blueprint $table) {
-            $table->string('tipo_servico')->nullable()->after('titulo');
-            $table->boolean('recorrente')->default(false)->after('parcelado');
-            $table->decimal('valor_recorrencia', 10, 2)->nullable()->after('valor_parcela');
-        });
+        if (Schema::connection('integer')->hasTable('servicos') && ! Schema::connection('integer')->hasColumn('servicos', 'tipo_servico')) {
+            Schema::connection('integer')->table('servicos', function (Blueprint $table) {
+                $table->string('tipo_servico')->nullable()->after('titulo');
+                $table->boolean('recorrente')->default(false)->after('parcelado');
+                $table->decimal('valor_recorrencia', 10, 2)->nullable()->after('valor_parcela');
+            });
+        }
     }
 
     /**
@@ -23,8 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection('integer')->table('servicos', function (Blueprint $table) {
-            $table->dropColumn(['tipo_servico', 'recorrente', 'valor_recorrencia']);
-        });
+        if (Schema::connection('integer')->hasTable('servicos') && Schema::connection('integer')->hasColumn('servicos', 'tipo_servico')) {
+            Schema::connection('integer')->table('servicos', function (Blueprint $table) {
+                $table->dropColumn(['tipo_servico', 'recorrente', 'valor_recorrencia']);
+            });
+        }
     }
 };

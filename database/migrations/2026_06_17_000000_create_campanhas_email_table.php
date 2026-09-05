@@ -10,36 +10,38 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::connection('integer')->create('campanhas_email', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::connection('integer')->hasTable('campanhas_email')) {
+            Schema::connection('integer')->create('campanhas_email', function (Blueprint $table) {
+                $table->id();
 
-            $table->string('titulo');
-            $table->longText('corpo_html');
+                $table->string('titulo');
+                $table->longText('corpo_html');
 
-            // Produto alvo: all, sacratech_id, sismatriz_ticket, sismatriz_main, airlink
-            $table->string('produto')->default('all');
+                // Produto alvo: all, sacratech_id, sismatriz_ticket, sismatriz_main, airlink
+                $table->string('produto')->default('all');
 
-            // todos ou selecionados
-            $table->string('destinatarios_tipo')->default('todos');
+                // todos ou selecionados
+                $table->string('destinatarios_tipo')->default('todos');
 
-            // JSON com IDs quando destinatarios_tipo = selecionados
-            $table->json('destinatarios_ids')->nullable();
+                // JSON com IDs quando destinatarios_tipo = selecionados
+                $table->json('destinatarios_ids')->nullable();
 
-            // Status: rascunho, enviando, enviado, erro
-            $table->string('status')->default('rascunho');
+                // Status: rascunho, enviando, enviado, erro
+                $table->string('status')->default('rascunho');
 
-            $table->unsignedInteger('total_destinatarios')->default(0);
+                $table->unsignedInteger('total_destinatarios')->default(0);
 
-            // Resposta bruta do webhook n8n
-            $table->text('webhook_response')->nullable();
+                // Resposta bruta do webhook n8n
+                $table->text('webhook_response')->nullable();
 
-            $table->timestamp('enviado_em')->nullable();
+                $table->timestamp('enviado_em')->nullable();
 
-            $table->unsignedBigInteger('criado_por')->nullable();
+                $table->unsignedBigInteger('criado_por')->nullable();
 
-            $table->timestamp('criado_em')->useCurrent();
-            $table->timestamp('atualizado_em')->useCurrent()->useCurrentOnUpdate();
-        });
+                $table->timestamp('criado_em')->useCurrent();
+                $table->timestamp('atualizado_em')->useCurrent()->useCurrentOnUpdate();
+            });
+        }
     }
 
     public function down(): void

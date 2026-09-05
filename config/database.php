@@ -64,10 +64,10 @@ return [
         ],
 
         'integer' => [
-            'driver' => 'mysql',
+            'driver' => env('APP_ENV') === 'testing' ? 'sqlite' : 'mysql',
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => 'integer_db',
+            'database' => env('APP_ENV') === 'testing' ? database_path('database.sqlite') : 'integer_db',
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
@@ -83,10 +83,10 @@ return [
         ],
 
         'sismatriz_ticket' => [
-            'driver' => 'mysql',
+            'driver' => env('APP_ENV') === 'testing' ? 'sqlite' : 'mysql',
             'host' => env('DB_SISMATRIZ_HOST', '127.0.0.1'),
             'port' => env('DB_SISMATRIZ_PORT', '3306'),
-            'database' => env('DB_SISMATRIZ_DATABASE', 'sismatriz_ticket'),
+            'database' => env('APP_ENV') === 'testing' ? database_path('database.sqlite') : env('DB_SISMATRIZ_DATABASE', 'sismatriz_ticket'),
             'username' => env('DB_SISMATRIZ_USERNAME', 'root'),
             'password' => env('DB_SISMATRIZ_PASSWORD', ''),
             'unix_socket' => env('DB_SISMATRIZ_SOCKET', ''),
@@ -102,10 +102,10 @@ return [
         ],
 
         'sismatriz_main' => [
-            'driver' => 'mysql',
+            'driver' => env('APP_ENV') === 'testing' ? 'sqlite' : 'mysql',
             'host' => env('DB_SISMATRIZ_HOST', '127.0.0.1'),
             'port' => env('DB_SISMATRIZ_PORT', '3306'),
-            'database' => env('DB_SISMATRIZ_MAIN_DATABASE', 'sismatriz_dev'),
+            'database' => env('APP_ENV') === 'testing' ? database_path('database.sqlite') : env('DB_SISMATRIZ_MAIN_DATABASE', 'sismatriz_dev'),
             'username' => env('DB_SISMATRIZ_USERNAME', 'root'),
             'password' => env('DB_SISMATRIZ_PASSWORD', ''),
             'unix_socket' => env('DB_SISMATRIZ_SOCKET', ''),

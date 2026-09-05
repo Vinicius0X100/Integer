@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection('integer')->create('servicos', function (Blueprint $table) {
+        if (! Schema::connection('integer')->hasTable('servicos')) {
+            Schema::connection('integer')->create('servicos', function (Blueprint $table) {
             $table->id();
             $table->integer('cliente_id');
             $table->foreign('cliente_id')->references('id')->on('clientes')->onDelete('cascade');
@@ -38,6 +39,7 @@ return new class extends Migration
             
             $table->timestamps();
         });
+        }
     }
 
     /**
