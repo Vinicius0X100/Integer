@@ -201,7 +201,9 @@
                                 <div class="col-md-3">
                                     <div class="text-white-50 small">Mensalidade</div>
                                     <div class="fw-semibold text-white">
-                                        @if(isset($currentPlan['monthly_price_cents']))
+                                        @if(isset($currentPlan['monthly_price_brl']))
+                                            R$ {{ number_format((float) $currentPlan['monthly_price_brl'], 2, ',', '.') }}
+                                        @elseif(isset($currentPlan['monthly_price_cents']))
                                             R$ {{ number_format($currentPlan['monthly_price_cents'] / 100, 2, ',', '.') }}
                                         @else
                                             R$ 0,00
@@ -213,8 +215,12 @@
                                     @if(!empty($currentPlan['is_unlimited']))
                                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
                                     @else
+                                        @php
+                                            $currUsers = $currentPlan['included_users'] ?? $currentPlan['max_users'] ?? '—';
+                                            $currAi = isset($currentPlan['included_ai_credits']) ? number_format($currentPlan['included_ai_credits'], 0, ',', '.') : ($currentPlan['ai_credits'] ?? '—');
+                                        @endphp
                                         <div class="text-white-50 small">
-                                            Usuários: {{ $currentPlan['max_users'] ?? '∞' }} | IA: {{ $currentPlan['ai_credits'] ?? '∞' }}
+                                            Usuários: {{ $currUsers }} | IA: {{ $currAi }}
                                         </div>
                                     @endif
                                 </div>

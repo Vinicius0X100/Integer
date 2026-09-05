@@ -69,16 +69,21 @@ class NodalBillingPlanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'                => 'required|string|max:255',
-            'code'                => 'required|string|max:100|regex:/^[a-z0-9-]+$/',
-            'monthly_price_cents' => 'required|integer|min:0',
-            'max_users'           => 'nullable|integer|min:1',
-            'ai_credits'          => 'nullable|integer|min:0',
-            'overage_price_cents' => 'nullable|integer|min:0',
-            'is_public'           => 'nullable|boolean',
-            'is_unlimited'        => 'nullable|boolean',
-            'is_active'           => 'nullable|boolean',
-            'description'         => 'nullable|string|max:1000',
+            'name'                                 => 'required|string|max:255',
+            'code'                                 => 'required|string|max:100|regex:/^[a-z0-9-]+$/',
+            'description'                          => 'nullable|string|max:1000',
+            'monthly_price_cents'                  => 'required|integer|min:0',
+            'included_users'                       => 'nullable|integer|min:0',
+            'included_ai_credits'                  => 'nullable|integer|min:0',
+            'integrations_limit'                   => 'nullable|integer|min:0',
+            'overage_price_per_1000_credits_cents' => 'nullable|integer|min:0',
+            'is_public'                            => 'nullable|boolean',
+            'is_unlimited'                         => 'nullable|boolean',
+            'is_active'                            => 'nullable|boolean',
+            'is_enterprise'                        => 'nullable|boolean',
+            'default_postpaid_enabled'             => 'nullable|boolean',
+            'default_postpaid_limit_cents'         => 'nullable|integer|min:0',
+            'features_text'                        => 'nullable|string',
         ], [
             'name.required'                => 'O nome do plano é obrigatório.',
             'code.required'                => 'O código do plano é obrigatório.',
@@ -86,17 +91,28 @@ class NodalBillingPlanController extends Controller
             'monthly_price_cents.required' => 'A mensalidade é obrigatória.',
         ]);
 
+        // Converter texto de características (1 por linha) para array de strings
+        $featuresJson = [];
+        if (!empty($validated['features_text'])) {
+            $featuresJson = array_values(array_filter(array_map('trim', explode("\n", $validated['features_text']))));
+        }
+
         $data = [
-            'name'                => $validated['name'],
-            'code'                => strtolower(trim($validated['code'])),
-            'monthly_price_cents' => (int) $validated['monthly_price_cents'],
-            'max_users'           => isset($validated['max_users']) ? (int) $validated['max_users'] : null,
-            'ai_credits'          => isset($validated['ai_credits']) ? (int) $validated['ai_credits'] : null,
-            'overage_price_cents' => isset($validated['overage_price_cents']) ? (int) $validated['overage_price_cents'] : null,
-            'is_public'           => $request->has('is_public') ? (bool) $request->is_public : true,
-            'is_unlimited'        => $request->has('is_unlimited') ? (bool) $request->is_unlimited : false,
-            'is_active'           => $request->has('is_active') ? (bool) $request->is_active : true,
-            'description'         => $validated['description'] ?? null,
+            'name'                                 => $validated['name'],
+            'code'                                 => strtolower(trim($validated['code'])),
+            'description'                          => $validated['description'] ?? null,
+            'monthly_price_cents'                  => (int) $validated['monthly_price_cents'],
+            'included_users'                       => isset($validated['included_users']) ? (int) $validated['included_users'] : null,
+            'included_ai_credits'                  => isset($validated['included_ai_credits']) ? (int) $validated['included_ai_credits'] : null,
+            'integrations_limit'                   => isset($validated['integrations_limit']) ? (int) $validated['integrations_limit'] : 0,
+            'overage_price_per_1000_credits_cents' => isset($validated['overage_price_per_1000_credits_cents']) ? (int) $validated['overage_price_per_1000_credits_cents'] : null,
+            'is_public'                            => $request->has('is_public') ? (bool) $request->is_public : true,
+            'is_unlimited'                         => $request->has('is_unlimited') ? (bool) $request->is_unlimited : false,
+            'is_active'                            => $request->has('is_active') ? (bool) $request->is_active : true,
+            'is_enterprise'                        => $request->has('is_enterprise') ? (bool) $request->is_enterprise : false,
+            'default_postpaid_enabled'             => $request->has('default_postpaid_enabled') ? (bool) $request->default_postpaid_enabled : false,
+            'default_postpaid_limit_cents'         => isset($validated['default_postpaid_limit_cents']) ? (int) $validated['default_postpaid_limit_cents'] : null,
+            'features_json'                        => $featuresJson,
         ];
 
         try {
@@ -158,15 +174,20 @@ class NodalBillingPlanController extends Controller
     public function update(Request $request, string $uuid)
     {
         $validated = $request->validate([
-            'name'                => 'required|string|max:255',
-            'monthly_price_cents' => 'required|integer|min:0',
-            'max_users'           => 'nullable|integer|min:1',
-            'ai_credits'          => 'nullable|integer|min:0',
-            'overage_price_cents' => 'nullable|integer|min:0',
-            'is_public'           => 'nullable|boolean',
-            'is_unlimited'        => 'nullable|boolean',
-            'is_active'           => 'nullable|boolean',
-            'description'         => 'nullable|string|max:1000',
+            'name'                                 => 'required|string|max:255',
+            'description'                          => 'nullable|string|max:1000',
+            'monthly_price_cents'                  => 'required|integer|min:0',
+            'included_users'                       => 'nullable|integer|min:0',
+            'included_ai_credits'                  => 'nullable|integer|min:0',
+            'integrations_limit'                   => 'nullable|integer|min:0',
+            'overage_price_per_1000_credits_cents' => 'nullable|integer|min:0',
+            'is_public'                            => 'nullable|boolean',
+            'is_unlimited'                         => 'nullable|boolean',
+            'is_active'                            => 'nullable|boolean',
+            'is_enterprise'                        => 'nullable|boolean',
+            'default_postpaid_enabled'             => 'nullable|boolean',
+            'default_postpaid_limit_cents'         => 'nullable|integer|min:0',
+            'features_text'                        => 'nullable|string',
         ], [
             'name.required'                => 'O nome do plano é obrigatório.',
             'monthly_price_cents.required' => 'A mensalidade é obrigatória.',
@@ -174,16 +195,26 @@ class NodalBillingPlanController extends Controller
 
         $isActive = $request->has('is_active') ? (bool) $request->is_active : false;
 
+        $featuresJson = [];
+        if (!empty($validated['features_text'])) {
+            $featuresJson = array_values(array_filter(array_map('trim', explode("\n", $validated['features_text']))));
+        }
+
         $data = [
-            'name'                => $validated['name'],
-            'monthly_price_cents' => (int) $validated['monthly_price_cents'],
-            'max_users'           => isset($validated['max_users']) ? (int) $validated['max_users'] : null,
-            'ai_credits'          => isset($validated['ai_credits']) ? (int) $validated['ai_credits'] : null,
-            'overage_price_cents' => isset($validated['overage_price_cents']) ? (int) $validated['overage_price_cents'] : null,
-            'is_public'           => $request->has('is_public') ? (bool) $request->is_public : false,
-            'is_unlimited'        => $request->has('is_unlimited') ? (bool) $request->is_unlimited : false,
-            'is_active'           => $isActive,
-            'description'         => $validated['description'] ?? null,
+            'name'                                 => $validated['name'],
+            'description'                          => $validated['description'] ?? null,
+            'monthly_price_cents'                  => (int) $validated['monthly_price_cents'],
+            'included_users'                       => isset($validated['included_users']) ? (int) $validated['included_users'] : null,
+            'included_ai_credits'                  => isset($validated['included_ai_credits']) ? (int) $validated['included_ai_credits'] : null,
+            'integrations_limit'                   => isset($validated['integrations_limit']) ? (int) $validated['integrations_limit'] : 0,
+            'overage_price_per_1000_credits_cents' => isset($validated['overage_price_per_1000_credits_cents']) ? (int) $validated['overage_price_per_1000_credits_cents'] : null,
+            'is_public'                            => $request->has('is_public') ? (bool) $request->is_public : false,
+            'is_unlimited'                         => $request->has('is_unlimited') ? (bool) $request->is_unlimited : false,
+            'is_active'                            => $isActive,
+            'is_enterprise'                        => $request->has('is_enterprise') ? (bool) $request->is_enterprise : false,
+            'default_postpaid_enabled'             => $request->has('default_postpaid_enabled') ? (bool) $request->default_postpaid_enabled : false,
+            'default_postpaid_limit_cents'         => isset($validated['default_postpaid_limit_cents']) ? (int) $validated['default_postpaid_limit_cents'] : null,
+            'features_json'                        => $featuresJson,
         ];
 
         // O campo 'code' é rigorosamente imutável e nunca enviado na atualização

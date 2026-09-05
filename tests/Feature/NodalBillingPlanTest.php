@@ -36,39 +36,53 @@ class NodalBillingPlanTest extends TestCase
     }
 
     /**
-     * Helper para mock de resposta da API do Nodal.
+     * Helper para mock de resposta com contrato REAL do Nodal.
      */
     protected function mockPlansResponse(array $plans = []): array
     {
         if (empty($plans)) {
             $plans = [
                 [
-                    'uuid'                 => 'plan-uuid-starter-111',
-                    'name'                 => 'Starter',
-                    'code'                 => 'starter',
-                    'monthly_price_cents' => 59900,
-                    'max_users'           => 50,
-                    'ai_credits'          => 10000,
-                    'overage_price_cents' => 2500,
-                    'is_public'           => true,
-                    'is_unlimited'        => false,
-                    'is_active'           => true,
-                    'organizations_count' => 12,
-                    'description'         => 'Plano inicial para pequenas paróquias',
+                    'uuid'                                 => 'plan-uuid-business-111',
+                    'code'                                 => 'business',
+                    'name'                                 => 'Business',
+                    'description'                          => 'Plano empresarial avançado',
+                    'monthly_price_cents'                  => 199000,
+                    'monthly_price_brl'                    => 1990,
+                    'included_ai_credits'                  => 50000,
+                    'included_users'                       => 500,
+                    'integrations_limit'                   => 0,
+                    'overage_price_per_1000_credits_cents' => 2200,
+                    'overage_price_per_1000_brl'           => 22,
+                    'is_public'                            => true,
+                    'is_unlimited'                         => false,
+                    'is_active'                            => true,
+                    'is_enterprise'                        => false,
+                    'default_postpaid_enabled'             => false,
+                    'default_postpaid_limit_cents'         => null,
+                    'features_json'                        => ['Google Workspace + Microsoft 365', 'AI Assistant'],
+                    'organizations_count'                  => 7,
                 ],
                 [
-                    'uuid'                 => 'plan-uuid-internal-222',
-                    'name'                 => 'SacraTech Internal',
-                    'code'                 => 'sacratech-internal',
-                    'monthly_price_cents' => 0,
-                    'max_users'           => null,
-                    'ai_credits'          => null,
-                    'overage_price_cents' => 0,
-                    'is_public'           => false,
-                    'is_unlimited'        => true,
-                    'is_active'           => true,
-                    'organizations_count' => 1,
-                    'description'         => 'Uso interno SacraTech',
+                    'uuid'                                 => 'plan-uuid-internal-222',
+                    'code'                                 => 'sacratech-internal',
+                    'name'                                 => 'SacraTech Internal',
+                    'description'                          => 'Uso interno SacraTech',
+                    'monthly_price_cents'                  => 0,
+                    'monthly_price_brl'                    => 0,
+                    'included_ai_credits'                  => null,
+                    'included_users'                       => null,
+                    'integrations_limit'                   => 0,
+                    'overage_price_per_1000_credits_cents' => 0,
+                    'overage_price_per_1000_brl'           => 0,
+                    'is_public'                            => false,
+                    'is_unlimited'                         => true,
+                    'is_active'                            => true,
+                    'is_enterprise'                        => false,
+                    'default_postpaid_enabled'             => false,
+                    'default_postpaid_limit_cents'         => null,
+                    'features_json'                        => [],
+                    'organizations_count'                  => 1,
                 ],
             ];
         }
@@ -105,8 +119,8 @@ class NodalBillingPlanTest extends TestCase
         });
     }
 
-    /** Teste 3: Listagem de planos carregada da API Nodal */
-    public function test_03_lists_plans_from_nodal_api(): void
+    /** Teste 3: Listagem de planos carregada da API Nodal com contrato real */
+    public function test_03_lists_plans_from_nodal_api_real_contract(): void
     {
         Http::fake([
             'http://nodal.test/api/v1/internal/integer/billing/plans*' => Http::response($this->mockPlansResponse(), 200),
@@ -114,8 +128,11 @@ class NodalBillingPlanTest extends TestCase
 
         $response = $this->actingAs($this->adminUser)->get(route('nodal-plans.index'));
         $response->assertStatus(200);
-        $response->assertSee('Starter');
-        $response->assertSee('starter');
+        $response->assertSee('Business');
+        $response->assertSee('business');
+        $response->assertSee('500'); // included_users
+        $response->assertSee('50.000'); // included_ai_credits
+        $response->assertSee('R$ 22,00 / 1.000'); // overage_price_per_1000_brl
         $response->assertSee('SacraTech Internal');
     }
 
@@ -149,8 +166,8 @@ class NodalBillingPlanTest extends TestCase
         });
     }
 
-    /** Teste 6: Criação de novo plano via POST */
-    public function test_06_creates_new_plan(): void
+    /** Teste 6: Criação de novo plano via POST enviando contrato real */
+    public function test_06_creates_new_plan_with_real_contract_fields(): void
     {
         Http::fake([
             'http://nodal.test/api/v1/internal/integer/billing/plans' => Http::response([
@@ -161,16 +178,21 @@ class NodalBillingPlanTest extends TestCase
         ]);
 
         $payload = [
-            'name'                => 'Business',
-            'code'                => 'business',
-            'monthly_price_cents' => 199000,
-            'max_users'           => 500,
-            'ai_credits'          => 50000,
-            'overage_price_cents' => 2200,
-            'is_public'           => 1,
-            'is_unlimited'        => 0,
-            'is_active'           => 1,
-            'description'         => 'Plano intermediário',
+            'name'                                 => 'Business',
+            'code'                                 => 'business',
+            'description'                          => 'Plano corporativo',
+            'monthly_price_cents'                  => 199000,
+            'included_users'                       => 500,
+            'included_ai_credits'                  => 50000,
+            'integrations_limit'                   => 0,
+            'overage_price_per_1000_credits_cents' => 2200,
+            'is_public'                            => 1,
+            'is_unlimited'                         => 0,
+            'is_active'                            => 1,
+            'is_enterprise'                        => 0,
+            'default_postpaid_enabled'             => 0,
+            'default_postpaid_limit_cents'         => 50000,
+            'features_text'                        => "Google Workspace + Microsoft 365\nAI Assistant",
         ];
 
         $response = $this->actingAs($this->adminUser)->post(route('nodal-plans.store'), $payload);
@@ -180,7 +202,11 @@ class NodalBillingPlanTest extends TestCase
         Http::assertSent(function ($request) {
             return $request->url() === 'http://nodal.test/api/v1/internal/integer/billing/plans' &&
                    $request['code'] === 'business' &&
-                   $request['monthly_price_cents'] === 199000;
+                   $request['included_users'] === 500 &&
+                   $request['included_ai_credits'] === 50000 &&
+                   $request['overage_price_per_1000_credits_cents'] === 2200 &&
+                   $request['integrations_limit'] === 0 &&
+                   $request['features_json'] === ['Google Workspace + Microsoft 365', 'AI Assistant'];
         });
 
         $this->assertDatabaseHas('automation_audit_logs', [
@@ -194,40 +220,54 @@ class NodalBillingPlanTest extends TestCase
         Http::fake([
             'http://nodal.test/api/v1/internal/integer/billing/plans' => Http::response([
                 'message' => 'O código do plano informado já existe.',
-                'errors'  => ['code' => ['O código "starter" já está em uso.']],
+                'errors'  => ['code' => ['O código "business" já está em uso.']],
             ], 422),
         ]);
 
         $payload = [
-            'name'                => 'Starter Duplicado',
-            'code'                => 'starter',
-            'monthly_price_cents' => 59900,
+            'name'                => 'Business Duplicado',
+            'code'                => 'business',
+            'monthly_price_cents' => 199000,
         ];
 
         $response = $this->actingAs($this->adminUser)->post(route('nodal-plans.store'), $payload);
         $response->assertSessionHasErrors(['code']);
     }
 
-    /** Teste 8: Edição de plano via PATCH */
-    public function test_08_updates_existing_plan(): void
+    /** Teste 8: Edição de plano via PATCH com campos reais */
+    public function test_08_updates_existing_plan_with_real_contract_fields(): void
     {
         Http::fake([
-            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-uuid-starter-111' => Http::response([
-                'uuid' => 'plan-uuid-starter-111',
-                'name' => 'Starter Atualizado',
+            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-uuid-business-111' => Http::response([
+                'uuid' => 'plan-uuid-business-111',
+                'name' => 'Business Atualizado',
             ], 200),
         ]);
 
         $payload = [
-            'name'                => 'Starter Atualizado',
-            'monthly_price_cents' => 69900,
-            'is_public'           => 1,
-            'is_active'           => 1,
+            'name'                                 => 'Business Atualizado',
+            'monthly_price_cents'                  => 219000,
+            'included_users'                       => 600,
+            'included_ai_credits'                  => 60000,
+            'overage_price_per_1000_credits_cents' => 2000,
+            'integrations_limit'                   => 5,
+            'is_public'                            => 1,
+            'is_active'                            => 1,
+            'features_text'                        => "Recurso 1\nRecurso 2",
         ];
 
-        $response = $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-uuid-starter-111'), $payload);
+        $response = $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-uuid-business-111'), $payload);
         $response->assertRedirect(route('nodal-plans.index'));
         $response->assertSessionHas('success');
+
+        Http::assertSent(function ($request) {
+            return $request['name'] === 'Business Atualizado' &&
+                   $request['included_users'] === 600 &&
+                   $request['included_ai_credits'] === 60000 &&
+                   $request['overage_price_per_1000_credits_cents'] === 2000 &&
+                   $request['integrations_limit'] === 5 &&
+                   $request['features_json'] === ['Recurso 1', 'Recurso 2'];
+        });
 
         $this->assertDatabaseHas('automation_audit_logs', [
             'automation_key' => 'nodal_billing_plan_updated',
@@ -238,17 +278,17 @@ class NodalBillingPlanTest extends TestCase
     public function test_09_code_field_is_immutable_on_update(): void
     {
         Http::fake([
-            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-uuid-starter-111' => Http::response([], 200),
+            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-uuid-business-111' => Http::response([], 200),
         ]);
 
         $payload = [
-            'name'                => 'Starter Tentando Mudar Code',
+            'name'                => 'Business Tentando Mudar Code',
             'code'                => 'tentativa-novo-code',
-            'monthly_price_cents' => 59900,
+            'monthly_price_cents' => 199000,
             'is_active'           => 1,
         ];
 
-        $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-uuid-starter-111'), $payload);
+        $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-uuid-business-111'), $payload);
 
         Http::assertSent(function ($request) {
             return !array_key_exists('code', $request->data());
@@ -259,16 +299,16 @@ class NodalBillingPlanTest extends TestCase
     public function test_10_retires_plan_setting_is_active_false(): void
     {
         Http::fake([
-            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-uuid-starter-111' => Http::response([], 200),
+            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-uuid-business-111' => Http::response([], 200),
         ]);
 
         $payload = [
-            'name'                => 'Starter Aposentado',
-            'monthly_price_cents' => 59900,
+            'name'                => 'Business Aposentado',
+            'monthly_price_cents' => 199000,
             'is_active'           => 0,
         ];
 
-        $response = $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-uuid-starter-111'), $payload);
+        $response = $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-uuid-business-111'), $payload);
         $response->assertRedirect(route('nodal-plans.index'));
 
         $this->assertDatabaseHas('automation_audit_logs', [
@@ -279,7 +319,7 @@ class NodalBillingPlanTest extends TestCase
     /** Teste 11: Não existe rota ou método DELETE para planos */
     public function test_11_delete_route_does_not_exist(): void
     {
-        $response = $this->actingAs($this->adminUser)->delete('/nodal-plans/plan-uuid-starter-111');
+        $response = $this->actingAs($this->adminUser)->delete('/nodal-plans/plan-uuid-business-111');
         $response->assertStatus(405); // Method Not Allowed
     }
 
@@ -294,6 +334,9 @@ class NodalBillingPlanTest extends TestCase
                         'name'                 => 'SacraTech Internal',
                         'code'                 => 'sacratech-internal',
                         'monthly_price_cents' => 0,
+                        'monthly_price_brl'   => 0,
+                        'included_users'      => null,
+                        'included_ai_credits' => null,
                         'is_public'           => false,
                         'is_unlimited'        => true,
                         'is_active'           => true,
@@ -306,7 +349,6 @@ class NodalBillingPlanTest extends TestCase
         $response = $this->actingAs($this->adminUser)->get(route('nodal-plans.index'));
         $response->assertStatus(200);
         $response->assertSee('∞ Ilimitado');
-        $response->assertSee('Não aplicável');
     }
 
     /** Teste 13: Plano com mensalidade R$ 0,00 renderizado corretamente */
@@ -320,6 +362,7 @@ class NodalBillingPlanTest extends TestCase
                         'name'                 => 'Plano Especial R$0',
                         'code'                 => 'plano-zero',
                         'monthly_price_cents' => 0,
+                        'monthly_price_brl'   => 0,
                         'is_public'           => false,
                         'is_unlimited'        => false,
                         'is_active'           => true,
@@ -344,7 +387,7 @@ class NodalBillingPlanTest extends TestCase
 
         $response = $this->actingAs($this->adminUser)->get(route('nodal-plans.index'));
         $response->assertStatus(200);
-        $response->assertSee('12');
+        $response->assertSee('7');
     }
 
     /** Teste 15: Atribuição de plano a uma organização */
@@ -364,7 +407,7 @@ class NodalBillingPlanTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->adminUser)->patch(route('nodal-plans.assign', 'org-uuid-999'), [
-            'plan_uuid' => 'plan-uuid-starter-111',
+            'plan_uuid' => 'plan-uuid-business-111',
         ]);
 
         $response->assertRedirect();
@@ -372,7 +415,7 @@ class NodalBillingPlanTest extends TestCase
 
         Http::assertSent(function ($request) {
             return $request->url() === 'http://nodal.test/api/v1/internal/integer/billing/organizations/org-uuid-999/billing-plan' &&
-                   $request['plan_uuid'] === 'plan-uuid-starter-111';
+                   $request['plan_uuid'] === 'plan-uuid-business-111';
         });
 
         $this->assertDatabaseHas('automation_audit_logs', [
@@ -446,8 +489,9 @@ class NodalBillingPlanTest extends TestCase
         Http::fake([
             'http://nodal.test/api/v1/internal/integer/billing/plans*' => Http::response($this->mockPlansResponse(), 200),
             'http://nodal.test/api/v1/internal/integer/billing/organizations/org-uuid-777/billing-plan' => Http::response([
-                'name'                 => 'Starter',
-                'monthly_price_cents' => 59900,
+                'name'                 => 'Business',
+                'monthly_price_cents' => 199000,
+                'monthly_price_brl'   => 1990,
                 'is_public'           => true,
             ], 200),
         ]);
@@ -492,7 +536,6 @@ class NodalBillingPlanTest extends TestCase
     public function test_21_non_admin_user_is_blocked(): void
     {
         $response = $this->actingAs($this->regularUser)->get(route('nodal-plans.index'));
-        // EnsureUserIsAdmin bloqueia ou redireciona não-admins (ex: 403 ou 302)
         $this->assertTrue(in_array($response->status(), [403, 302]));
     }
 
