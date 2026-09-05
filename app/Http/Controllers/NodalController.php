@@ -166,6 +166,7 @@ class NodalController extends Controller
 
         $plans = [];
         $currentPlan = null;
+        $currentSubscription = null;
 
         try {
             $plansResponse = $planClient->listPlans();
@@ -175,10 +176,14 @@ class NodalController extends Controller
         }
 
         if ($organization->nodal_organization_uuid) {
-            $currentPlan = $planClient->getOrganizationPlan($organization->nodal_organization_uuid);
+            $response = $planClient->getOrganizationPlan($organization->nodal_organization_uuid);
+            if (!empty($response)) {
+                $currentPlan = $response['data']['plan'] ?? $response['plan'] ?? $response['data'] ?? $response;
+                $currentSubscription = $response['data']['subscription'] ?? $response['subscription'] ?? null;
+            }
         }
 
-        return view('nodal.edit', compact('organization', 'plans', 'currentPlan'));
+        return view('nodal.edit', compact('organization', 'plans', 'currentPlan', 'currentSubscription'));
     }
 
     /**

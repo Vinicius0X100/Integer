@@ -178,17 +178,27 @@
                 <div class="card bg-dark bg-opacity-50 border-secondary border-opacity-25 rounded-4 mb-4">
                     <div class="card-body p-4">
                         @if($currentPlan)
+                            @php
+                                $cName = $currentPlan['name'] ?? '—';
+                                $cCode = $currentPlan['code'] ?? '';
+                                $cIsPublic = !empty($currentPlan['is_public']);
+                                $cIsUnlimited = !empty($currentPlan['is_unlimited']);
+                                
+                                $cMonthlyPriceBrl = isset($currentPlan['monthly_price_brl'])
+                                    ? (float) $currentPlan['monthly_price_brl']
+                                    : ((int) ($currentPlan['monthly_price_cents'] ?? 0)) / 100;
+                            @endphp
                             <div class="row align-items-center g-3">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="text-white-50 small">Plano Atual</div>
-                                    <div class="fw-bold text-white fs-5">{{ $currentPlan['name'] ?? '—' }}</div>
-                                    @if(!empty($currentPlan['code']))
-                                        <span class="badge bg-dark border border-secondary text-white font-monospace mt-1">{{ $currentPlan['code'] }}</span>
+                                    <div class="fw-bold text-white fs-5">{{ $cName }}</div>
+                                    @if(!empty($cCode))
+                                        <span class="badge bg-dark border border-secondary text-white font-monospace mt-1">{{ $cCode }}</span>
                                     @endif
                                 </div>
                                 <div class="col-md-2">
                                     <div class="text-white-50 small">Visibilidade</div>
-                                    @if(!empty($currentPlan['is_public']))
+                                    @if($cIsPublic)
                                         <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3">
                                             <i class="bi bi-eye me-1"></i> Público
                                         </span>
@@ -201,30 +211,38 @@
                                 <div class="col-md-3">
                                     <div class="text-white-50 small">Mensalidade</div>
                                     <div class="fw-semibold text-white">
-                                        @if(isset($currentPlan['monthly_price_brl']))
-                                            R$ {{ number_format((float) $currentPlan['monthly_price_brl'], 2, ',', '.') }}
-                                        @elseif(isset($currentPlan['monthly_price_cents']))
-                                            R$ {{ number_format($currentPlan['monthly_price_cents'] / 100, 2, ',', '.') }}
-                                        @else
-                                            R$ 0,00
-                                        @endif
+                                        R$ {{ number_format($cMonthlyPriceBrl, 2, ',', '.') }}
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="text-white-50 small">Limites</div>
-                                    @if(!empty($currentPlan['is_unlimited']))
-                                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
+                                <div class="col-md-4">
+                                    <div class="text-white-50 small">Limites Efetivos</div>
+                                    @if($cIsUnlimited)
+                                        <div class="d-flex flex-wrap gap-2 mt-1">
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1">Usuários: ∞ Ilimitado</span>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1">IA: ∞ Ilimitado</span>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1">Integrações: ∞ Ilimitado</span>
+                                        </div>
                                     @else
                                         @php
-                                            $currUsers = $currentPlan['included_users'] ?? $currentPlan['max_users'] ?? '—';
-                                            $currAi = isset($currentPlan['included_ai_credits']) ? number_format($currentPlan['included_ai_credits'], 0, ',', '.') : ($currentPlan['ai_credits'] ?? '—');
+                                            $cUsers = isset($currentPlan['included_users']) ? number_format($currentPlan['included_users'], 0, ',', '.') : '—';
+                                            $cAi = isset($currentPlan['included_ai_credits']) ? number_format($currentPlan['included_ai_credits'], 0, ',', '.') : '—';
+                                            $cInteg = isset($currentPlan['integrations_limit']) ? number_format($currentPlan['integrations_limit'], 0, ',', '.') : '—';
                                         @endphp
-                                        <div class="text-white-50 small">
-                                            Usuários: {{ $currUsers }} | IA: {{ $currAi }}
+                                        <div class="text-white-50 small mt-1">
+                                            Usuários: <strong>{{ $cUsers }}</strong> | IA: <strong>{{ $cAi }}</strong> | Integrações: <strong>{{ $cInteg }}</strong>
                                         </div>
                                     @endif
                                 </div>
                             </div>
+
+                            @if(!empty($currentSubscription))
+                                <div class="mt-3 pt-3 border-top border-secondary border-opacity-25 d-flex gap-3 text-white-50 small">
+                                    <span>Assinatura: <strong class="text-success">{{ strtoupper($currentSubscription['status'] ?? 'active') }}</strong></span>
+                                    @if(!empty($currentSubscription['postpaid_enabled']))
+                                        <span>Pós-Pago: <strong class="text-info">Habilitado</strong></span>
+                                    @endif
+                                </div>
+                            @endif
                         @else
                             <div class="text-white-50 py-2">
                                 <i class="bi bi-info-circle me-2 text-warning"></i>

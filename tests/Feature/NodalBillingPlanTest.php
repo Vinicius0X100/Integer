@@ -531,6 +531,69 @@ class NodalBillingPlanTest extends TestCase
         $response->assertSee('A alteração entra em vigor imediatamente no período de faturamento aberto.');
     }
 
+    /** Teste 18b: Renderiza o payload REAL da organização com is_unlimited=true */
+    public function test_18b_renders_real_organization_current_plan_payload_with_unlimited_precedence(): void
+    {
+        $org = NodalOrganization::create([
+            'nome'                    => 'Empresa SacraTech Teste',
+            'owner_name'              => 'Resp',
+            'owner_email'             => 'resp@sacratech.com',
+            'nodal_organization_uuid' => 'org-uuid-insider-999',
+        ]);
+
+        $realPayload = [
+            'success' => true,
+            'data' => [
+                'organization_uuid' => 'org-uuid-insider-999',
+                'subscription' => [
+                    'status' => 'active',
+                    'preferred_payment_method' => null,
+                    'postpaid_enabled' => false,
+                    'postpaid_limit_cents' => null,
+                ],
+                'plan' => [
+                    'uuid' => 'plan-insider-uuid',
+                    'code' => 'interno-sacratech',
+                    'name' => 'Insider Sacratech',
+                    'description' => 'Plano interno ilimitado',
+                    'monthly_price_cents' => 0,
+                    'monthly_price_brl' => 0,
+                    'included_ai_credits' => 0,
+                    'included_users' => 1,
+                    'integrations_limit' => 0,
+                    'overage_price_per_1000_credits_cents' => 0,
+                    'overage_price_per_1000_brl' => 0,
+                    'is_public' => false,
+                    'is_unlimited' => true,
+                    'is_active' => true,
+                    'is_enterprise' => false,
+                    'default_postpaid_enabled' => false,
+                    'default_postpaid_limit_cents' => null,
+                    'features_json' => [],
+                    'organizations_count' => 1,
+                ]
+            ]
+        ];
+
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans*' => Http::response($this->mockPlansResponse(), 200),
+            'http://nodal.test/api/v1/internal/integer/billing/organizations/org-uuid-insider-999/billing-plan' => Http::response($realPayload, 200),
+        ]);
+
+        $response = $this->actingAs($this->adminUser)->get(route('nodal.edit', $org->id));
+        $response->assertStatus(200);
+        $response->assertSee('Insider Sacratech');
+        $response->assertSee('interno-sacratech');
+        $response->assertSee('Oculto');
+        $response->assertSee('R$ 0,00');
+        $response->assertSee('Usuários: ∞ Ilimitado');
+        $response->assertSee('IA: ∞ Ilimitado');
+        $response->assertSee('Integrações: ∞ Ilimitado');
+
+        // Garantir que 1 ou 0 não aparecem como limites efetivos
+        $response->assertDontSee('Usuários: 1');
+    }
+
     /** Teste 19: API 422 exibida corretamente */
     public function test_19_displays_api_422_validation_error(): void
     {
