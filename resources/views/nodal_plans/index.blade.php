@@ -52,17 +52,20 @@
     @endif
 
     {{-- Abas de Navegação no Topo --}}
+    @php
+        $currentTab = request('visibility', request('tab', 'all'));
+    @endphp
     <div class="d-flex gap-2 mb-4">
-        <a href="{{ route('nodal-plans.index', array_merge(request()->except('tab'), ['tab' => 'all'])) }}"
-           class="btn rounded-pill px-4 py-2 {{ request('tab', 'all') === 'all' ? 'btn-primary' : 'btn-dark border border-secondary border-opacity-25' }}">
+        <a href="{{ route('nodal-plans.index', array_merge(request()->except(['tab', 'visibility']), ['tab' => 'all'])) }}"
+           class="btn rounded-pill px-4 py-2 {{ in_array($currentTab, ['all', '']) ? 'btn-primary' : 'btn-dark border border-secondary border-opacity-25' }}">
             Todos
         </a>
-        <a href="{{ route('nodal-plans.index', array_merge(request()->except('tab'), ['tab' => 'public'])) }}"
-           class="btn rounded-pill px-4 py-2 {{ request('tab') === 'public' ? 'btn-primary' : 'btn-dark border border-secondary border-opacity-25' }}">
+        <a href="{{ route('nodal-plans.index', array_merge(request()->except(['tab', 'visibility']), ['tab' => 'public'])) }}"
+           class="btn rounded-pill px-4 py-2 {{ $currentTab === 'public' ? 'btn-primary' : 'btn-dark border border-secondary border-opacity-25' }}">
             👁 Públicos
         </a>
-        <a href="{{ route('nodal-plans.index', array_merge(request()->except('tab'), ['tab' => 'hidden'])) }}"
-           class="btn rounded-pill px-4 py-2 {{ request('tab') === 'hidden' ? 'btn-primary' : 'btn-dark border border-secondary border-opacity-25' }}">
+        <a href="{{ route('nodal-plans.index', array_merge(request()->except(['tab', 'visibility']), ['tab' => 'hidden'])) }}"
+           class="btn rounded-pill px-4 py-2 {{ $currentTab === 'hidden' ? 'btn-primary' : 'btn-dark border border-secondary border-opacity-25' }}">
             👁‍🗨 Ocultos
         </a>
     </div>
@@ -71,9 +74,11 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4 bg-dark bg-opacity-50 border-secondary border-opacity-10">
         <div class="card-body p-3">
             <form action="{{ route('nodal-plans.index') }}" method="GET" class="row g-3 align-items-center">
-                <input type="hidden" name="tab" value="{{ request('tab', 'all') }}">
+                @if(request()->filled('tab'))
+                    <input type="hidden" name="tab" value="{{ request('tab') }}">
+                @endif
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-secondary border-opacity-25 text-white-50"><i class="bi bi-search"></i></span>
                         <input type="text" name="search" class="form-control bg-transparent border-secondary border-opacity-25 text-white" placeholder="Buscar por nome ou código..." value="{{ request('search') }}">
@@ -81,6 +86,14 @@
                 </div>
 
                 <div class="col-md-3">
+                    <select name="visibility" class="form-select bg-transparent border-secondary border-opacity-25 text-white">
+                        <option value="" class="bg-dark text-white">Todas as Visibilidades</option>
+                        <option value="public" {{ $currentTab === 'public' ? 'selected' : '' }} class="bg-dark text-white">Públicos</option>
+                        <option value="hidden" {{ $currentTab === 'hidden' ? 'selected' : '' }} class="bg-dark text-white">Ocultos</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
                     <select name="status" class="form-select bg-transparent border-secondary border-opacity-25 text-white">
                         <option value="" class="bg-dark text-white">Todos os Status</option>
                         <option value="active" {{ request('status') === 'active' ? 'selected' : '' }} class="bg-dark text-white">Ativos</option>
@@ -88,7 +101,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select name="unlimited" class="form-select bg-transparent border-secondary border-opacity-25 text-white">
                         <option value="" class="bg-dark text-white">Todos os Limites</option>
                         <option value="1" {{ request('unlimited') === '1' ? 'selected' : '' }} class="bg-dark text-white">Ilimitados</option>
@@ -98,8 +111,8 @@
 
                 <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100 rounded-pill">Filtrar</button>
-                    @if(request()->anyFilled(['search', 'status', 'unlimited']))
-                        <a href="{{ route('nodal-plans.index', ['tab' => request('tab', 'all')]) }}" class="btn btn-outline-light rounded-circle" title="Limpar Filtros"><i class="bi bi-x-lg"></i></a>
+                    @if(request()->anyFilled(['search', 'status', 'unlimited', 'visibility', 'tab']))
+                        <a href="{{ route('nodal-plans.index') }}" class="btn btn-outline-light rounded-circle" title="Limpar Filtros"><i class="bi bi-x-lg"></i></a>
                     @endif
                 </div>
             </form>
@@ -132,10 +145,10 @@
                                 $uuid = $plan['uuid'] ?? $plan['id'] ?? '';
                                 $code = $plan['code'] ?? '';
                                 $name = $plan['name'] ?? '';
-                                $isPublic = (bool) ($plan['is_public'] ?? false);
-                                $isActive = (bool) ($plan['is_active'] ?? true);
-                                $isUnlimited = (bool) ($plan['is_unlimited'] ?? false);
-                                $isEnterprise = (bool) ($plan['is_enterprise'] ?? false);
+                                $isPublic = filter_var($plan['is_public'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                                $isActive = filter_var($plan['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN);
+                                $isUnlimited = filter_var($plan['is_unlimited'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                                $isEnterprise = filter_var($plan['is_enterprise'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
                                 // Preço Mensal
                                 $monthlyPriceBrl = isset($plan['monthly_price_brl']) 
@@ -268,11 +281,11 @@
         $uuid = $plan['uuid'] ?? $plan['id'] ?? '';
         $code = $plan['code'] ?? '';
         $name = $plan['name'] ?? '';
-        $isPublic = (bool) ($plan['is_public'] ?? false);
-        $isActive = (bool) ($plan['is_active'] ?? true);
-        $isUnlimited = (bool) ($plan['is_unlimited'] ?? false);
-        $isEnterprise = (bool) ($plan['is_enterprise'] ?? false);
-        $defaultPostpaidEnabled = (bool) ($plan['default_postpaid_enabled'] ?? false);
+        $isPublic = filter_var($plan['is_public'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $isActive = filter_var($plan['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN);
+        $isUnlimited = filter_var($plan['is_unlimited'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $isEnterprise = filter_var($plan['is_enterprise'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $defaultPostpaidEnabled = filter_var($plan['default_postpaid_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $defaultPostpaidLimitCents = $plan['default_postpaid_limit_cents'] ?? null;
         
         $overagePriceCents = isset($plan['overage_price_per_1000_credits_cents'])
@@ -438,12 +451,12 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label text-white-50">Nome do Plano <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control bg-dark text-white border-secondary" placeholder="Ex: Starter, Business, SacraTech Internal" value="{{ old('name') }}" required>
+                            <input type="text" name="name" class="form-control bg-dark text-white border-secondary" placeholder="Ex: Enterprise, Professional" value="{{ old('name') }}" required>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label text-white-50">Código (Slug) <span class="text-danger">*</span></label>
-                            <input type="text" name="code" class="form-control bg-dark text-white border-secondary font-monospace" placeholder="Ex: starter, business, sacratech-internal" value="{{ old('code') }}" required>
+                            <input type="text" name="code" class="form-control bg-dark text-white border-secondary font-monospace" placeholder="Ex: enterprise, professional" value="{{ old('code') }}" required>
                             <div class="form-text text-warning small">
                                 <i class="bi bi-exclamation-triangle me-1"></i>
                                 Identificador permanente. Não poderá ser alterado após a criação.

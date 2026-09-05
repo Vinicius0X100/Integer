@@ -21,17 +21,25 @@ class NodalBillingPlanController extends Controller
     public function index(Request $request)
     {
         $filters = [];
-        if ($request->filled('tab') && in_array($request->tab, ['public', 'hidden'])) {
-            $filters['visibility'] = $request->tab;
+        $visibilityFilter = null;
+
+        // Suporta tanto 'visibility' quanto 'tab' para definir a filtragem de visibilidade
+        $rawVisibility = $request->input('visibility');
+        if (empty($rawVisibility)) {
+            $rawVisibility = $request->input('tab');
         }
+
+        if (in_array($rawVisibility, ['public', 'hidden'])) {
+            $visibilityFilter = $rawVisibility;
+            $filters['visibility'] = $rawVisibility;
+            $filters['is_public'] = $rawVisibility === 'public' ? 1 : 0;
+        }
+
         if ($request->filled('search')) {
             $filters['search'] = $request->search;
         }
         if ($request->filled('status')) {
             $filters['status'] = $request->status;
-        }
-        if ($request->filled('visibility')) {
-            $filters['visibility'] = $request->visibility;
         }
         if ($request->filled('unlimited')) {
             $filters['unlimited'] = $request->unlimited;
@@ -49,6 +57,50 @@ class NodalBillingPlanController extends Controller
             } elseif (is_array($response)) {
                 $plans = $response;
             }
+
+            // Aplicar filtragem local nos dados para garantir 100% de precisão na UI
+            $plansCollection = collect($plans);
+
+            // Helper para avaliação booleana robusta (trata bool, int e strings como "false", "0", "true", "1")
+            $toBool = fn($val, $default = false) => filter_var($val ?? $default, FILTER_VALIDATE_BOOLEAN);
+
+            // Filtro por Visibilidade (Aba ou Select: Públicos / Ocultos)
+            if ($visibilityFilter === 'public') {
+                $plansCollection = $plansCollection->filter(fn($p) => $toBool($p['is_public'] ?? false));
+            } elseif ($visibilityFilter === 'hidden') {
+                $plansCollection = $plansCollection->filter(fn($p) => ! $toBool($p['is_public'] ?? false));
+            }
+
+            // Filtro por Status (Ativos / Inativos)
+            if ($request->filled('status')) {
+                if ($request->status === 'active') {
+                    $plansCollection = $plansCollection->filter(fn($p) => $toBool($p['is_active'] ?? true, true));
+                } elseif ($request->status === 'inactive') {
+                    $plansCollection = $plansCollection->filter(fn($p) => ! $toBool($p['is_active'] ?? true, true));
+                }
+            }
+
+            // Filtro por Ilimitado (Sim / Não)
+            if ($request->filled('unlimited')) {
+                if ($request->unlimited === '1') {
+                    $plansCollection = $plansCollection->filter(fn($p) => $toBool($p['is_unlimited'] ?? false));
+                } elseif ($request->unlimited === '0') {
+                    $plansCollection = $plansCollection->filter(fn($p) => ! $toBool($p['is_unlimited'] ?? false));
+                }
+            }
+
+            // Filtro por Busca Textual
+            if ($request->filled('search')) {
+                $search = strtolower(trim($request->search));
+                $plansCollection = $plansCollection->filter(function ($p) use ($search) {
+                    $name = strtolower($p['name'] ?? '');
+                    $code = strtolower($p['code'] ?? '');
+                    return str_contains($name, $search) || str_contains($code, $search);
+                });
+            }
+
+            $plans = array_values($plansCollection->toArray());
+
         } catch (\Illuminate\Http\Client\RequestException $e) {
             $status = $e->response?->status();
             if ($status === 401 || $status === 403) {

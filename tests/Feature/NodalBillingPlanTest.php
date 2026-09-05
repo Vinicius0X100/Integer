@@ -145,6 +145,8 @@ class NodalBillingPlanTest extends TestCase
 
         $response = $this->actingAs($this->adminUser)->get(route('nodal-plans.index', ['tab' => 'public']));
         $response->assertStatus(200);
+        $response->assertSee('Business');
+        $response->assertDontSee('SacraTech Internal');
 
         Http::assertSent(function ($request) {
             return str_contains($request->url(), 'visibility=public');
@@ -160,10 +162,55 @@ class NodalBillingPlanTest extends TestCase
 
         $response = $this->actingAs($this->adminUser)->get(route('nodal-plans.index', ['tab' => 'hidden']));
         $response->assertStatus(200);
+        $response->assertSee('SacraTech Internal');
+        $response->assertDontSee('Business');
 
         Http::assertSent(function ($request) {
             return str_contains($request->url(), 'visibility=hidden');
         });
+    }
+
+    /** Teste 05b: Filtro por query param 'visibility' e tratamento de is_public booleano/string */
+    public function test_05b_filters_visibility_param_and_string_boolean_is_public(): void
+    {
+        $mockPlans = [
+            [
+                'uuid' => 'plan-pub-1',
+                'code' => 'plan-pub',
+                'name' => 'Plano Publico Teste',
+                'monthly_price_cents' => 10000,
+                'is_public' => 'true',
+                'is_active' => true,
+                'is_unlimited' => false,
+            ],
+            [
+                'uuid' => 'plan-hid-1',
+                'code' => 'plan-hid',
+                'name' => 'Plano Oculto Teste',
+                'monthly_price_cents' => 20000,
+                'is_public' => 'false',
+                'is_active' => true,
+                'is_unlimited' => false,
+            ],
+        ];
+
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans*' => Http::response(['data' => $mockPlans], 200),
+        ]);
+
+        // Filtrando por visibility=hidden
+        $responseHidden = $this->actingAs($this->adminUser)->get(route('nodal-plans.index', ['visibility' => 'hidden']));
+        $responseHidden->assertStatus(200);
+        $responseHidden->assertSee('Plano Oculto Teste');
+        $responseHidden->assertDontSee('Plano Publico Teste');
+        $responseHidden->assertSee('Oculto');
+
+        // Filtrando por visibility=public
+        $responsePublic = $this->actingAs($this->adminUser)->get(route('nodal-plans.index', ['visibility' => 'public']));
+        $responsePublic->assertStatus(200);
+        $responsePublic->assertSee('Plano Publico Teste');
+        $responsePublic->assertDontSee('Plano Oculto Teste');
+        $responsePublic->assertSee('Público');
     }
 
     /** Teste 6: Criação de novo plano via POST enviando contrato real */
