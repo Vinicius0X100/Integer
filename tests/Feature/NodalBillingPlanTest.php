@@ -337,12 +337,14 @@ class NodalBillingPlanTest extends TestCase
         $response->assertSessionHas('success');
 
         Http::assertSent(function ($request) {
-            return $request['name'] === 'Business Atualizado' &&
-                   $request['included_users'] === 600 &&
-                   $request['included_ai_credits'] === 60000 &&
-                   $request['overage_price_per_1000_credits_cents'] === 2000 &&
-                   $request['integrations_limit'] === 5 &&
-                   $request['features_json'] === ['Recurso 1', 'Recurso 2'];
+            return $request->method() === 'PATCH'
+                   && isset($request['name'])
+                   && $request['name'] === 'Business Atualizado'
+                   && $request['included_users'] === 600
+                   && $request['included_ai_credits'] === 60000
+                   && $request['overage_price_per_1000_credits_cents'] === 2000
+                   && $request['integrations_limit'] === 5
+                   && $request['features_json'] === ['Recurso 1', 'Recurso 2'];
         });
 
         $this->assertDatabaseHas('automation_audit_logs', [
@@ -751,12 +753,13 @@ class NodalBillingPlanTest extends TestCase
         $responseUpdate->assertRedirect(route('nodal-plans.index'));
 
         Http::assertSent(function ($request) {
-            if (! str_contains($request->url(), '/api/v1/internal/integer/billing/plans/plan-uuid-edit')) {
+            if ($request->method() !== 'PATCH' || ! str_contains($request->url(), '/api/v1/internal/integer/billing/plans/plan-uuid-edit')) {
                 return false;
             }
             $data = $request->data();
 
-            return $data['monthly_price_cents'] === 0
+            return isset($data['monthly_price_cents'])
+                && $data['monthly_price_cents'] === 0
                 && $data['overage_price_per_1000_credits_cents'] === 0
                 && $data['included_ai_credits'] === 150000;
         });
@@ -793,5 +796,170 @@ class NodalBillingPlanTest extends TestCase
                 && $data['default_postpaid_limit_cents'] === null;
         });
     }
+
+    /** Teste 25 (Caso A): Edição de plano para is_unlimited=true omitindo campos disabled preserva os limites existentes */
+    public function test_25_update_unlimited_plan_preserves_disabled_limits_without_corruption(): void
+    {
+        $existingPlanPayload = [
+            'uuid'                                 => 'plan-existing-unlimited-test',
+            'code'                                 => 'plano-existente',
+            'name'                                 => 'Plano Existente',
+            'monthly_price_cents'                  => 199000,
+            'included_users'                       => 500,
+            'included_ai_credits'                  => 50000,
+            'integrations_limit'                   => 10,
+            'overage_price_per_1000_credits_cents' => 2200,
+            'is_unlimited'                         => false,
+            'is_public'                            => true,
+            'is_active'                            => true,
+        ];
+
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-existing-unlimited-test' => Http::response($existingPlanPayload, 200),
+        ]);
+
+        // Simular envio do formulário com is_unlimited = 1, onde o navegador omite os inputs disabled
+        $response = $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-existing-unlimited-test'), [
+            'name'                => 'Plano Existente Ilimitado',
+            'monthly_price_cents' => 'R$ 1.990,00',
+            'is_unlimited'        => '1',
+            'is_active'           => '1',
+            'is_public'           => '1',
+            // Campos included_users, included_ai_credits, integrations_limit, overage omitidos pois foram desabilitados pelo JS
+        ]);
+
+        $response->assertRedirect(route('nodal-plans.index'));
+
+        // Garantir que a requisição PATCH enviada ao Nodal preservou os valores existentes (500, 50000, 10, 2200)
+        Http::assertSent(function ($request) {
+            if ($request->method() !== 'PATCH') {
+                return false;
+            }
+            $data = $request->data();
+
+            return $data['is_unlimited'] === true
+                && $data['included_users'] === 500
+                && $data['included_ai_credits'] === 50000
+                && $data['integrations_limit'] === 10
+                && $data['overage_price_per_1000_credits_cents'] === 2200;
+        });
+    }
+
+    /** Teste 26 (Caso B): Criação de novo plano unlimited omitindo campos disabled gera payload compatível com o Nodal */
+    public function test_26_store_unlimited_plan_omitting_disabled_fields_creates_valid_payload(): void
+    {
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans' => Http::response([
+                'uuid' => 'new-unlimited-uuid',
+                'name' => 'Novo Plano Ilimitado',
+                'code' => 'novo-plano-ilimitado',
+            ], 201),
+        ]);
+
+        $response = $this->actingAs($this->adminUser)->post(route('nodal-plans.store'), [
+            'name'                => 'Novo Plano Ilimitado',
+            'code'                => 'novo-plano-ilimitado',
+            'monthly_price_cents' => 'R$ 2.990,00',
+            'is_unlimited'        => '1',
+            'is_active'           => '1',
+        ]);
+
+        $response->assertRedirect(route('nodal-plans.index'));
+
+        Http::assertSent(function ($request) {
+            if ($request->method() !== 'POST') {
+                return false;
+            }
+            $data = $request->data();
+
+            return $data['is_unlimited'] === true
+                && $data['included_users'] === null
+                && $data['included_ai_credits'] === null
+                && $data['integrations_limit'] === 0
+                && $data['overage_price_per_1000_credits_cents'] === null;
+        });
+    }
+
+    /** Teste 27 (Caso C): Garantir default_postpaid_limit_cents=null quando pós-pago estiver desabilitado */
+    public function test_27_default_postpaid_disabled_sends_null_limit_in_all_cases(): void
+    {
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans' => Http::response([
+                'uuid' => 'new-plan-nopostpaid-test',
+                'name' => 'Sem Pós Pago Teste',
+                'code' => 'sem-pos-pago-teste',
+            ], 201),
+        ]);
+
+        $response = $this->actingAs($this->adminUser)->post(route('nodal-plans.store'), [
+            'name'                         => 'Sem Pós Pago Teste',
+            'code'                         => 'sem-pos-pago-teste',
+            'monthly_price_cents'          => '500,00',
+            'default_postpaid_enabled'     => '0',
+            'default_postpaid_limit_cents' => '1.000,00',
+        ]);
+
+        $response->assertRedirect(route('nodal-plans.index'));
+
+        Http::assertSent(function ($request) {
+            if ($request->method() !== 'POST') {
+                return false;
+            }
+            $data = $request->data();
+
+            return $data['default_postpaid_enabled'] === false
+                && $data['default_postpaid_limit_cents'] === null;
+        });
+    }
+
+    /** Teste 28 (Caso D): Editar plano de unlimited=true de volta para unlimited=false atualiza os limites normalmente */
+    public function test_28_update_unlimited_plan_back_to_limited_replaces_fields_normally(): void
+    {
+        $existingUnlimitedPlan = [
+            'uuid'                                 => 'plan-unlimited-switch',
+            'code'                                 => 'plano-unlimited-switch',
+            'name'                                 => 'Plano Switch',
+            'monthly_price_cents'                  => 199000,
+            'included_users'                       => 500,
+            'included_ai_credits'                  => 50000,
+            'integrations_limit'                   => 10,
+            'overage_price_per_1000_credits_cents' => 2200,
+            'is_unlimited'                         => true,
+            'is_public'                            => true,
+            'is_active'                            => true,
+        ];
+
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-unlimited-switch' => Http::response($existingUnlimitedPlan, 200),
+        ]);
+
+        // Voltar is_unlimited para false e enviar novos valores preenchidos nos inputs habilitados
+        $response = $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-unlimited-switch'), [
+            'name'                                 => 'Plano Switch Limitado',
+            'monthly_price_cents'                  => 'R$ 1.990,00',
+            'is_unlimited'                         => '0',
+            'included_users'                       => '600',
+            'included_ai_credits'                  => '60.000',
+            'integrations_limit'                   => '15',
+            'overage_price_per_1000_credits_cents' => 'R$ 25,00',
+            'is_active'                            => '1',
+        ]);
+
+        $response->assertRedirect(route('nodal-plans.index'));
+
+        Http::assertSent(function ($request) {
+            if ($request->method() !== 'PATCH') {
+                return false;
+            }
+            $data = $request->data();
+
+            return $data['is_unlimited'] === false
+                && $data['included_users'] === 600
+                && $data['included_ai_credits'] === 60000
+                && $data['integrations_limit'] === 15
+                && $data['overage_price_per_1000_credits_cents'] === 2500;
+        });
+    }
 }
+
 

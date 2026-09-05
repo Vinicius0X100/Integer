@@ -323,6 +323,19 @@ class NodalBillingPlanController extends Controller
      */
     public function update(Request $request, string $uuid)
     {
+        // Buscar o plano existente no Nodal para preservar dados quando os campos estiverem disabled na UI
+        $existingPlan = null;
+        try {
+            $response = $this->client->getPlan($uuid);
+            if (isset($response['data']) && is_array($response['data'])) {
+                $existingPlan = $response['data'];
+            } elseif (is_array($response)) {
+                $existingPlan = $response;
+            }
+        } catch (\Exception $e) {
+            // Falha graciosa caso o Nodal esteja indisponível ao buscar plano existente
+        }
+
         $request->merge($this->normalizeCommercialFields($request));
 
         $validated = $request->validate([
@@ -346,6 +359,7 @@ class NodalBillingPlanController extends Controller
         ]);
 
         $isActive = $request->boolean('is_active');
+        $isPostpaid = $request->boolean('default_postpaid_enabled');
 
         $featuresJson = [];
         if (!empty($validated['features_text'])) {
@@ -353,21 +367,52 @@ class NodalBillingPlanController extends Controller
         }
 
         $data = [
-            'name'                                 => $validated['name'],
-            'description'                          => $validated['description'] ?? null,
-            'monthly_price_cents'                  => (int) $validated['monthly_price_cents'],
-            'included_users'                       => isset($validated['included_users']) ? (int) $validated['included_users'] : null,
-            'included_ai_credits'                  => isset($validated['included_ai_credits']) ? (int) $validated['included_ai_credits'] : null,
-            'integrations_limit'                   => isset($validated['integrations_limit']) ? (int) $validated['integrations_limit'] : 0,
-            'overage_price_per_1000_credits_cents' => isset($validated['overage_price_per_1000_credits_cents']) ? (int) $validated['overage_price_per_1000_credits_cents'] : null,
-            'is_public'                            => $request->boolean('is_public'),
-            'is_unlimited'                         => $request->boolean('is_unlimited'),
-            'is_active'                            => $isActive,
-            'is_enterprise'                        => $request->boolean('is_enterprise'),
-            'default_postpaid_enabled'             => $request->boolean('default_postpaid_enabled'),
-            'default_postpaid_limit_cents'         => isset($validated['default_postpaid_limit_cents']) ? (int) $validated['default_postpaid_limit_cents'] : null,
-            'features_json'                        => $featuresJson,
+            'name'                     => $validated['name'],
+            'description'              => $validated['description'] ?? null,
+            'monthly_price_cents'      => (int) $validated['monthly_price_cents'],
+            'is_public'                => $request->boolean('is_public'),
+            'is_unlimited'             => $request->boolean('is_unlimited'),
+            'is_active'                => $isActive,
+            'is_enterprise'            => $request->boolean('is_enterprise'),
+            'default_postpaid_enabled' => $isPostpaid,
+            'default_postpaid_limit_cents' => $isPostpaid
+                ? (isset($validated['default_postpaid_limit_cents']) ? (int) $validated['default_postpaid_limit_cents'] : null)
+                : null,
+            'features_json'            => $featuresJson,
         ];
+
+        // Tratar campos de limites que não vêm no request quando estiverem disabled no navegador
+        if ($request->has('included_users')) {
+            $data['included_users'] = $validated['included_users'] !== null ? (int) $validated['included_users'] : null;
+        } elseif ($existingPlan && array_key_exists('included_users', $existingPlan)) {
+            $data['included_users'] = $existingPlan['included_users'];
+        } else {
+            $data['included_users'] = null;
+        }
+
+        if ($request->has('included_ai_credits')) {
+            $data['included_ai_credits'] = $validated['included_ai_credits'] !== null ? (int) $validated['included_ai_credits'] : null;
+        } elseif ($existingPlan && array_key_exists('included_ai_credits', $existingPlan)) {
+            $data['included_ai_credits'] = $existingPlan['included_ai_credits'];
+        } else {
+            $data['included_ai_credits'] = null;
+        }
+
+        if ($request->has('integrations_limit')) {
+            $data['integrations_limit'] = $validated['integrations_limit'] !== null ? (int) $validated['integrations_limit'] : 0;
+        } elseif ($existingPlan && array_key_exists('integrations_limit', $existingPlan)) {
+            $data['integrations_limit'] = $existingPlan['integrations_limit'];
+        } else {
+            $data['integrations_limit'] = 0;
+        }
+
+        if ($request->has('overage_price_per_1000_credits_cents')) {
+            $data['overage_price_per_1000_credits_cents'] = $validated['overage_price_per_1000_credits_cents'] !== null ? (int) $validated['overage_price_per_1000_credits_cents'] : null;
+        } elseif ($existingPlan && array_key_exists('overage_price_per_1000_credits_cents', $existingPlan)) {
+            $data['overage_price_per_1000_credits_cents'] = $existingPlan['overage_price_per_1000_credits_cents'];
+        } else {
+            $data['overage_price_per_1000_credits_cents'] = null;
+        }
 
         // O campo 'code' é rigorosamente imutável e nunca enviado na atualização
         unset($data['code']);
