@@ -690,4 +690,108 @@ class NodalBillingPlanTest extends TestCase
         // Garantir que a chave não aparece no HTML/Response
         $response->assertDontSee('test-admin-secret-key-12345');
     }
+
+    /** Teste 23: Converte entradas formatadas em BRL e separadores de milhar para centavos/inteiros puros enviados ao Nodal */
+    public function test_23_converts_brl_monetary_formatted_inputs_to_cents_and_integers(): void
+    {
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans' => Http::response([
+                'uuid' => 'new-plan-formatted-111',
+                'name' => 'Plano Formatado BRL',
+                'code' => 'plano-formatado-brl',
+            ], 201),
+        ]);
+
+        $responseStore = $this->actingAs($this->adminUser)->post(route('nodal-plans.store'), [
+            'name'                                 => 'Plano Formatado BRL',
+            'code'                                 => 'plano-formatado-brl',
+            'monthly_price_cents'                  => 'R$ 1.990,00',
+            'overage_price_per_1000_credits_cents' => 'R$ 22,00',
+            'default_postpaid_limit_cents'         => 'R$ 500,00',
+            'included_ai_credits'                  => '50.000',
+            'included_users'                       => '500',
+            'integrations_limit'                   => '0',
+            'default_postpaid_enabled'             => '1',
+            'is_public'                            => '1',
+            'is_active'                            => '1',
+        ]);
+
+        $responseStore->assertRedirect(route('nodal-plans.index'));
+
+        Http::assertSent(function ($request) {
+            if (! str_contains($request->url(), '/api/v1/internal/integer/billing/plans')) {
+                return false;
+            }
+            $data = $request->data();
+
+            return $data['monthly_price_cents'] === 199000
+                && $data['overage_price_per_1000_credits_cents'] === 2200
+                && $data['default_postpaid_limit_cents'] === 50000
+                && $data['included_ai_credits'] === 50000
+                && $data['included_users'] === 500
+                && $data['integrations_limit'] === 0;
+        });
+
+        // Testar Atualização com 0,00 e 150.000 créditos
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans/plan-uuid-edit' => Http::response([
+                'uuid' => 'plan-uuid-edit',
+                'name' => 'Plano Editado BRL',
+            ], 200),
+        ]);
+
+        $responseUpdate = $this->actingAs($this->adminUser)->patch(route('nodal-plans.update', 'plan-uuid-edit'), [
+            'name'                                 => 'Plano Editado BRL',
+            'monthly_price_cents'                  => 'R$ 0,00',
+            'overage_price_per_1000_credits_cents' => '0,00',
+            'included_ai_credits'                  => '150.000',
+            'is_active'                            => '1',
+        ]);
+
+        $responseUpdate->assertRedirect(route('nodal-plans.index'));
+
+        Http::assertSent(function ($request) {
+            if (! str_contains($request->url(), '/api/v1/internal/integer/billing/plans/plan-uuid-edit')) {
+                return false;
+            }
+            $data = $request->data();
+
+            return $data['monthly_price_cents'] === 0
+                && $data['overage_price_per_1000_credits_cents'] === 0
+                && $data['included_ai_credits'] === 150000;
+        });
+    }
+
+    /** Teste 24: Envia default_postpaid_limit_cents como null quando pós-pago estiver desabilitado */
+    public function test_24_sends_null_default_postpaid_limit_when_postpaid_disabled(): void
+    {
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans' => Http::response([
+                'uuid' => 'new-plan-nopostpaid',
+                'name' => 'Plano Sem Pós Pago',
+                'code' => 'plano-sem-pos-pago',
+            ], 201),
+        ]);
+
+        $response = $this->actingAs($this->adminUser)->post(route('nodal-plans.store'), [
+            'name'                         => 'Plano Sem Pós Pago',
+            'code'                         => 'plano-sem-pos-pago',
+            'monthly_price_cents'          => '100,00',
+            'default_postpaid_enabled'     => '0',
+            'default_postpaid_limit_cents' => '500,00',
+        ]);
+
+        $response->assertRedirect(route('nodal-plans.index'));
+
+        Http::assertSent(function ($request) {
+            if (! str_contains($request->url(), '/api/v1/internal/integer/billing/plans')) {
+                return false;
+            }
+            $data = $request->data();
+
+            return $data['default_postpaid_enabled'] === false
+                && $data['default_postpaid_limit_cents'] === null;
+        });
+    }
 }
+

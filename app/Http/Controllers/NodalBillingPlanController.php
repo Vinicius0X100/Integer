@@ -116,10 +116,108 @@ class NodalBillingPlanController extends Controller
     }
 
     /**
+     * Converte um valor monetário (em Reais ou centavos) para um valor inteiro em centavos, sem usar float.
+     */
+    public function parseBrlToCents(mixed $input): ?int
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        if (is_int($input)) {
+            return $input;
+        }
+
+        $str = trim((string) $input);
+        if ($str === '') {
+            return null;
+        }
+
+        // Se contiver vírgula (ex: "R$ 1.990,00", "1.990,00", "22,00", "0,00")
+        if (str_contains($str, ',')) {
+            $parts = explode(',', $str);
+            $intPart = preg_replace('/\D/', '', $parts[0] ?? '0');
+            $decPart = substr(preg_replace('/\D/', '', $parts[1] ?? '0') . '00', 0, 2);
+            $intPart = $intPart !== '' ? $intPart : '0';
+            return ((int) $intPart) * 100 + ((int) $decPart);
+        }
+
+        // Se for string apenas numérica sem vírgula (ex: "199000", "2200", "50000", "0")
+        $digitsOnly = preg_replace('/\D/', '', $str);
+        if ($digitsOnly === '') {
+            return null;
+        }
+
+        return (int) $digitsOnly;
+    }
+
+    /**
+     * Converte um valor inteiro com separadores de milhar (ex: "50.000", "150.000") para int.
+     */
+    public function parseIntegerWithSeparators(mixed $input): ?int
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        if (is_int($input)) {
+            return $input;
+        }
+
+        $str = trim((string) $input);
+        if ($str === '') {
+            return null;
+        }
+
+        $digitsOnly = preg_replace('/\D/', '', $str);
+        if ($digitsOnly === '') {
+            return null;
+        }
+
+        return (int) $digitsOnly;
+    }
+
+    /**
+     * Normaliza os campos comerciais do request antes da validação.
+     */
+    protected function normalizeCommercialFields(Request $request): array
+    {
+        $input = $request->all();
+
+        if (array_key_exists('monthly_price_cents', $input)) {
+            $input['monthly_price_cents'] = $this->parseBrlToCents($request->input('monthly_price_cents'));
+        }
+        if (array_key_exists('overage_price_per_1000_credits_cents', $input)) {
+            $input['overage_price_per_1000_credits_cents'] = $this->parseBrlToCents($request->input('overage_price_per_1000_credits_cents'));
+        }
+        if (array_key_exists('default_postpaid_limit_cents', $input)) {
+            $input['default_postpaid_limit_cents'] = $this->parseBrlToCents($request->input('default_postpaid_limit_cents'));
+        }
+
+        if (array_key_exists('included_ai_credits', $input)) {
+            $input['included_ai_credits'] = $this->parseIntegerWithSeparators($request->input('included_ai_credits'));
+        }
+        if (array_key_exists('included_users', $input)) {
+            $input['included_users'] = $this->parseIntegerWithSeparators($request->input('included_users'));
+        }
+        if (array_key_exists('integrations_limit', $input)) {
+            $input['integrations_limit'] = $this->parseIntegerWithSeparators($request->input('integrations_limit'));
+        }
+
+        if (! $request->boolean('default_postpaid_enabled')) {
+            $input['default_postpaid_limit_cents'] = null;
+        }
+
+        return $input;
+    }
+
+    /**
      * Processa a criação de um novo plano no Nodal.
      */
     public function store(Request $request)
     {
+        $request->merge($this->normalizeCommercialFields($request));
+
         $validated = $request->validate([
             'name'                                 => 'required|string|max:255',
             'code'                                 => 'required|string|max:100|regex:/^[a-z0-9-]+$/',
@@ -225,6 +323,8 @@ class NodalBillingPlanController extends Controller
      */
     public function update(Request $request, string $uuid)
     {
+        $request->merge($this->normalizeCommercialFields($request));
+
         $validated = $request->validate([
             'name'                                 => 'required|string|max:255',
             'description'                          => 'nullable|string|max:1000',

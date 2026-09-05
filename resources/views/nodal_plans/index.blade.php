@@ -300,6 +300,30 @@
         $featuresText = is_array($featuresJson) ? implode("\n", $featuresJson) : (string) $featuresJson;
 
         $orgsCount = (int) ($plan['organizations_count'] ?? $plan['companies_count'] ?? 0);
+
+        // Formatações BRL e inteiros com separadores de milhar
+        $monthlyPriceCentsVal = $plan['monthly_price_cents'] ?? 0;
+        $monthlyPriceFormatted = number_format(((int) $monthlyPriceCentsVal) / 100, 2, ',', '.');
+
+        $overagePriceFormatted = $overagePriceCents > 0
+            ? number_format($overagePriceCents / 100, 2, ',', '.')
+            : '';
+
+        $defaultPostpaidLimitFormatted = $defaultPostpaidLimitCents !== null
+            ? number_format(((int) $defaultPostpaidLimitCents) / 100, 2, ',', '.')
+            : '';
+
+        $includedAiCreditsFormatted = $includedAiCredits !== null
+            ? number_format((int) $includedAiCredits, 0, ',', '.')
+            : '';
+
+        $includedUsersFormatted = $includedUsers !== null
+            ? number_format((int) $includedUsers, 0, ',', '.')
+            : '';
+
+        $integrationsLimitFormatted = $integrationsLimit !== null
+            ? number_format((int) $integrationsLimit, 0, ',', '.')
+            : '0';
     @endphp
 
     <div class="modal fade" id="modalEditarPlano-{{ $uuid }}" tabindex="-1" aria-hidden="true">
@@ -327,6 +351,11 @@
                             </div>
                         @endif
 
+                        <div class="alert alert-info rounded-4 border-0 shadow-sm mb-4 unlimited-warning-alert" style="display: none;">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            Os limites individuais não são aplicados enquanto este plano estiver marcado como ilimitado.
+                        </div>
+
                         <div class="row g-3 mb-3">
                             <div class="col-md-8">
                                 <label class="form-label text-white-50">Nome do Plano <span class="text-danger">*</span></label>
@@ -342,38 +371,46 @@
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-4">
-                                <label class="form-label text-white-50">Mensalidade (Centavos) <span class="text-danger">*</span></label>
-                                <input type="number" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', $plan['monthly_price_cents'] ?? 0) }}" min="0" required>
-                                <div class="form-text text-white-50">Ex: 199000 = R$ 1.990,00</div>
+                                <label class="form-label text-white-50">Mensalidade (R$) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                                    <input type="text" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', $monthlyPriceFormatted) }}" placeholder="1.990,00" required>
+                                </div>
+                                <div class="form-text text-white-50">Ex: 1.990,00</div>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label text-white-50">Usuários Incluídos (included_users)</label>
-                                <input type="number" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users', $includedUsers) }}" min="0" placeholder="Ex: 500">
+                                <input type="text" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users', $includedUsersFormatted) }}" placeholder="Ex: 500">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label text-white-50">Créditos IA Incluídos (included_ai_credits)</label>
-                                <input type="number" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits', $includedAiCredits) }}" min="0" placeholder="Ex: 50000">
+                                <input type="text" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits', $includedAiCreditsFormatted) }}" placeholder="Ex: 50.000">
                             </div>
                         </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-4">
                                 <label class="form-label text-white-50">Limite de Integrações</label>
-                                <input type="number" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', $integrationsLimit) }}" min="0" placeholder="Ex: 0">
-                                <div class="form-text text-white-50">Valor numérico real de integrações.</div>
+                                <input type="text" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', $integrationsLimitFormatted) }}" placeholder="Ex: 0">
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label text-white-50">Excedente / 1.000 créditos (Centavos)</label>
-                                <input type="number" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents', $overagePriceCents) }}" min="0" placeholder="Ex: 2200">
-                                <div class="form-text text-white-50">Ex: 2200 = R$ 22,00</div>
+                                <label class="form-label text-white-50">Excedente / 1.000 créditos (R$)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                                    <input type="text" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents', $overagePriceFormatted) }}" placeholder="Ex: 22,00">
+                                </div>
+                                <div class="form-text text-white-50">Ex: 22,00</div>
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label text-white-50">Limite Pós-Pago Padrão (Centavos)</label>
-                                <input type="number" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents', $defaultPostpaidLimitCents) }}" min="0" placeholder="Ex: 50000">
+                                <label class="form-label text-white-50">Limite Pós-Pago Padrão (R$)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                                    <input type="text" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents', $defaultPostpaidLimitFormatted) }}" placeholder="Ex: 500,00">
+                                </div>
                             </div>
                         </div>
 
@@ -448,6 +485,11 @@
                         O plano será cadastrado diretamente no Nodal. Chaves e identificadores serão preservados.
                     </div>
 
+                    <div class="alert alert-info rounded-4 border-0 shadow-sm mb-4 unlimited-warning-alert" style="display: none;">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Os limites individuais não são aplicados enquanto este plano estiver marcado como ilimitado.
+                    </div>
+
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label text-white-50">Nome do Plano <span class="text-danger">*</span></label>
@@ -466,37 +508,46 @@
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label class="form-label text-white-50">Mensalidade (Centavos) <span class="text-danger">*</span></label>
-                            <input type="number" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', 0) }}" min="0" required>
-                            <div class="form-text text-white-50">Ex: 199000 = R$ 1.990,00. 0 = Sem cobrança.</div>
+                            <label class="form-label text-white-50">Mensalidade (R$) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                                <input type="text" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', '0,00') }}" placeholder="1.990,00" required>
+                            </div>
+                            <div class="form-text text-white-50">Ex: 1.990,00. 0,00 = Sem cobrança.</div>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label text-white-50">Usuários Incluídos (included_users)</label>
-                            <input type="number" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users') }}" min="0" placeholder="Ex: 500">
+                            <input type="text" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users') }}" placeholder="Ex: 500">
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label text-white-50">Créditos IA Incluídos (included_ai_credits)</label>
-                            <input type="number" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits') }}" min="0" placeholder="Ex: 50000">
+                            <input type="text" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits') }}" placeholder="Ex: 50.000">
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="form-label text-white-50">Limite de Integrações</label>
-                            <input type="number" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', 0) }}" min="0" placeholder="Ex: 0">
+                            <input type="text" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', '0') }}" placeholder="Ex: 0">
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label text-white-50">Excedente / 1.000 créditos (Centavos)</label>
-                            <input type="number" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents') }}" min="0" placeholder="Ex: 2200">
-                            <div class="form-text text-white-50">Ex: 2200 = R$ 22,00</div>
+                            <label class="form-label text-white-50">Excedente / 1.000 créditos (R$)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                                <input type="text" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents') }}" placeholder="Ex: 22,00">
+                            </div>
+                            <div class="form-text text-white-50">Ex: 22,00</div>
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label text-white-50">Limite Pós-Pago Padrão (Centavos)</label>
-                            <input type="number" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents') }}" min="0" placeholder="Ex: 50000">
+                            <label class="form-label text-white-50">Limite Pós-Pago Padrão (R$)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                                <input type="text" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents') }}" placeholder="Ex: 500,00">
+                            </div>
                         </div>
                     </div>
 
@@ -550,4 +601,63 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function setupPlanModalLogic(modalEl) {
+        if (!modalEl) return;
+
+        const unlimitedSwitch = modalEl.querySelector('input[name="is_unlimited"]');
+        const postpaidSwitch = modalEl.querySelector('input[name="default_postpaid_enabled"]');
+        const warningAlert = modalEl.querySelector('.unlimited-warning-alert');
+
+        const limitedInputs = modalEl.querySelectorAll(
+            'input[name="included_users"], input[name="included_ai_credits"], input[name="integrations_limit"], input[name="overage_price_per_1000_credits_cents"]'
+        );
+        const postpaidLimitInput = modalEl.querySelector('input[name="default_postpaid_limit_cents"]');
+
+        function updateUnlimitedState() {
+            if (!unlimitedSwitch) return;
+            const isUnlimited = unlimitedSwitch.checked;
+
+            limitedInputs.forEach(input => {
+                input.disabled = isUnlimited;
+                if (isUnlimited) {
+                    input.classList.add('bg-secondary', 'bg-opacity-25', 'text-white-50');
+                } else {
+                    input.classList.remove('bg-secondary', 'bg-opacity-25', 'text-white-50');
+                }
+            });
+
+            if (warningAlert) {
+                warningAlert.style.display = isUnlimited ? 'block' : 'none';
+            }
+        }
+
+        function updatePostpaidState() {
+            if (!postpaidSwitch || !postpaidLimitInput) return;
+            const isPostpaid = postpaidSwitch.checked;
+
+            postpaidLimitInput.disabled = !isPostpaid;
+            if (!isPostpaid) {
+                postpaidLimitInput.classList.add('bg-secondary', 'bg-opacity-25', 'text-white-50');
+            } else {
+                postpaidLimitInput.classList.remove('bg-secondary', 'bg-opacity-25', 'text-white-50');
+            }
+        }
+
+        if (unlimitedSwitch) {
+            unlimitedSwitch.addEventListener('change', updateUnlimitedState);
+        }
+        if (postpaidSwitch) {
+            postpaidSwitch.addEventListener('change', updatePostpaidState);
+        }
+
+        updateUnlimitedState();
+        updatePostpaidState();
+    }
+
+    document.querySelectorAll('.modal').forEach(setupPlanModalLogic);
+});
+</script>
 @endsection
