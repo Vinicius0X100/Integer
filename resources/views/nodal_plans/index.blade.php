@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid">
     {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h2 class="fw-bold text-white mb-1">
                 <i class="bi bi-box-seam-fill me-2 text-primary"></i>Planos de Licenciamento
@@ -37,7 +37,7 @@
     {{-- Erro de Indisponibilidade da API do Nodal --}}
     @if(!empty($apiError))
         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-danger bg-opacity-10 border border-danger border-opacity-25 text-white p-4">
-            <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div>
                     <h5 class="fw-bold text-danger mb-1">
                         <i class="bi bi-exclamation-octagon-fill me-2"></i>Indisponibilidade do Nodal
@@ -107,23 +107,23 @@
     </div>
 
     {{-- Tabela de Planos --}}
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" style="min-width: 1000px;">
                     <thead class="bg-light border-bottom">
                         <tr>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Plano</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Código</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Visibilidade</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Status</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Mensalidade</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Usuários</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Créditos IA</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Excedente</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Ilimitado</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Empresas</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Ações</th>
+                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0" style="min-width: 180px;">Plano</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Código</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Visibilidade</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Status</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Mensalidade</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Usuários</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Créditos IA</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Excedente</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Ilimitado</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Empresas</th>
+                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -132,19 +132,17 @@
                                 $uuid = $plan['uuid'] ?? $plan['id'] ?? '';
                                 $code = $plan['code'] ?? '';
                                 $name = $plan['name'] ?? '';
-                                $isPublic = (bool) ($plan['is_public'] ?? true);
+                                $isPublic = (bool) ($plan['is_public'] ?? false);
                                 $isActive = (bool) ($plan['is_active'] ?? true);
                                 $isUnlimited = (bool) ($plan['is_unlimited'] ?? false);
                                 $isEnterprise = (bool) ($plan['is_enterprise'] ?? false);
-                                $defaultPostpaidEnabled = (bool) ($plan['default_postpaid_enabled'] ?? false);
-                                $defaultPostpaidLimitCents = $plan['default_postpaid_limit_cents'] ?? null;
-                                
-                                // Preço Mensal (usar monthly_price_brl se disponível, senão converter monthly_price_cents)
+
+                                // Preço Mensal
                                 $monthlyPriceBrl = isset($plan['monthly_price_brl']) 
                                     ? (float) $plan['monthly_price_brl'] 
                                     : ((int) ($plan['monthly_price_cents'] ?? 0)) / 100;
 
-                                // Preço Excedente (usar overage_price_per_1000_brl se disponível, senão converter overage_price_per_1000_credits_cents)
+                                // Preço Excedente
                                 $overagePriceCents = isset($plan['overage_price_per_1000_credits_cents'])
                                     ? (int) $plan['overage_price_per_1000_credits_cents']
                                     : (int) ($plan['overage_price_cents'] ?? 0);
@@ -156,11 +154,6 @@
                                 // Limites do contrato real
                                 $includedUsers = $plan['included_users'] ?? $plan['max_users'] ?? null;
                                 $includedAiCredits = $plan['included_ai_credits'] ?? $plan['ai_credits'] ?? null;
-                                $integrationsLimit = $plan['integrations_limit'] ?? 0;
-
-                                $featuresJson = $plan['features_json'] ?? $plan['features'] ?? [];
-                                $featuresText = is_array($featuresJson) ? implode("\n", $featuresJson) : (string) $featuresJson;
-
                                 $orgsCount = (int) ($plan['organizations_count'] ?? $plan['companies_count'] ?? 0);
                             @endphp
                             <tr>
@@ -176,11 +169,11 @@
                                     @endif
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0">
-                                    <span class="badge bg-dark border border-secondary text-white font-monospace">{{ $code }}</span>
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap">
+                                    <span class="badge bg-dark border border-secondary text-white font-monospace px-2 py-1">{{ $code }}</span>
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap">
                                     @if($isPublic)
                                         <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3" data-bs-toggle="tooltip" title="Disponível comercialmente no Nodal.">
                                             <i class="bi bi-eye me-1"></i> Público
@@ -192,7 +185,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap">
                                     @if($isActive)
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">
                                             <i class="bi bi-check-circle me-1"></i> Ativo
@@ -204,11 +197,11 @@
                                     @endif
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0 fw-semibold text-white">
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-end fw-semibold text-white">
                                     R$ {{ number_format($monthlyPriceBrl, 2, ',', '.') }}
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-center">
                                     @if($isUnlimited)
                                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
                                     @else
@@ -216,7 +209,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-center">
                                     @if($isUnlimited)
                                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
                                     @else
@@ -224,7 +217,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap">
                                     @if($isUnlimited)
                                         <span class="text-white-50">—</span>
                                     @else
@@ -236,7 +229,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-center">
                                     @if($isUnlimited)
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Sim</span>
                                     @else
@@ -244,144 +237,16 @@
                                     @endif
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0 fw-bold text-white">
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-center fw-bold text-white">
                                     {{ $orgsCount }}
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0 text-end">
+                                <td class="px-4 py-3 border-bottom-0 text-nowrap text-end">
                                     <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalEditarPlano-{{ $uuid }}">
                                         <i class="bi bi-pencil me-1"></i> Editar
                                     </button>
                                 </td>
                             </tr>
-
-                            {{-- Modal Editar Plano --}}
-                            <div class="modal fade" id="modalEditarPlano-{{ $uuid }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-lg modal-dialog-centered">
-                                    <div class="modal-content bg-dark text-white border-secondary">
-                                        <form action="{{ route('nodal-plans.update', $uuid) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <div class="modal-header border-secondary">
-                                                <h5 class="modal-title fw-bold">
-                                                    <i class="bi bi-pencil me-2 text-primary"></i>Editar Plano: {{ $name }}
-                                                </h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-
-                                            <div class="modal-body p-4">
-                                                <p class="text-white-50 mb-3">
-                                                    Este plano está atribuído a <strong>{{ $orgsCount }}</strong> {{ $orgsCount === 1 ? 'organização' : 'organizações' }}.
-                                                </p>
-
-                                                @if($orgsCount > 0)
-                                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm mb-4" role="alert">
-                                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                                        <strong>Atenção:</strong> Alterações comerciais poderão afetar organizações vinculadas nos períodos abertos/futuros.
-                                                    </div>
-                                                @endif
-
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col-md-8">
-                                                        <label class="form-label text-white-50">Nome do Plano <span class="text-danger">*</span></label>
-                                                        <input type="text" name="name" class="form-control bg-dark text-white border-secondary" value="{{ old('name', $name) }}" required>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label class="form-label text-white-50">Código <span class="text-muted small">(Identificador Permanente)</span></label>
-                                                        <input type="text" class="form-control bg-dark text-white-50 border-secondary font-monospace" value="{{ $code }}" readonly disabled>
-                                                        <div class="form-text text-white-50">O código não pode ser alterado após a criação.</div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col-md-4">
-                                                        <label class="form-label text-white-50">Mensalidade (Centavos) <span class="text-danger">*</span></label>
-                                                        <input type="number" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', $plan['monthly_price_cents'] ?? 0) }}" min="0" required>
-                                                        <div class="form-text text-white-50">Ex: 199000 = R$ 1.990,00</div>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label class="form-label text-white-50">Usuários Incluídos (included_users)</label>
-                                                        <input type="number" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users', $includedUsers) }}" min="0" placeholder="Ex: 500">
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label class="form-label text-white-50">Créditos IA Incluídos (included_ai_credits)</label>
-                                                        <input type="number" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits', $includedAiCredits) }}" min="0" placeholder="Ex: 50000">
-                                                    </div>
-                                                </div>
-
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col-md-4">
-                                                        <label class="form-label text-white-50">Limite de Integrações</label>
-                                                        <input type="number" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', $integrationsLimit) }}" min="0" placeholder="Ex: 0">
-                                                        <div class="form-text text-white-50">Valor numérico real de integrações.</div>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label class="form-label text-white-50">Excedente / 1.000 créditos (Centavos)</label>
-                                                        <input type="number" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents', $overagePriceCents) }}" min="0" placeholder="Ex: 2200">
-                                                        <div class="form-text text-white-50">Ex: 2200 = R$ 22,00</div>
-                                                    </div>
-
-                                                    <div class="col-md-4">
-                                                        <label class="form-label text-white-50">Limite Pós-Pago Padrão (Centavos)</label>
-                                                        <input type="number" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents', $defaultPostpaidLimitCents) }}" min="0" placeholder="Ex: 50000">
-                                                    </div>
-                                                </div>
-
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col-12">
-                                                        <label class="form-label text-white-50">Descrição / Notas Comerciais</label>
-                                                        <textarea name="description" class="form-control bg-dark text-white border-secondary" rows="2">{{ old('description', $plan['description'] ?? '') }}</textarea>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col-12">
-                                                        <label class="form-label text-white-50">Benefícios e Recursos (features_json - 1 por linha)</label>
-                                                        <textarea name="features_text" class="form-control bg-dark text-white border-secondary font-monospace" rows="3" placeholder="Google Workspace + Microsoft 365&#10;APIs customizadas&#10;AI Assistant">{{ old('features_text', $featuresText) }}</textarea>
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-flex flex-wrap gap-4 mt-4 pt-3 border-top border-secondary">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" name="is_public" value="1" id="edit_public_{{ $uuid }}" {{ $isPublic ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-white" for="edit_public_{{ $uuid }}">Plano Público</label>
-                                                    </div>
-
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" name="is_unlimited" value="1" id="edit_unlimited_{{ $uuid }}" {{ $isUnlimited ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-white" for="edit_unlimited_{{ $uuid }}">Plano Ilimitado</label>
-                                                    </div>
-
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" name="is_enterprise" value="1" id="edit_enterprise_{{ $uuid }}" {{ $isEnterprise ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-white" for="edit_enterprise_{{ $uuid }}">Enterprise</label>
-                                                    </div>
-
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" name="default_postpaid_enabled" value="1" id="edit_postpaid_{{ $uuid }}" {{ $defaultPostpaidEnabled ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-white" for="edit_postpaid_{{ $uuid }}">Pós-Pago Habilitado</label>
-                                                    </div>
-
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" name="is_active" value="1" id="edit_active_{{ $uuid }}" {{ $isActive ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-white" for="edit_active_{{ $uuid }}">Ativo (Desmarque para Aposentar)</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="modal-footer border-secondary">
-                                                <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                                                <button type="submit" class="btn btn-primary rounded-pill px-4">Salvar Alterações</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
                         @empty
                             <tr>
                                 <td colspan="11" class="text-center py-5 text-white-50">
@@ -397,10 +262,164 @@
     </div>
 </div>
 
+{{-- Modais de Edição (fora da tabela para preservar a responsividade e semântica HTML) --}}
+@foreach($plans as $plan)
+    @php
+        $uuid = $plan['uuid'] ?? $plan['id'] ?? '';
+        $code = $plan['code'] ?? '';
+        $name = $plan['name'] ?? '';
+        $isPublic = (bool) ($plan['is_public'] ?? false);
+        $isActive = (bool) ($plan['is_active'] ?? true);
+        $isUnlimited = (bool) ($plan['is_unlimited'] ?? false);
+        $isEnterprise = (bool) ($plan['is_enterprise'] ?? false);
+        $defaultPostpaidEnabled = (bool) ($plan['default_postpaid_enabled'] ?? false);
+        $defaultPostpaidLimitCents = $plan['default_postpaid_limit_cents'] ?? null;
+        
+        $overagePriceCents = isset($plan['overage_price_per_1000_credits_cents'])
+            ? (int) $plan['overage_price_per_1000_credits_cents']
+            : (int) ($plan['overage_price_cents'] ?? 0);
+
+        $includedUsers = $plan['included_users'] ?? $plan['max_users'] ?? null;
+        $includedAiCredits = $plan['included_ai_credits'] ?? $plan['ai_credits'] ?? null;
+        $integrationsLimit = $plan['integrations_limit'] ?? 0;
+
+        $featuresJson = $plan['features_json'] ?? $plan['features'] ?? [];
+        $featuresText = is_array($featuresJson) ? implode("\n", $featuresJson) : (string) $featuresJson;
+
+        $orgsCount = (int) ($plan['organizations_count'] ?? $plan['companies_count'] ?? 0);
+    @endphp
+
+    <div class="modal fade" id="modalEditarPlano-{{ $uuid }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary shadow-lg rounded-4">
+                <form action="{{ route('nodal-plans.update', $uuid) }}" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title fw-bold">
+                            <i class="bi bi-pencil me-2 text-primary"></i>Editar Plano: {{ $name }}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body p-4">
+                        <p class="text-white-50 mb-3">
+                            Este plano está atribuído a <strong>{{ $orgsCount }}</strong> {{ $orgsCount === 1 ? 'organização' : 'organizações' }}.
+                        </p>
+
+                        @if($orgsCount > 0)
+                            <div class="alert alert-warning rounded-4 border-0 shadow-sm mb-4" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>Atenção:</strong> Alterações comerciais poderão afetar organizações vinculadas nos períodos abertos/futuros.
+                            </div>
+                        @endif
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label text-white-50">Nome do Plano <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control bg-dark text-white border-secondary" value="{{ old('name', $name) }}" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label text-white-50">Código <span class="text-muted small">(Identificador Permanente)</span></label>
+                                <input type="text" class="form-control bg-dark text-white-50 border-secondary font-monospace" value="{{ $code }}" readonly disabled>
+                                <div class="form-text text-white-50">O código não pode ser alterado após a criação.</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label text-white-50">Mensalidade (Centavos) <span class="text-danger">*</span></label>
+                                <input type="number" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', $plan['monthly_price_cents'] ?? 0) }}" min="0" required>
+                                <div class="form-text text-white-50">Ex: 199000 = R$ 1.990,00</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label text-white-50">Usuários Incluídos (included_users)</label>
+                                <input type="number" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users', $includedUsers) }}" min="0" placeholder="Ex: 500">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label text-white-50">Créditos IA Incluídos (included_ai_credits)</label>
+                                <input type="number" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits', $includedAiCredits) }}" min="0" placeholder="Ex: 50000">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label text-white-50">Limite de Integrações</label>
+                                <input type="number" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', $integrationsLimit) }}" min="0" placeholder="Ex: 0">
+                                <div class="form-text text-white-50">Valor numérico real de integrações.</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label text-white-50">Excedente / 1.000 créditos (Centavos)</label>
+                                <input type="number" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents', $overagePriceCents) }}" min="0" placeholder="Ex: 2200">
+                                <div class="form-text text-white-50">Ex: 2200 = R$ 22,00</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label text-white-50">Limite Pós-Pago Padrão (Centavos)</label>
+                                <input type="number" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents', $defaultPostpaidLimitCents) }}" min="0" placeholder="Ex: 50000">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-12">
+                                <label class="form-label text-white-50">Descrição / Notas Comerciais</label>
+                                <textarea name="description" class="form-control bg-dark text-white border-secondary" rows="2">{{ old('description', $plan['description'] ?? '') }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-12">
+                                <label class="form-label text-white-50">Benefícios e Recursos (features_json - 1 por linha)</label>
+                                <textarea name="features_text" class="form-control bg-dark text-white border-secondary font-monospace" rows="3" placeholder="Google Workspace + Microsoft 365&#10;APIs customizadas&#10;AI Assistant">{{ old('features_text', $featuresText) }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-4 mt-4 pt-3 border-top border-secondary">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_public" value="1" id="edit_public_{{ $uuid }}" {{ $isPublic ? 'checked' : '' }}>
+                                <label class="form-check-label text-white" for="edit_public_{{ $uuid }}">Plano Público</label>
+                            </div>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_unlimited" value="1" id="edit_unlimited_{{ $uuid }}" {{ $isUnlimited ? 'checked' : '' }}>
+                                <label class="form-check-label text-white" for="edit_unlimited_{{ $uuid }}">Plano Ilimitado</label>
+                            </div>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_enterprise" value="1" id="edit_enterprise_{{ $uuid }}" {{ $isEnterprise ? 'checked' : '' }}>
+                                <label class="form-check-label text-white" for="edit_enterprise_{{ $uuid }}">Enterprise</label>
+                            </div>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="default_postpaid_enabled" value="1" id="edit_postpaid_{{ $uuid }}" {{ $defaultPostpaidEnabled ? 'checked' : '' }}>
+                                <label class="form-check-label text-white" for="edit_postpaid_{{ $uuid }}">Pós-Pago Habilitado</label>
+                            </div>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_active" value="1" id="edit_active_{{ $uuid }}" {{ $isActive ? 'checked' : '' }}>
+                                <label class="form-check-label text-white" for="edit_active_{{ $uuid }}">Ativo (Desmarque para Aposentar)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endforeach
+
 {{-- Modal Novo Plano --}}
 <div class="modal fade" id="modalNovoPlano" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-content bg-dark text-white border-secondary shadow-lg rounded-4">
             <form action="{{ route('nodal-plans.store') }}" method="POST">
                 @csrf
                 <div class="modal-header border-secondary">

@@ -106,11 +106,11 @@ class NodalBillingPlanController extends Controller
             'included_ai_credits'                  => isset($validated['included_ai_credits']) ? (int) $validated['included_ai_credits'] : null,
             'integrations_limit'                   => isset($validated['integrations_limit']) ? (int) $validated['integrations_limit'] : 0,
             'overage_price_per_1000_credits_cents' => isset($validated['overage_price_per_1000_credits_cents']) ? (int) $validated['overage_price_per_1000_credits_cents'] : null,
-            'is_public'                            => $request->has('is_public') ? (bool) $request->is_public : true,
-            'is_unlimited'                         => $request->has('is_unlimited') ? (bool) $request->is_unlimited : false,
-            'is_active'                            => $request->has('is_active') ? (bool) $request->is_active : true,
-            'is_enterprise'                        => $request->has('is_enterprise') ? (bool) $request->is_enterprise : false,
-            'default_postpaid_enabled'             => $request->has('default_postpaid_enabled') ? (bool) $request->default_postpaid_enabled : false,
+            'is_public'                            => $request->boolean('is_public'),
+            'is_unlimited'                         => $request->boolean('is_unlimited'),
+            'is_active'                            => $request->boolean('is_active'),
+            'is_enterprise'                        => $request->boolean('is_enterprise'),
+            'default_postpaid_enabled'             => $request->boolean('default_postpaid_enabled'),
             'default_postpaid_limit_cents'         => isset($validated['default_postpaid_limit_cents']) ? (int) $validated['default_postpaid_limit_cents'] : null,
             'features_json'                        => $featuresJson,
         ];
@@ -193,7 +193,7 @@ class NodalBillingPlanController extends Controller
             'monthly_price_cents.required' => 'A mensalidade é obrigatória.',
         ]);
 
-        $isActive = $request->has('is_active') ? (bool) $request->is_active : false;
+        $isActive = $request->boolean('is_active');
 
         $featuresJson = [];
         if (!empty($validated['features_text'])) {
@@ -208,11 +208,11 @@ class NodalBillingPlanController extends Controller
             'included_ai_credits'                  => isset($validated['included_ai_credits']) ? (int) $validated['included_ai_credits'] : null,
             'integrations_limit'                   => isset($validated['integrations_limit']) ? (int) $validated['integrations_limit'] : 0,
             'overage_price_per_1000_credits_cents' => isset($validated['overage_price_per_1000_credits_cents']) ? (int) $validated['overage_price_per_1000_credits_cents'] : null,
-            'is_public'                            => $request->has('is_public') ? (bool) $request->is_public : false,
-            'is_unlimited'                         => $request->has('is_unlimited') ? (bool) $request->is_unlimited : false,
+            'is_public'                            => $request->boolean('is_public'),
+            'is_unlimited'                         => $request->boolean('is_unlimited'),
             'is_active'                            => $isActive,
-            'is_enterprise'                        => $request->has('is_enterprise') ? (bool) $request->is_enterprise : false,
-            'default_postpaid_enabled'             => $request->has('default_postpaid_enabled') ? (bool) $request->default_postpaid_enabled : false,
+            'is_enterprise'                        => $request->boolean('is_enterprise'),
+            'default_postpaid_enabled'             => $request->boolean('default_postpaid_enabled'),
             'default_postpaid_limit_cents'         => isset($validated['default_postpaid_limit_cents']) ? (int) $validated['default_postpaid_limit_cents'] : null,
             'features_json'                        => $featuresJson,
         ];

@@ -214,6 +214,35 @@ class NodalBillingPlanTest extends TestCase
         ]);
     }
 
+    /** Teste 6b: Criação de plano oculto (is_public desmarcado/ausente no POST) */
+    public function test_06b_creates_hidden_plan_when_is_public_is_unchecked(): void
+    {
+        Http::fake([
+            'http://nodal.test/api/v1/internal/integer/billing/plans' => Http::response([
+                'uuid' => 'new-plan-uuid-hidden',
+                'name' => 'Plano Oculto Especial',
+                'code' => 'plano-oculto',
+            ], 201),
+        ]);
+
+        $payload = [
+            'name'                => 'Plano Oculto Especial',
+            'code'                => 'plano-oculto',
+            'monthly_price_cents' => 0,
+            // 'is_public' desmarcado no formulário HTML (não enviado no body)
+            'is_active'           => 1,
+        ];
+
+        $response = $this->actingAs($this->adminUser)->post(route('nodal-plans.store'), $payload);
+        $response->assertRedirect(route('nodal-plans.index'));
+
+        Http::assertSent(function ($request) {
+            return $request->url() === 'http://nodal.test/api/v1/internal/integer/billing/plans' &&
+                   $request['code'] === 'plano-oculto' &&
+                   $request['is_public'] === false;
+        });
+    }
+
     /** Teste 7: Tratar erro 422 de código duplicado */
     public function test_07_handles_duplicate_code_422_error(): void
     {
