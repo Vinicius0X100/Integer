@@ -9,7 +9,7 @@ class AutomationAuditLog extends Model
 {
     use HasFactory;
 
-    protected $connection = 'integer';
+
 
     protected $table = 'automation_audit_logs';
 

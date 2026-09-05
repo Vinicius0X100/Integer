@@ -35,6 +35,24 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        if (! Schema::hasTable('usuarios')) {
+            Schema::create('usuarios', function (Blueprint $table) {
+                $table->id();
+                $table->string('name')->nullable();
+                $table->string('nome')->nullable();
+                $table->string('sobrenome')->nullable();
+                $table->string('email')->unique();
+                $table->timestamp('email_verified_at')->nullable();
+                $table->string('senha')->nullable();
+                $table->string('password')->nullable();
+                $table->rememberToken();
+                $table->string('papel')->default('usuario');
+                $table->timestamp('criado_em')->nullable();
+                $table->timestamp('atualizado_em')->nullable();
+                $table->timestamp('excluido_em')->nullable();
+            });
+        }
     }
 
     /**

@@ -15,6 +15,7 @@ use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Controllers\CampanhaEmailController;
 use App\Http\Controllers\NodalController;
 use App\Http\Controllers\NodalVerificationController;
+use App\Http\Controllers\NodalBillingController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -94,5 +95,11 @@ Route::middleware('auth')->group(function () {
         Route::post('nodal-verifications/{id}/approve', [NodalVerificationController::class, 'approve'])->name('nodal-verifications.approve');
         Route::post('nodal-verifications/{id}/reject', [NodalVerificationController::class, 'reject'])->name('nodal-verifications.reject');
         Route::resource('nodal-verifications', NodalVerificationController::class)->only(['index', 'show']);
+
+        // Rotas Nodal Billing (Faturamento)
+        Route::get('nodal-billing/export', [NodalBillingController::class, 'export'])->name('nodal-billing.export');
+        Route::post('nodal-billing/sync', [NodalBillingController::class, 'sync'])->name('nodal-billing.sync');
+        Route::post('nodal-billing/{id}/fiscal', [NodalBillingController::class, 'updateFiscal'])->name('nodal-billing.update-fiscal');
+        Route::resource('nodal-billing', NodalBillingController::class)->only(['index', 'show']);
     });
 });

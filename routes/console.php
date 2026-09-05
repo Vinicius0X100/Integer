@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('monitor:systems')->everyFiveMinutes();
+Schedule::command('integer:sync-nodal-billing')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
