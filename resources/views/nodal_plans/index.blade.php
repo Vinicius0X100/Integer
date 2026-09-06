@@ -604,6 +604,30 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    function formatCurrencyInput(input) {
+        let digits = input.value.replace(/\D/g, '');
+        if (!digits) {
+            input.value = '';
+            return;
+        }
+        let cents = parseInt(digits, 10);
+        let formatted = (cents / 100).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        input.value = formatted;
+    }
+
+    function formatIntegerInput(input) {
+        let digits = input.value.replace(/\D/g, '');
+        if (!digits) {
+            input.value = '';
+            return;
+        }
+        let num = parseInt(digits, 10);
+        input.value = num.toLocaleString('pt-BR');
+    }
+
     function setupPlanModalLogic(modalEl) {
         if (!modalEl) return;
 
@@ -615,6 +639,25 @@ document.addEventListener('DOMContentLoaded', function () {
             'input[name="included_users"], input[name="included_ai_credits"], input[name="integrations_limit"], input[name="overage_price_per_1000_credits_cents"]'
         );
         const postpaidLimitInput = modalEl.querySelector('input[name="default_postpaid_limit_cents"]');
+
+        const currencyInputs = modalEl.querySelectorAll(
+            'input[name="monthly_price_cents"], input[name="overage_price_per_1000_credits_cents"], input[name="default_postpaid_limit_cents"]'
+        );
+        const integerInputs = modalEl.querySelectorAll(
+            'input[name="included_users"], input[name="included_ai_credits"], input[name="integrations_limit"]'
+        );
+
+        currencyInputs.forEach(input => {
+            input.addEventListener('input', function () {
+                formatCurrencyInput(this);
+            });
+        });
+
+        integerInputs.forEach(input => {
+            input.addEventListener('input', function () {
+                formatIntegerInput(this);
+            });
+        });
 
         function updateUnlimitedState() {
             if (!unlimitedSwitch) return;
