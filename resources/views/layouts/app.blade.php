@@ -288,6 +288,26 @@
             font-size: 0.85rem;
             margin-top: auto;
         }
+
+        /* Utility: w-sm-auto (Bootstrap 5 não tem este breakpoint utilitário nativo) */
+        @media (min-width: 576px) {
+            .w-sm-auto { width: auto !important; }
+        }
+
+        /* Evita scrollbar horizontal dentro de table-responsive em mobile */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 575.98px) {
+            .table-responsive {
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            .table-responsive::-webkit-scrollbar {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>

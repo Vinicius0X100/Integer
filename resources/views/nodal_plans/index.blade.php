@@ -12,9 +12,9 @@
             </h2>
             <p class="text-white-50 mb-0 small">Administração do catálogo comercial e assinaturas do Nodal.</p>
         </div>
-        <div class="w-100 w-sm-auto">
-            <button type="button" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm w-100 w-sm-auto text-nowrap" data-bs-toggle="modal" data-bs-target="#modalNovoPlano" @if(!empty($apiError)) disabled @endif>
-                <i class="bi bi-plus-lg me-2"></i> Novo Plano
+        <div>
+            <button type="button" class="btn btn-primary rounded-pill shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalNovoPlano" @if(!empty($apiError)) disabled @endif>
+                <i class="bi bi-plus-lg me-1"></i> Novo Plano
             </button>
         </div>
     </div>
@@ -126,17 +126,16 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light border-bottom">
                         <tr>
-                            <th class="px-3 px-md-4 py-3 text-secondary text-uppercase small fw-bold border-0">Plano</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-sm-table-cell">Código</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-md-table-cell">Visibilidade</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Status</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Mensalidade</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-lg-table-cell">Usuários</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-xl-table-cell">Créditos IA</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-xxl-table-cell">Excedente</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-md-table-cell">Ilimitado</th>
-                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-sm-table-cell">Empresas</th>
-                            <th class="px-3 px-md-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0">Plano</th>
+                            <th class="px-2 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-sm-table-cell">Status</th>
+                            <th class="px-2 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-sm-table-cell text-end">Mensalidade</th>
+                            <th class="px-2 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-md-table-cell">Código</th>
+                            <th class="px-2 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-md-table-cell">Visibilidade</th>
+                            <th class="px-2 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-lg-table-cell">Usuários</th>
+                            <th class="px-2 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-xl-table-cell">Créditos IA</th>
+                            <th class="px-2 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-md-table-cell">Ilimitado</th>
+                            <th class="px-2 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-lg-table-cell">Empresas</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -170,23 +169,44 @@
                                 $orgsCount = (int) ($plan['organizations_count'] ?? $plan['companies_count'] ?? 0);
                             @endphp
                             <tr>
-                                <td class="px-3 px-md-4 py-3 border-bottom-0">
-                                    <div class="fw-semibold text-white">
+                                {{-- Plano (sempre visível) --}}
+                                <td class="px-3 py-3 border-bottom-0">
+                                    <div class="fw-semibold text-white text-truncate" style="max-width: 180px;">
                                         {{ $name }}
                                         @if($isEnterprise)
-                                            <span class="badge bg-purple text-white ms-1" style="font-size: 0.7rem;">Enterprise</span>
+                                            <span class="badge bg-purple text-white ms-1" style="font-size: 0.65rem;">Ent.</span>
                                         @endif
                                     </div>
                                     @if(!empty($plan['description']))
-                                        <div class="text-white-50 small text-truncate" style="max-width: 200px;" title="{{ $plan['description'] }}">{{ $plan['description'] }}</div>
+                                        <div class="text-white-50 small text-truncate d-none d-md-block" style="max-width: 180px;" title="{{ $plan['description'] }}">{{ $plan['description'] }}</div>
                                     @endif
                                 </td>
 
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap d-none d-sm-table-cell">
+                                {{-- Status (d-none d-sm-table-cell) --}}
+                                <td class="px-2 py-3 border-bottom-0 text-nowrap d-none d-sm-table-cell">
+                                    @if($isActive)
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">
+                                            <i class="bi bi-check-circle me-1"></i> Ativo
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2">
+                                            <i class="bi bi-pause-circle me-1"></i> Inativo
+                                        </span>
+                                    @endif
+                                </td>
+
+                                {{-- Mensalidade (d-none d-sm-table-cell) --}}
+                                <td class="px-2 py-3 border-bottom-0 text-nowrap text-end fw-semibold text-white d-none d-sm-table-cell">
+                                    R$ {{ number_format($monthlyPriceBrl, 2, ',', '.') }}
+                                </td>
+
+                                {{-- Código (d-none d-md-table-cell) --}}
+                                <td class="px-2 py-3 border-bottom-0 text-nowrap d-none d-md-table-cell">
                                     <span class="badge bg-dark border border-secondary text-white font-monospace px-2 py-1">{{ $code }}</span>
                                 </td>
 
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap d-none d-md-table-cell">
+                                {{-- Visibilidade (d-none d-md-table-cell) --}}
+                                <td class="px-2 py-3 border-bottom-0 text-nowrap d-none d-md-table-cell">
                                     @if($isPublic)
                                         <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3" data-bs-toggle="tooltip" title="Disponível comercialmente no Nodal.">
                                             <i class="bi bi-eye me-1"></i> Público
@@ -198,23 +218,8 @@
                                     @endif
                                 </td>
 
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap">
-                                    @if($isActive)
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 px-sm-3">
-                                            <i class="bi bi-check-circle me-1"></i> Ativo
-                                        </span>
-                                    @else
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 px-sm-3">
-                                            <i class="bi bi-pause-circle me-1"></i> Inativo
-                                        </span>
-                                    @endif
-                                </td>
-
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-end fw-semibold text-white">
-                                    R$ {{ number_format($monthlyPriceBrl, 2, ',', '.') }}
-                                </td>
-
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-center d-none d-lg-table-cell">
+                                {{-- Usuários (d-none d-lg-table-cell) --}}
+                                <td class="px-2 py-3 border-bottom-0 text-nowrap text-center d-none d-lg-table-cell">
                                     @if($isUnlimited)
                                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
                                     @else
@@ -222,7 +227,8 @@
                                     @endif
                                 </td>
 
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-center d-none d-xl-table-cell">
+                                {{-- Créditos IA (d-none d-xl-table-cell) --}}
+                                <td class="px-2 py-3 border-bottom-0 text-nowrap text-center d-none d-xl-table-cell">
                                     @if($isUnlimited)
                                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
                                     @else
@@ -230,19 +236,8 @@
                                     @endif
                                 </td>
 
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap d-none d-xxl-table-cell">
-                                    @if($isUnlimited)
-                                        <span class="text-white-50">—</span>
-                                    @else
-                                        @if($overagePriceCents > 0 || $overagePriceBrl > 0)
-                                            <span class="text-white-50">R$ {{ number_format($overagePriceBrl, 2, ',', '.') }} / 1.000</span>
-                                        @else
-                                            <span class="text-white-50">—</span>
-                                        @endif
-                                    @endif
-                                </td>
-
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-center d-none d-md-table-cell">
+                                {{-- Ilimitado (d-none d-md-table-cell) --}}
+                                <td class="px-2 py-3 border-bottom-0 text-nowrap text-center d-none d-md-table-cell">
                                     @if($isUnlimited)
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Sim</span>
                                     @else
@@ -250,11 +245,13 @@
                                     @endif
                                 </td>
 
-                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-center fw-bold text-white d-none d-sm-table-cell">
+                                {{-- Empresas (d-none d-lg-table-cell) --}}
+                                <td class="px-2 py-3 border-bottom-0 text-nowrap text-center fw-bold text-white d-none d-lg-table-cell">
                                     {{ $orgsCount }}
                                 </td>
 
-                                <td class="px-3 px-md-4 py-3 border-bottom-0 text-nowrap text-end">
+                                {{-- Ações (sempre visível) --}}
+                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-end">
                                     <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2 px-sm-3" data-bs-toggle="modal" data-bs-target="#modalEditarPlano-{{ $uuid }}">
                                         <i class="bi bi-pencil me-1"></i> Editar
                                     </button>
@@ -262,7 +259,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center py-5 text-white-50">
+                                <td colspan="10" class="text-center py-5 text-white-50">
                                     <i class="bi bi-inbox text-secondary display-4 d-block mb-3"></i>
                                     Nenhum plano encontrado no catálogo Nodal.
                                 </td>
