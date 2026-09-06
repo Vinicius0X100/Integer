@@ -209,6 +209,9 @@
             width: 100%;
             margin-left: 260px; /* Same as sidebar width */
             transition: all 0.3s;
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: hidden;
         }
         
         @media (max-width: 768px) {
@@ -220,6 +223,9 @@
             }
             #content {
                 margin-left: 0;
+                min-width: 0;
+                width: 100%;
+                max-width: 100vw;
             }
         }
 
@@ -228,10 +234,11 @@
             background-color: var(--apple-sidebar-bg);
             backdrop-filter: saturate(180%) blur(20px);
             border-bottom: 1px solid var(--apple-border);
-            padding: 10px 20px;
+            padding: 10px 16px;
             position: sticky;
             top: 0;
             z-index: 900;
+            min-width: 0;
         }
 
         /* Components */
@@ -472,26 +479,26 @@
             <!-- Page Content -->
             <div id="content" class="d-flex flex-column min-vh-100">
                 <header class="main-header d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <button type="button" id="sidebarCollapseBtn" class="btn btn-link text-reset me-3 d-md-none">
+                    <div class="d-flex align-items-center me-2 flex-grow-1 min-w-0" style="min-width: 0;">
+                        <button type="button" id="sidebarCollapseBtn" class="btn btn-link text-reset me-2 me-sm-3 p-0 d-md-none flex-shrink-0">
                             <i class="bi bi-list fs-4"></i>
                         </button>
-                        <h5 class="m-0 fw-bold">@yield('page-title', 'Dashboard')</h5>
+                        <h5 class="m-0 fw-bold text-truncate" style="font-size: clamp(0.9rem, 2.5vw, 1.15rem);">@yield('page-title', 'Dashboard')</h5>
                     </div>
 
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2 gap-sm-3 flex-shrink-0">
                         <!-- Theme Toggle -->
-                        <button class="btn btn-link text-reset" id="theme-toggle-dash" title="Alternar Tema">
+                        <button class="btn btn-link text-reset p-1" id="theme-toggle-dash" title="Alternar Tema">
                             <i class="bi bi-moon-stars-fill"></i>
                         </button>
 
                         <!-- User Dropdown -->
                         <div class="dropdown">
                             <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-reset" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white me-2" style="width: 32px; height: 32px;">
+                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white me-1 me-sm-2 flex-shrink-0" style="width: 32px; height: 32px;">
                                     {{ substr(Auth::user()->nome ?? 'A', 0, 1) }}
                                 </div>
-                                <span class="d-none d-sm-inline">{{ Auth::user()->nome }} {{ Auth::user()->sobrenome }}</span>
+                                <span class="d-none d-sm-inline text-truncate" style="max-width: 140px;">{{ Auth::user()->nome }} {{ Auth::user()->sobrenome }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4" aria-labelledby="dropdownUser1">
                                 <li><a class="dropdown-item" href="{{ route('profile.index') }}">Perfil</a></li>
@@ -508,10 +515,10 @@
                         </div>
 
                         <!-- LOGO SACRATECH_ID -->
-                        <div class="border-start ps-3 ms-2 d-flex align-items-center" title="Sacratech ID">
+                        <div class="border-start ps-2 ps-sm-3 ms-1 ms-sm-2 d-flex align-items-center" title="Sacratech ID">
                              @if(file_exists(public_path('img/sacratech-id.png')))
                                 <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech ID" height="24" class="d-none d-md-block">
-                                <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech ID" height="20" class="d-md-none">
+                                <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech ID" height="18" class="d-md-none">
                              @else
                                 <span class="badge bg-primary rounded-pill">Sacratech ID</span>
                              @endif
@@ -519,7 +526,7 @@
                     </div>
                 </header>
 
-                <main class="p-4 flex-grow-1">
+                <main class="p-3 p-md-4 flex-grow-1" style="min-width: 0;">
                     @yield('content')
                 </main>
 

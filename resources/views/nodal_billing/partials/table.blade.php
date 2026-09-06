@@ -1,17 +1,17 @@
 <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
+    <table class="table table-hover align-middle mb-0" style="min-width: 1000px;">
         <thead class="bg-light border-bottom">
             <tr>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Empresa</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">CNPJ</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Competência</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Plano / Serviço</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Mensalidade</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Adicional</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Total</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-center">Pagamento</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-center">Status Fiscal</th>
-                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Ações</th>
+                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0" style="min-width: 220px;">Empresa</th>
+                <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">CNPJ</th>
+                <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Competência</th>
+                <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Plano / Serviço</th>
+                <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Mensalidade</th>
+                <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Adicional</th>
+                <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Total</th>
+                <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Pagamento</th>
+                <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Status Fiscal</th>
+                <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
             </tr>
         </thead>
         <tbody>

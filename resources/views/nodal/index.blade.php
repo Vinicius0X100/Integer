@@ -3,22 +3,22 @@
 @section('page-title', 'Nodal — Empresas')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid px-2 px-md-4 py-2">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold text-white mb-1">
+            <h2 class="fw-bold text-white mb-1 h3 h2-md">
                 @if(file_exists(public_path('img/Nodal-Icon.png')))
                     <img src="{{ asset('img/Nodal-Icon.png') }}" alt="Nodal" style="height: 28px; width: auto; object-fit: contain; margin-right: 10px; vertical-align: middle;">
                 @endif
                 Empresas Provisionadas
             </h2>
-            <p class="text-white-50 mb-0">Listagem de todas as organizações provisionadas no Nodal.</p>
+            <p class="text-white-50 mb-0 small">Listagem de todas as organizações provisionadas no Nodal.</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('nodal.settings') }}" class="btn btn-dark rounded-pill px-4 py-2 shadow-sm border border-secondary border-opacity-25">
+        <div class="d-flex gap-2 w-100 w-sm-auto justify-content-sm-end">
+            <a href="{{ route('nodal.settings') }}" class="btn btn-dark rounded-pill px-3 px-sm-4 py-2 shadow-sm border border-secondary border-opacity-25 flex-grow-1 flex-sm-grow-0 text-center text-nowrap">
                 <i class="bi bi-gear-fill me-2"></i> Configurações
             </a>
-            <a href="{{ route('nodal.create') }}" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+            <a href="{{ route('nodal.create') }}" class="btn btn-primary px-3 px-sm-4 py-2 rounded-pill shadow-sm flex-grow-1 flex-sm-grow-0 text-center text-nowrap">
                 <i class="bi bi-plus-lg me-2"></i> Nova Empresa
             </a>
         </div>
@@ -50,25 +50,25 @@
 
     {{-- Filtros --}}
     <div class="card border-0 shadow-sm rounded-4 mb-4 bg-dark bg-opacity-50 border-secondary border-opacity-10">
-        <div class="card-body p-3">
+        <div class="card-body p-3 p-md-4">
             <form action="{{ route('nodal.index') }}" method="GET" class="row g-3 align-items-center">
-                <div class="col-md-6">
+                <div class="col-12 col-sm-6 col-md-6">
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-secondary border-opacity-25 text-white-50"><i class="bi bi-search"></i></span>
                         <input type="text" name="search" class="form-control bg-transparent border-secondary border-opacity-25 text-white" placeholder="Buscar por nome, e-mail, responsável..." value="{{ request('search') }}">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <select name="status" class="form-select bg-transparent border-secondary border-opacity-25 text-white">
-                        <option value="">Todos os Status</option>
-                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Ativo</option>
-                        <option value="error" {{ request('status') === 'error' ? 'selected' : '' }}>Com Erro</option>
+                        <option value="" class="bg-dark text-white">Todos os Status</option>
+                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }} class="bg-dark text-white">Ativo</option>
+                        <option value="error" {{ request('status') === 'error' ? 'selected' : '' }} class="bg-dark text-white">Com Erro</option>
                     </select>
                 </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill">Filtrar</button>
+                <div class="col-12 col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill text-nowrap">Filtrar</button>
                     @if(request()->anyFilled(['search', 'status']))
-                        <a href="{{ route('nodal.index') }}" class="btn btn-outline-light rounded-circle" title="Limpar Filtros"><i class="bi bi-x-lg"></i></a>
+                        <a href="{{ route('nodal.index') }}" class="btn btn-outline-light rounded-circle flex-shrink-0" title="Limpar Filtros"><i class="bi bi-x-lg"></i></a>
                     @endif
                 </div>
             </form>
@@ -76,18 +76,18 @@
     </div>
 
     {{-- Tabela --}}
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
                     <thead class="bg-light border-bottom">
                         <tr>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Organização</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Responsável</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Nodal UUID</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Status</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Provisionado em</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Ações</th>
+                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0" style="min-width: 200px;">Organização</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Responsável</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Nodal UUID</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Status</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Provisionado em</th>
+                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>

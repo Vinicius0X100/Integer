@@ -3,20 +3,20 @@
 @section('page-title', 'Nodal — Verificações KYC')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid px-2 px-md-4 py-2">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold text-white mb-1">
+            <h2 class="fw-bold text-white mb-1 h3 h2-md">
                 @if(file_exists(public_path('img/Nodal-Icon.png')))
                     <img src="{{ asset('img/Nodal-Icon.png') }}" alt="Nodal" style="height: 28px; width: auto; object-fit: contain; margin-right: 10px; vertical-align: middle;">
                 @endif
                 Verificações de Documentos
             </h2>
-            <p class="text-white-50 mb-0">Listagem ao vivo de empresas aguardando aprovação KYC (via API).</p>
+            <p class="text-white-50 mb-0 small">Listagem ao vivo de empresas aguardando aprovação KYC (via API).</p>
         </div>
-        <div>
+        <div class="w-100 w-sm-auto">
             <form action="{{ route('nodal-verifications.index') }}" method="GET" class="d-inline">
-                <button type="submit" class="btn btn-outline-light rounded-pill px-4 py-2 shadow-sm border border-secondary border-opacity-25">
+                <button type="submit" class="btn btn-outline-light rounded-pill px-4 py-2 shadow-sm border border-secondary border-opacity-25 w-100 w-sm-auto text-nowrap">
                     <i class="bi bi-arrow-clockwise me-2"></i> Atualizar
                 </button>
             </form>
@@ -39,16 +39,16 @@
     @endif
 
     {{-- Tabela --}}
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" style="min-width: 650px;">
                     <thead class="bg-light border-bottom">
                         <tr>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Empresa</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Documento</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0">Enviado em</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-end">Ações</th>
+                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0" style="min-width: 200px;">Empresa</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Documento</th>
+                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Enviado em</th>
+                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
