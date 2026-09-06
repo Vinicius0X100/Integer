@@ -42,26 +42,26 @@
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="min-width: 650px;">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light border-bottom">
                         <tr>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0" style="min-width: 200px;">Empresa</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Documento</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Enviado em</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
+                            <th class="px-3 px-md-4 py-3 text-secondary text-uppercase small fw-bold border-0">Empresa</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Documento</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-sm-table-cell">Enviado em</th>
+                            <th class="px-3 px-md-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($verifications as $ver)
                             <tr>
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 px-md-4 py-3 border-bottom-0">
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center text-primary fw-bold me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+                                        <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center text-primary fw-bold me-2 me-sm-3 flex-shrink-0" style="width: 38px; height: 38px; font-size: 0.95rem;">
                                             {{ strtoupper(substr($ver['organization_name'] ?? 'N', 0, 1)) }}
                                         </div>
-                                        <div>
-                                            <div class="fw-semibold">{{ $ver['organization_name'] ?? 'Desconhecida' }}</div>
-                                            <div class="text-muted small">ID Nodal: <span title="{{ $ver['organization_uuid'] ?? '' }}">{{ substr($ver['organization_uuid'] ?? '', 0, 8) }}...</span></div>
+                                        <div class="min-w-0">
+                                            <div class="fw-semibold text-truncate" style="max-width: 160px;">{{ $ver['organization_name'] ?? 'Desconhecida' }}</div>
+                                            <div class="text-muted small text-truncate" style="max-width: 160px;">ID Nodal: <span title="{{ $ver['organization_uuid'] ?? '' }}">{{ substr($ver['organization_uuid'] ?? '', 0, 8) }}...</span></div>
                                         </div>
                                     </div>
                                 </td>
@@ -76,16 +76,16 @@
                                     $rawType = $ver['document_type'] ?? 'DOCUMENTO';
                                     $docLabel = $docLabels[$rawType] ?? str_replace('_', ' ', $rawType);
                                 @endphp
-                                <td class="px-4 py-3 border-bottom-0">
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">{{ mb_strtoupper($docLabel, 'UTF-8') }}</span>
+                                <td class="px-2 px-md-3 py-3 border-bottom-0">
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 px-sm-3">{{ mb_strtoupper($docLabel, 'UTF-8') }}</span>
                                 </td>
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 d-none d-sm-table-cell">
                                     <span class="text-muted small">
                                         {{ !empty($ver['submitted_at']) ? \Carbon\Carbon::parse($ver['submitted_at'])->format('d/m/Y H:i') : '—' }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 border-bottom-0 text-end">
-                                    <a href="{{ route('nodal-verifications.show', $ver['uuid']) }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                <td class="px-3 px-md-4 py-3 border-bottom-0 text-end">
+                                    <a href="{{ route('nodal-verifications.show', $ver['uuid']) }}" class="btn btn-sm btn-primary rounded-pill px-2 px-sm-3 text-nowrap">
                                         Verificar <i class="bi bi-arrow-right ms-1"></i>
                                     </a>
                                 </td>

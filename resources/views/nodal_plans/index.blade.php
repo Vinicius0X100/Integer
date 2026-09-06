@@ -123,20 +123,20 @@
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="min-width: 1000px;">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light border-bottom">
                         <tr>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0" style="min-width: 180px;">Plano</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Código</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Visibilidade</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Status</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Mensalidade</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Usuários</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Créditos IA</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Excedente</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Ilimitado</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center">Empresas</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
+                            <th class="px-3 px-md-4 py-3 text-secondary text-uppercase small fw-bold border-0">Plano</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-sm-table-cell">Código</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-md-table-cell">Visibilidade</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Status</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Mensalidade</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-lg-table-cell">Usuários</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-xl-table-cell">Créditos IA</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-xxl-table-cell">Excedente</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-md-table-cell">Ilimitado</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-center d-none d-sm-table-cell">Empresas</th>
+                            <th class="px-3 px-md-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -170,7 +170,7 @@
                                 $orgsCount = (int) ($plan['organizations_count'] ?? $plan['companies_count'] ?? 0);
                             @endphp
                             <tr>
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 px-md-4 py-3 border-bottom-0">
                                     <div class="fw-semibold text-white">
                                         {{ $name }}
                                         @if($isEnterprise)
@@ -178,15 +178,15 @@
                                         @endif
                                     </div>
                                     @if(!empty($plan['description']))
-                                        <div class="text-white-50 small text-truncate" style="max-width: 220px;" title="{{ $plan['description'] }}">{{ $plan['description'] }}</div>
+                                        <div class="text-white-50 small text-truncate" style="max-width: 200px;" title="{{ $plan['description'] }}">{{ $plan['description'] }}</div>
                                     @endif
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap d-none d-sm-table-cell">
                                     <span class="badge bg-dark border border-secondary text-white font-monospace px-2 py-1">{{ $code }}</span>
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap d-none d-md-table-cell">
                                     @if($isPublic)
                                         <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3" data-bs-toggle="tooltip" title="Disponível comercialmente no Nodal.">
                                             <i class="bi bi-eye me-1"></i> Público
@@ -198,23 +198,23 @@
                                     @endif
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap">
                                     @if($isActive)
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 px-sm-3">
                                             <i class="bi bi-check-circle me-1"></i> Ativo
                                         </span>
                                     @else
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 px-sm-3">
                                             <i class="bi bi-pause-circle me-1"></i> Inativo
                                         </span>
                                     @endif
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-end fw-semibold text-white">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-end fw-semibold text-white">
                                     R$ {{ number_format($monthlyPriceBrl, 2, ',', '.') }}
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-center">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-center d-none d-lg-table-cell">
                                     @if($isUnlimited)
                                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
                                     @else
@@ -222,7 +222,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-center">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-center d-none d-xl-table-cell">
                                     @if($isUnlimited)
                                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
                                     @else
@@ -230,7 +230,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap d-none d-xxl-table-cell">
                                     @if($isUnlimited)
                                         <span class="text-white-50">—</span>
                                     @else
@@ -242,7 +242,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-center">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-center d-none d-md-table-cell">
                                     @if($isUnlimited)
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Sim</span>
                                     @else
@@ -250,12 +250,12 @@
                                     @endif
                                 </td>
 
-                                <td class="px-3 py-3 border-bottom-0 text-nowrap text-center fw-bold text-white">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap text-center fw-bold text-white d-none d-sm-table-cell">
                                     {{ $orgsCount }}
                                 </td>
 
-                                <td class="px-4 py-3 border-bottom-0 text-nowrap text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalEditarPlano-{{ $uuid }}">
+                                <td class="px-3 px-md-4 py-3 border-bottom-0 text-nowrap text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-2 px-sm-3" data-bs-toggle="modal" data-bs-target="#modalEditarPlano-{{ $uuid }}">
                                         <i class="bi bi-pencil me-1"></i> Editar
                                     </button>
                                 </td>

@@ -79,71 +79,71 @@
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light border-bottom">
                         <tr>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0" style="min-width: 200px;">Organização</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Responsável</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Nodal UUID</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Status</th>
-                            <th class="px-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Provisionado em</th>
-                            <th class="px-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
+                            <th class="px-3 px-md-4 py-3 text-secondary text-uppercase small fw-bold border-0">Organização</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-md-table-cell">Responsável</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-lg-table-cell">Nodal UUID</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap">Status</th>
+                            <th class="px-2 px-md-3 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap d-none d-sm-table-cell">Provisionado em</th>
+                            <th class="px-3 px-md-4 py-3 text-secondary text-uppercase small fw-bold border-0 text-nowrap text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($organizations as $org)
                             <tr>
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-3 px-md-4 py-3 border-bottom-0">
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center text-primary fw-bold me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+                                        <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center text-primary fw-bold me-2 me-sm-3 flex-shrink-0" style="width: 38px; height: 38px; font-size: 0.95rem;">
                                             {{ strtoupper(substr($org->nome, 0, 1)) }}
                                         </div>
-                                        <div>
-                                            <div class="fw-semibold">{{ $org->nome }}</div>
+                                        <div class="min-w-0">
+                                            <div class="fw-semibold text-truncate" style="max-width: 180px;">{{ $org->nome }}</div>
                                             @if($org->slug)
-                                                <div class="text-muted small">{{ $org->slug }}</div>
+                                                <div class="text-muted small text-truncate" style="max-width: 180px;">{{ $org->slug }}</div>
                                             @endif
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 d-none d-md-table-cell">
                                     <div class="fw-medium">{{ $org->owner_name }}</div>
                                     <div class="text-muted small">{{ $org->owner_email }}</div>
                                 </td>
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 d-none d-lg-table-cell">
                                     @if($org->nodal_organization_uuid)
                                         <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3" title="{{ $org->nodal_organization_uuid }}">{{ substr($org->nodal_organization_uuid, 0, 8) }}...</span>
                                     @else
                                         <span class="text-muted small">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 text-nowrap">
                                     @if($org->status === 'active')
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 px-sm-3">
                                             <i class="bi bi-check-circle me-1"></i> Ativo
                                         </span>
                                     @else
-                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3" title="{{ $org->provisioning_error }}">
+                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 px-sm-3" title="{{ $org->provisioning_error }}">
                                             <i class="bi bi-exclamation-circle me-1"></i> Erro
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 border-bottom-0">
+                                <td class="px-2 px-md-3 py-3 border-bottom-0 d-none d-sm-table-cell">
                                     <span class="text-muted small">
                                         {{ $org->provisionado_em ? $org->provisionado_em->format('d/m/Y H:i') : '—' }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 border-bottom-0 text-end">
-                                    <div class="d-flex justify-content-end gap-2">
+                                <td class="px-3 px-md-4 py-3 border-bottom-0 text-end">
+                                    <div class="d-flex justify-content-end gap-1 gap-sm-2">
                                         @if($org->nodal_login_url)
-                                            <a href="{{ $org->nodal_login_url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3" title="Acessar Nodal">
+                                            <a href="{{ $org->nodal_login_url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-2 px-sm-3" title="Acessar Nodal">
                                                 <i class="bi bi-box-arrow-up-right"></i>
                                             </a>
                                         @endif
-                                        <a href="{{ route('nodal.edit', $org->id) }}" class="btn btn-sm btn-outline-light rounded-pill px-3" title="Editar">
+                                        <a href="{{ route('nodal.edit', $org->id) }}" class="btn btn-sm btn-outline-light rounded-pill px-2 px-sm-3" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Excluir" data-bs-toggle="modal" data-bs-target="#modalExcluir-{{ $org->id }}">
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 px-sm-3" title="Excluir" data-bs-toggle="modal" data-bs-target="#modalExcluir-{{ $org->id }}">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
