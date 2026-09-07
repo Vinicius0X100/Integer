@@ -233,6 +233,11 @@
                                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">∞ Ilimitado</span>
                                     @else
                                         <span class="text-white-50">{{ $includedAiCredits !== null ? number_format($includedAiCredits, 0, ',', '.') : '—' }}</span>
+                                        @if($overagePriceBrl > 0)
+                                            <div class="text-white-50 small" style="font-size: 0.75rem;">
+                                                R$ {{ number_format($overagePriceBrl, 2, ',', '.') }} / 1.000
+                                            </div>
+                                        @endif
                                     @endif
                                 </td>
 
@@ -325,159 +330,27 @@
 
     <div class="modal fade" id="modalEditarPlano-{{ $uuid }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content bg-dark text-white border-secondary shadow-lg rounded-4">
-                <form action="{{ route('nodal-plans.update', $uuid) }}" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <div class="modal-header border-secondary">
-                        <h5 class="modal-title fw-bold">
-                            <i class="bi bi-pencil me-2 text-primary"></i>Editar Plano: {{ $name }}
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body p-3 p-md-4">
-                        <p class="text-white-50 mb-3 small">
-                            Este plano está atribuído a <strong>{{ $orgsCount }}</strong> {{ $orgsCount === 1 ? 'organização' : 'organizações' }}.
-                        </p>
-
-                        @if($orgsCount > 0)
-                            <div class="alert alert-warning rounded-4 border-0 shadow-sm mb-4 small" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                <strong>Atenção:</strong> Alterações comerciais poderão afetar organizações vinculadas nos períodos abertos/futuros.
-                            </div>
-                        @endif
-
-                        <div class="alert alert-info rounded-4 border-0 shadow-sm mb-4 unlimited-warning-alert small" style="display: none;">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            Os limites individuais não são aplicados enquanto este plano estiver marcado como ilimitado.
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-12 col-md-8">
-                                <label class="form-label text-white-50 small">Nome do Plano <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control bg-dark text-white border-secondary" value="{{ old('name', $name) }}" required>
-                            </div>
-
-                            <div class="col-12 col-md-4">
-                                <label class="form-label text-white-50 small">Código <span class="text-muted small">(Permanente)</span></label>
-                                <input type="text" class="form-control bg-dark text-white-50 border-secondary font-monospace" value="{{ $code }}" readonly disabled>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-12 col-sm-6 col-md-4">
-                                <label class="form-label text-white-50 small">Mensalidade (R$) <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
-                                    <input type="text" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', $monthlyPriceFormatted) }}" placeholder="1.990,00" required>
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-sm-6 col-md-4">
-                                <label class="form-label text-white-50 small">Usuários Incluídos</label>
-                                <input type="text" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users', $includedUsersFormatted) }}" placeholder="Ex: 500">
-                            </div>
-
-                            <div class="col-12 col-sm-6 col-md-4">
-                                <label class="form-label text-white-50 small">Créditos IA Incluídos</label>
-                                <input type="text" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits', $includedAiCreditsFormatted) }}" placeholder="Ex: 50.000">
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-12 col-sm-6 col-md-4">
-                                <label class="form-label text-white-50 small">Limite de Integrações</label>
-                                <input type="text" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', $integrationsLimitFormatted) }}" placeholder="Ex: 0">
-                            </div>
-
-                            <div class="col-12 col-sm-6 col-md-4">
-                                <label class="form-label text-white-50 small">Excedente / 1.000 créditos (R$)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
-                                    <input type="text" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents', $overagePriceFormatted) }}" placeholder="Ex: 22,00">
-                                </div>
-                            </div>
-
-                            <div class="col-12 col-sm-6 col-md-4">
-                                <label class="form-label text-white-50 small">Limite Pós-Pago Padrão (R$)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
-                                    <input type="text" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents', $defaultPostpaidLimitFormatted) }}" placeholder="Ex: 500,00">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-12">
-                                <label class="form-label text-white-50 small">Descrição / Notas Comerciais</label>
-                                <textarea name="description" class="form-control bg-dark text-white border-secondary" rows="2">{{ old('description', $plan['description'] ?? '') }}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-12">
-                                <label class="form-label text-white-50 small">Benefícios e Recursos (features_json - 1 por linha)</label>
-                                <textarea name="features_text" class="form-control bg-dark text-white border-secondary font-monospace" rows="3" placeholder="Google Workspace + Microsoft 365&#10;APIs customizadas&#10;AI Assistant">{{ old('features_text', $featuresText) }}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="d-flex flex-wrap gap-3 gap-md-4 mt-4 pt-3 border-top border-secondary">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="is_public" value="1" id="edit_public_{{ $uuid }}" {{ $isPublic ? 'checked' : '' }}>
-                                <label class="form-check-label text-white small" for="edit_public_{{ $uuid }}">Plano Público</label>
-                            </div>
-
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="is_unlimited" value="1" id="edit_unlimited_{{ $uuid }}" {{ $isUnlimited ? 'checked' : '' }}>
-                                <label class="form-check-label text-white small" for="edit_unlimited_{{ $uuid }}">Plano Ilimitado</label>
-                            </div>
-
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="is_enterprise" value="1" id="edit_enterprise_{{ $uuid }}" {{ $isEnterprise ? 'checked' : '' }}>
-                                <label class="form-check-label text-white small" for="edit_enterprise_{{ $uuid }}">Enterprise</label>
-                            </div>
-
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="default_postpaid_enabled" value="1" id="edit_postpaid_{{ $uuid }}" {{ $defaultPostpaidEnabled ? 'checked' : '' }}>
-                                <label class="form-check-label text-white small" for="edit_postpaid_{{ $uuid }}">Pós-Pago Habilitado</label>
-                            </div>
-
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="is_active" value="1" id="edit_active_{{ $uuid }}" {{ $isActive ? 'checked' : '' }}>
-                                <label class="form-check-label text-white small" for="edit_active_{{ $uuid }}">Ativo</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer border-secondary">
-                        <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4">Salvar Alterações</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-@endforeach
-
-{{-- Modal Novo Plano --}}
-<div class="modal fade" id="modalNovoPlano" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content bg-dark text-white border-secondary shadow-lg rounded-4">
-            <form action="{{ route('nodal-plans.store') }}" method="POST">
+            <form action="{{ route('nodal-plans.update', $uuid) }}" method="POST" class="modal-content bg-dark text-white border-secondary shadow-lg rounded-4">
                 @csrf
+                @method('PATCH')
                 <div class="modal-header border-secondary">
                     <h5 class="modal-title fw-bold">
-                        <i class="bi bi-plus-lg me-2 text-primary"></i>Criar Novo Plano de Licenciamento
+                        <i class="bi bi-pencil me-2 text-primary"></i>Editar Plano: {{ $name }}
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body p-3 p-md-4">
-                    <div class="alert alert-info rounded-4 border-0 shadow-sm mb-4 small" role="alert">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        O plano será cadastrado diretamente no Nodal. Chaves e identificadores serão preservados.
-                    </div>
+                    <p class="text-white-50 mb-3 small">
+                        Este plano está atribuído a <strong>{{ $orgsCount }}</strong> {{ $orgsCount === 1 ? 'organização' : 'organizações' }}.
+                    </p>
+
+                    @if($orgsCount > 0)
+                        <div class="alert alert-warning rounded-4 border-0 shadow-sm mb-4 small" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Atenção:</strong> Alterações comerciais poderão afetar organizações vinculadas nos períodos abertos/futuros.
+                        </div>
+                    @endif
 
                     <div class="alert alert-info rounded-4 border-0 shadow-sm mb-4 unlimited-warning-alert small" style="display: none;">
                         <i class="bi bi-info-circle-fill me-2"></i>
@@ -485,14 +358,14 @@
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-8">
                             <label class="form-label text-white-50 small">Nome do Plano <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control bg-dark text-white border-secondary" placeholder="Ex: Enterprise, Professional" value="{{ old('name') }}" required>
+                            <input type="text" name="name" class="form-control bg-dark text-white border-secondary" value="{{ old('name', $name) }}" required>
                         </div>
 
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-white-50 small">Código (Slug) <span class="text-danger">*</span></label>
-                            <input type="text" name="code" class="form-control bg-dark text-white border-secondary font-monospace" placeholder="Ex: enterprise, professional" value="{{ old('code') }}" required>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-white-50 small">Código <span class="text-muted small">(Permanente)</span></label>
+                            <input type="text" class="form-control bg-dark text-white-50 border-secondary font-monospace" value="{{ $code }}" readonly disabled>
                         </div>
                     </div>
 
@@ -501,32 +374,32 @@
                             <label class="form-label text-white-50 small">Mensalidade (R$) <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
-                                <input type="text" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', '0,00') }}" placeholder="1.990,00" required>
+                                <input type="text" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', $monthlyPriceFormatted) }}" placeholder="1.990,00" required>
                             </div>
                         </div>
 
                         <div class="col-12 col-sm-6 col-md-4">
                             <label class="form-label text-white-50 small">Usuários Incluídos</label>
-                            <input type="text" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users') }}" placeholder="Ex: 500">
+                            <input type="text" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users', $includedUsersFormatted) }}" placeholder="Ex: 500">
                         </div>
 
                         <div class="col-12 col-sm-6 col-md-4">
                             <label class="form-label text-white-50 small">Créditos IA Incluídos</label>
-                            <input type="text" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits') }}" placeholder="Ex: 50.000">
+                            <input type="text" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits', $includedAiCreditsFormatted) }}" placeholder="Ex: 50.000">
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-sm-6 col-md-4">
                             <label class="form-label text-white-50 small">Limite de Integrações</label>
-                            <input type="text" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', '0') }}" placeholder="Ex: 0">
+                            <input type="text" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', $integrationsLimitFormatted) }}" placeholder="Ex: 0">
                         </div>
 
                         <div class="col-12 col-sm-6 col-md-4">
                             <label class="form-label text-white-50 small">Excedente / 1.000 créditos (R$)</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
-                                <input type="text" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents') }}" placeholder="Ex: 22,00">
+                                <input type="text" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents', $overagePriceFormatted) }}" placeholder="Ex: 22,00">
                             </div>
                         </div>
 
@@ -534,7 +407,7 @@
                             <label class="form-label text-white-50 small">Limite Pós-Pago Padrão (R$)</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
-                                <input type="text" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents') }}" placeholder="Ex: 500,00">
+                                <input type="text" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents', $defaultPostpaidLimitFormatted) }}" placeholder="Ex: 500,00">
                             </div>
                         </div>
                     </div>
@@ -542,51 +415,179 @@
                     <div class="row g-3 mb-3">
                         <div class="col-12">
                             <label class="form-label text-white-50 small">Descrição / Notas Comerciais</label>
-                            <textarea name="description" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Descreva os termos comerciais deste plano">{{ old('description') }}</textarea>
+                            <textarea name="description" class="form-control bg-dark text-white border-secondary" rows="2">{{ old('description', $plan['description'] ?? '') }}</textarea>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-12">
                             <label class="form-label text-white-50 small">Benefícios e Recursos (features_json - 1 por linha)</label>
-                            <textarea name="features_text" class="form-control bg-dark text-white border-secondary font-monospace" rows="3" placeholder="Google Workspace + Microsoft 365&#10;APIs customizadas&#10;AI Assistant">{{ old('features_text') }}</textarea>
+                            <textarea name="features_text" class="form-control bg-dark text-white border-secondary font-monospace" rows="3" placeholder="Google Workspace + Microsoft 365&#10;APIs customizadas&#10;AI Assistant">{{ old('features_text', $featuresText) }}</textarea>
                         </div>
                     </div>
 
                     <div class="d-flex flex-wrap gap-3 gap-md-4 mt-4 pt-3 border-top border-secondary">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="is_public" value="1" id="new_public" checked>
-                            <label class="form-check-label text-white small" for="new_public">Plano Público</label>
+                            <input class="form-check-input" type="checkbox" name="is_public" value="1" id="edit_public_{{ $uuid }}" {{ $isPublic ? 'checked' : '' }}>
+                            <label class="form-check-label text-white small" for="edit_public_{{ $uuid }}">Plano Público</label>
                         </div>
 
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="is_unlimited" value="1" id="new_unlimited">
-                            <label class="form-check-label text-white small" for="new_unlimited">Plano Ilimitado</label>
+                            <input class="form-check-input" type="checkbox" name="is_unlimited" value="1" id="edit_unlimited_{{ $uuid }}" {{ $isUnlimited ? 'checked' : '' }}>
+                            <label class="form-check-label text-white small" for="edit_unlimited_{{ $uuid }}">Plano Ilimitado</label>
                         </div>
 
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="is_enterprise" value="1" id="new_enterprise">
-                            <label class="form-check-label text-white small" for="new_enterprise">Enterprise</label>
+                            <input class="form-check-input" type="checkbox" name="is_enterprise" value="1" id="edit_enterprise_{{ $uuid }}" {{ $isEnterprise ? 'checked' : '' }}>
+                            <label class="form-check-label text-white small" for="edit_enterprise_{{ $uuid }}">Enterprise</label>
                         </div>
 
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="default_postpaid_enabled" value="1" id="new_postpaid">
-                            <label class="form-check-label text-white small" for="new_postpaid">Pós-Pago Habilitado</label>
+                            <input class="form-check-input" type="checkbox" name="default_postpaid_enabled" value="1" id="edit_postpaid_{{ $uuid }}" {{ $defaultPostpaidEnabled ? 'checked' : '' }}>
+                            <label class="form-check-label text-white small" for="edit_postpaid_{{ $uuid }}">Pós-Pago Habilitado</label>
                         </div>
 
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="is_active" value="1" id="new_active" checked>
-                            <label class="form-check-label text-white small" for="new_active">Ativo</label>
+                            <input class="form-check-input" type="checkbox" name="is_active" value="1" id="edit_active_{{ $uuid }}" {{ $isActive ? 'checked' : '' }}>
+                            <label class="form-check-label text-white small" for="edit_active_{{ $uuid }}">Ativo</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">Criar Plano</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Salvar Alterações</button>
                 </div>
             </form>
         </div>
+    </div>
+@endforeach
+
+{{-- Modal Novo Plano --}}
+<div class="modal fade" id="modalNovoPlano" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <form action="{{ route('nodal-plans.store') }}" method="POST" class="modal-content bg-dark text-white border-secondary shadow-lg rounded-4">
+            @csrf
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-plus-lg me-2 text-primary"></i>Criar Novo Plano de Licenciamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-3 p-md-4">
+                <div class="alert alert-info rounded-4 border-0 shadow-sm mb-4 small" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    O plano será cadastrado diretamente no Nodal. Chaves e identificadores serão preservados.
+                </div>
+
+                <div class="alert alert-info rounded-4 border-0 shadow-sm mb-4 unlimited-warning-alert small" style="display: none;">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Os limites individuais não são aplicados enquanto este plano estiver marcado como ilimitado.
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-white-50 small">Nome do Plano <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control bg-dark text-white border-secondary" placeholder="Ex: Enterprise, Professional" value="{{ old('name') }}" required>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label text-white-50 small">Código (Slug) <span class="text-danger">*</span></label>
+                        <input type="text" name="code" class="form-control bg-dark text-white border-secondary font-monospace" placeholder="Ex: enterprise, professional" value="{{ old('code') }}" required>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <label class="form-label text-white-50 small">Mensalidade (R$) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                            <input type="text" name="monthly_price_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('monthly_price_cents', '0,00') }}" placeholder="1.990,00" required>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <label class="form-label text-white-50 small">Usuários Incluídos</label>
+                        <input type="text" name="included_users" class="form-control bg-dark text-white border-secondary" value="{{ old('included_users') }}" placeholder="Ex: 500">
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <label class="form-label text-white-50 small">Créditos IA Incluídos</label>
+                        <input type="text" name="included_ai_credits" class="form-control bg-dark text-white border-secondary" value="{{ old('included_ai_credits') }}" placeholder="Ex: 50.000">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <label class="form-label text-white-50 small">Limite de Integrações</label>
+                        <input type="text" name="integrations_limit" class="form-control bg-dark text-white border-secondary" value="{{ old('integrations_limit', '0') }}" placeholder="Ex: 0">
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <label class="form-label text-white-50 small">Excedente / 1.000 créditos (R$)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                            <input type="text" name="overage_price_per_1000_credits_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('overage_price_per_1000_credits_cents') }}" placeholder="Ex: 22,00">
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <label class="form-label text-white-50 small">Limite Pós-Pago Padrão (R$)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark text-white-50 border-secondary">R$</span>
+                            <input type="text" name="default_postpaid_limit_cents" class="form-control bg-dark text-white border-secondary" value="{{ old('default_postpaid_limit_cents') }}" placeholder="Ex: 500,00">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <label class="form-label text-white-50 small">Descrição / Notas Comerciais</label>
+                        <textarea name="description" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Descreva os termos comerciais deste plano">{{ old('description') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <label class="form-label text-white-50 small">Benefícios e Recursos (features_json - 1 por linha)</label>
+                        <textarea name="features_text" class="form-control bg-dark text-white border-secondary font-monospace" rows="3" placeholder="Google Workspace + Microsoft 365&#10;APIs customizadas&#10;AI Assistant">{{ old('features_text') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 gap-md-4 mt-4 pt-3 border-top border-secondary">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_public" value="1" id="new_public" checked>
+                        <label class="form-check-label text-white small" for="new_public">Plano Público</label>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_unlimited" value="1" id="new_unlimited">
+                        <label class="form-check-label text-white small" for="new_unlimited">Plano Ilimitado</label>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_enterprise" value="1" id="new_enterprise">
+                        <label class="form-check-label text-white small" for="new_enterprise">Enterprise</label>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="default_postpaid_enabled" value="1" id="new_postpaid">
+                        <label class="form-check-label text-white small" for="new_postpaid">Pós-Pago Habilitado</label>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" value="1" id="new_active" checked>
+                        <label class="form-check-label text-white small" for="new_active">Ativo</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-4">Criar Plano</button>
+            </div>
+        </form>
     </div>
 </div>
 

@@ -270,114 +270,112 @@
 {{-- Modal Alterar Plano de Licenciamento --}}
 @if($organization->nodal_organization_uuid)
 <div class="modal fade" id="modalAlterarPlano" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content bg-dark text-white border-secondary">
-            <form action="{{ route('nodal-plans.assign', $organization->nodal_organization_uuid) }}" method="POST" id="formAlterarPlano">
-                @csrf
-                @method('PATCH')
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <form action="{{ route('nodal-plans.assign', $organization->nodal_organization_uuid) }}" method="POST" id="formAlterarPlano" class="modal-content bg-dark text-white border-secondary shadow-lg rounded-4">
+            @csrf
+            @method('PATCH')
 
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title fw-bold">
-                        <i class="bi bi-box-seam-fill me-2 text-primary"></i>Alterar Plano de Licenciamento
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-box-seam-fill me-2 text-primary"></i>Alterar Plano de Licenciamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                <div class="modal-body p-4" id="stepSelecaoPlano">
-                    <p class="text-white-50 mb-4">
-                        Selecione o novo plano comercial ou administrativo para a organização <strong>{{ $organization->nome }}</strong>.
-                    </p>
+            <div class="modal-body p-4" id="stepSelecaoPlano">
+                <p class="text-white-50 mb-4">
+                    Selecione o novo plano comercial ou administrativo para a organização <strong>{{ $organization->nome }}</strong>.
+                </p>
 
-                    @php
-                        $publicPlans = collect($plans)->filter(fn($p) => !empty($p['is_public']) && (!isset($p['is_active']) || $p['is_active']));
-                        $hiddenPlans = collect($plans)->filter(fn($p) => empty($p['is_public']) && (!isset($p['is_active']) || $p['is_active']));
-                    @endphp
+                @php
+                    $publicPlans = collect($plans)->filter(fn($p) => !empty($p['is_public']) && (!isset($p['is_active']) || $p['is_active']));
+                    $hiddenPlans = collect($plans)->filter(fn($p) => empty($p['is_public']) && (!isset($p['is_active']) || $p['is_active']));
+                @endphp
 
-                    {{-- Planos Públicos --}}
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-info text-uppercase small tracking-wider mb-3">
-                            <i class="bi bi-eye me-1"></i> Planos Públicos
-                        </h6>
-                        <div class="row g-3">
-                            @forelse($publicPlans as $p)
-                                @php
-                                    $pUuid = $p['uuid'] ?? $p['id'] ?? '';
-                                    $pName = $p['name'] ?? '';
-                                    $pPrice = (int) ($p['monthly_price_cents'] ?? 0);
-                                @endphp
-                                <div class="col-md-6">
-                                    <div class="form-check card bg-dark border-secondary p-3 rounded-3 shadow-sm h-100 cursor-pointer">
-                                        <input class="form-check-input me-2 plan-radio-option" type="radio" name="plan_uuid" id="plan_{{ $pUuid }}" value="{{ $pUuid }}" data-name="{{ $pName }}" required>
-                                        <label class="form-check-label w-100 cursor-pointer" for="plan_{{ $pUuid }}">
-                                            <div class="fw-bold text-white">{{ $pName }}</div>
-                                            <div class="text-white-50 small">R$ {{ number_format($pPrice / 100, 2, ',', '.') }} / mês</div>
-                                        </label>
-                                    </div>
+                {{-- Planos Públicos --}}
+                <div class="mb-4">
+                    <h6 class="fw-bold text-info text-uppercase small tracking-wider mb-3">
+                        <i class="bi bi-eye me-1"></i> Planos Públicos
+                    </h6>
+                    <div class="row g-3">
+                        @forelse($publicPlans as $p)
+                            @php
+                                $pUuid = $p['uuid'] ?? $p['id'] ?? '';
+                                $pName = $p['name'] ?? '';
+                                $pPrice = (int) ($p['monthly_price_cents'] ?? 0);
+                            @endphp
+                            <div class="col-md-6">
+                                <div class="form-check card bg-dark border-secondary p-3 rounded-3 shadow-sm h-100 cursor-pointer">
+                                    <input class="form-check-input me-2 plan-radio-option" type="radio" name="plan_uuid" id="plan_{{ $pUuid }}" value="{{ $pUuid }}" data-name="{{ $pName }}" required>
+                                    <label class="form-check-label w-100 cursor-pointer" for="plan_{{ $pUuid }}">
+                                        <div class="fw-bold text-white">{{ $pName }}</div>
+                                        <div class="text-white-50 small">R$ {{ number_format($pPrice / 100, 2, ',', '.') }} / mês</div>
+                                    </label>
                                 </div>
-                            @empty
-                                <div class="col-12 text-white-50 small">Nenhum plano público disponível.</div>
-                            @endforelse
-                        </div>
+                            </div>
+                        @empty
+                            <div class="col-12 text-white-50 small">Nenhum plano público disponível.</div>
+                        @endforelse
                     </div>
+                </div>
 
-                    {{-- Planos Ocultos --}}
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-warning text-uppercase small tracking-wider mb-3">
-                            <i class="bi bi-eye-slash me-1"></i> Planos Ocultos (Administrativos / Especiais)
-                        </h6>
-                        <div class="row g-3">
-                            @forelse($hiddenPlans as $p)
-                                @php
-                                    $pUuid = $p['uuid'] ?? $p['id'] ?? '';
-                                    $pName = $p['name'] ?? '';
-                                    $pPrice = (int) ($p['monthly_price_cents'] ?? 0);
-                                @endphp
-                                <div class="col-md-6">
-                                    <div class="form-check card bg-dark border-secondary p-3 rounded-3 shadow-sm h-100 cursor-pointer">
-                                        <input class="form-check-input me-2 plan-radio-option" type="radio" name="plan_uuid" id="plan_{{ $pUuid }}" value="{{ $pUuid }}" data-name="{{ $pName }}" required>
-                                        <label class="form-check-label w-100 cursor-pointer" for="plan_{{ $pUuid }}">
-                                            <div class="fw-bold text-white">{{ $pName }}</div>
-                                            <div class="text-white-50 small">R$ {{ number_format($pPrice / 100, 2, ',', '.') }} / mês</div>
-                                        </label>
-                                    </div>
+                {{-- Planos Ocultos --}}
+                <div class="mb-4">
+                    <h6 class="fw-bold text-warning text-uppercase small tracking-wider mb-3">
+                        <i class="bi bi-eye-slash me-1"></i> Planos Ocultos (Administrativos / Especiais)
+                    </h6>
+                    <div class="row g-3">
+                        @forelse($hiddenPlans as $p)
+                            @php
+                                $pUuid = $p['uuid'] ?? $p['id'] ?? '';
+                                $pName = $p['name'] ?? '';
+                                $pPrice = (int) ($p['monthly_price_cents'] ?? 0);
+                            @endphp
+                            <div class="col-md-6">
+                                <div class="form-check card bg-dark border-secondary p-3 rounded-3 shadow-sm h-100 cursor-pointer">
+                                    <input class="form-check-input me-2 plan-radio-option" type="radio" name="plan_uuid" id="plan_{{ $pUuid }}" value="{{ $pUuid }}" data-name="{{ $pName }}" required>
+                                    <label class="form-check-label w-100 cursor-pointer" for="plan_{{ $pUuid }}">
+                                        <div class="fw-bold text-white">{{ $pName }}</div>
+                                        <div class="text-white-50 small">R$ {{ number_format($pPrice / 100, 2, ',', '.') }} / mês</div>
+                                    </label>
                                 </div>
-                            @empty
-                                <div class="col-12 text-white-50 small">Nenhum plano oculto disponível.</div>
-                            @endforelse
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnAvancarConfirmacao">
-                            Avançar &rarr;
-                        </button>
+                            </div>
+                        @empty
+                            <div class="col-12 text-white-50 small">Nenhum plano oculto disponível.</div>
+                        @endforelse
                     </div>
                 </div>
 
-                {{-- Passo de Confirmação --}}
-                <div class="modal-body p-4 d-none" id="stepConfirmacaoPlano">
-                    <div class="alert alert-warning rounded-4 border-0 shadow-sm mb-4" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <span id="textoModalConfirmacaoHeader">
-                            Alterar o plano da <strong>{{ $organization->nome }}</strong> de <strong>{{ $currentPlan['name'] ?? 'Plano Atual' }}</strong> para <strong id="nomeNovoPlanoConfirmacao"></strong>?
-                        </span>
-                    </div>
-
-                    <p class="text-white-50 mb-4">
-                        A alteração entra em vigor imediatamente no período de faturamento aberto. O consumo já realizado no período será preservado.
-                    </p>
-
-                    <div class="d-flex gap-3 justify-content-end">
-                        <button type="button" class="btn btn-outline-light rounded-pill px-4" id="btnVoltarSelecao">
-                            Voltar
-                        </button>
-                        <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">
-                            Confirmar alteração
-                        </button>
-                    </div>
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnAvancarConfirmacao">
+                        Avançar &rarr;
+                    </button>
                 </div>
-            </form>
-        </div>
+            </div>
+
+            {{-- Passo de Confirmação --}}
+            <div class="modal-body p-4 d-none" id="stepConfirmacaoPlano">
+                <div class="alert alert-warning rounded-4 border-0 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span id="textoModalConfirmacaoHeader">
+                        Alterar o plano da <strong>{{ $organization->nome }}</strong> de <strong>{{ $currentPlan['name'] ?? 'Plano Atual' }}</strong> para <strong id="nomeNovoPlanoConfirmacao"></strong>?
+                    </span>
+                </div>
+
+                <p class="text-white-50 mb-4">
+                    A alteração entra em vigor imediatamente no período de faturamento aberto. O consumo já realizado no período será preservado.
+                </p>
+
+                <div class="d-flex gap-3 justify-content-end">
+                    <button type="button" class="btn btn-outline-light rounded-pill px-4" id="btnVoltarSelecao">
+                        Voltar
+                    </button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">
+                        Confirmar alteração
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 @endif
