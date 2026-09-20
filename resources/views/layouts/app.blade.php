@@ -36,29 +36,11 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <style>
-        @font-face {
-            font-family: 'SF Pro Display';
-            src: local('SF Pro Display'), local('SFProDisplay'), local('Segoe UI'), local('Roboto');
-            font-weight: 400;
-            font-style: normal;
-        }
-        
-        @font-face {
-            font-family: 'SF Pro Display';
-            src: local('SF Pro Display Bold'), local('SFProDisplay-Bold'), local('Segoe UI Bold'), local('Roboto Bold');
-            font-weight: 700;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'SF Pro Display';
-            src: local('SF Pro Display Medium'), local('SFProDisplay-Medium'), local('Segoe UI Semibold'), local('Roboto Medium');
-            font-weight: 500;
-            font-style: normal;
-        }
-
         :root {
+            /* Integer Typography System - Inter (Google Fonts) */
+            --integer-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --apple-font: var(--integer-font);
+
             /* Apple Design System - Light Mode Variables */
             --apple-bg: #f5f5f7;
             --apple-sidebar-bg: rgba(255, 255, 255, 0.78);
@@ -77,7 +59,6 @@
             --apple-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03);
             --apple-shadow-md: 0 6px 24px rgba(0, 0, 0, 0.06);
             --apple-shadow-dropdown: 0 12px 36px rgba(0, 0, 0, 0.12);
-            --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --apple-radius-sm: 8px;
             --apple-radius-md: 10px;
             --apple-radius-lg: 16px;
@@ -105,17 +86,53 @@
             --apple-shadow-dropdown: 0 16px 40px rgba(0, 0, 0, 0.6);
         }
 
-        /* Base & Global Styles */
+        /* --- Padronização Tipográfica Inter --- */
         body {
-            font-family: var(--apple-font);
+            font-family: var(--integer-font);
+            font-weight: 400; /* Normal para leitura corrente */
+            font-size: 0.94rem;
+            line-height: 1.5;
             background-color: var(--apple-bg);
             color: var(--apple-text);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            letter-spacing: -0.012em;
+            letter-spacing: -0.011em;
             transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             overflow-x: hidden;
         }
+
+        /* Títulos e Cabeçalhos (Bold & SemiBold com tracking ajustado) */
+        h1, .h1, h2, .h2, h3, .h3 {
+            font-family: var(--integer-font);
+            font-weight: 700; /* Bold */
+            letter-spacing: -0.025em;
+            color: var(--apple-text);
+        }
+
+        h4, .h4, h5, .h5, h6, .h6 {
+            font-family: var(--integer-font);
+            font-weight: 600; /* SemiBold */
+            letter-spacing: -0.018em;
+            color: var(--apple-text);
+        }
+
+        .main-header h5 {
+            font-weight: 700; /* Bold para o título principal da página */
+            letter-spacing: -0.02em;
+        }
+
+        /* Textos Leves (Light: 300) */
+        small, .small, .form-text, .text-muted, .footer {
+            font-weight: 300 !important; /* Light para subtítulos, legendas e textos de apoio */
+            letter-spacing: -0.005em;
+        }
+
+        /* Utilitários de Peso de Fonte */
+        .fw-light { font-weight: 300 !important; }
+        .fw-normal { font-weight: 400 !important; }
+        .fw-medium { font-weight: 500 !important; }
+        .fw-semibold { font-weight: 600 !important; }
+        .fw-bold { font-weight: 700 !important; }
 
         /* Overrides para consistência de Tema */
         .bg-light {
@@ -135,13 +152,27 @@
             color: var(--apple-text-secondary) !important;
         }
 
-        /* Tabelas no estilo Apple */
+        /* Tabelas no estilo Apple com Inter */
         .table {
             color: var(--apple-text);
             --bs-table-color: var(--apple-text);
             --bs-table-hover-color: var(--apple-text);
             --bs-table-bg: transparent;
             --bs-table-border-color: var(--apple-border);
+            font-family: var(--integer-font);
+        }
+
+        .table th {
+            font-weight: 600; /* SemiBold em cabeçalhos de tabela */
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--apple-text-secondary);
+        }
+
+        .table td {
+            font-weight: 400; /* Normal para dados da tabela */
+            font-size: 0.9rem;
         }
 
         .table-hover > tbody > tr {
@@ -153,26 +184,37 @@
             color: var(--apple-text);
         }
         
-        /* Formulários e Inputs no estilo Apple */
+        /* Formulários e Inputs no estilo Apple com Inter */
+        .form-label {
+            font-family: var(--integer-font);
+            font-weight: 500; /* Medium para rótulos de campos */
+            font-size: 0.88rem;
+            letter-spacing: -0.01em;
+            margin-bottom: 6px;
+        }
+
         .form-control,
         .form-select {
             color: var(--apple-text);
             background-color: var(--apple-hover-bg);
             border: 1px solid var(--apple-border);
             border-radius: var(--apple-radius-md);
-            font-family: var(--apple-font);
+            font-family: var(--integer-font);
+            font-weight: 400; /* Normal nos campos de entrada */
             font-size: 0.92rem;
             padding: 8px 14px;
             transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
         .form-control::placeholder {
+            font-weight: 300; /* Light nos placeholders */
             color: var(--apple-text-tertiary);
         }
 
         .form-select option {
             background-color: var(--apple-card-bg);
             color: var(--apple-text);
+            font-weight: 400;
         }
 
         .form-control:focus,
@@ -184,11 +226,11 @@
             outline: none;
         }
 
-        /* Botões no estilo Apple Flat Design */
+        /* Botões no estilo Apple Flat Design com Inter */
         .btn {
-            font-family: var(--apple-font);
-            font-weight: 500;
-            letter-spacing: -0.01em;
+            font-family: var(--integer-font);
+            font-weight: 500; /* Medium para botões neutros e secundários */
+            letter-spacing: -0.012em;
             border-radius: var(--apple-radius-md);
             padding: 8px 16px;
             transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
@@ -197,6 +239,11 @@
 
         .btn:active {
             transform: scale(0.975);
+        }
+
+        .btn-primary, .btn-danger, .btn-success {
+            font-weight: 600; /* SemiBold/Bold nos botões de ação principal */
+            letter-spacing: -0.015em;
         }
 
         .btn-primary {
@@ -218,6 +265,7 @@
             background-color: var(--apple-hover-bg);
             color: var(--apple-text);
             border-color: var(--apple-border);
+            font-weight: 500;
         }
 
         .btn-light:hover,
@@ -230,6 +278,7 @@
         .btn-outline-secondary {
             border-color: var(--apple-border);
             color: var(--apple-text-secondary);
+            font-weight: 500;
         }
 
         .btn-outline-secondary:hover,
