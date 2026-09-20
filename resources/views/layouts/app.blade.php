@@ -644,8 +644,8 @@
             // Handle Form Submits
             document.addEventListener('submit', (e) => {
                 const form = e.target;
-                // If form has target="_blank", don't show loader
-                if (form.target === '_blank') return;
+                // If form has target="_blank", data-no-loader, or submission was prevented (AJAX), don't show loader
+                if (form.target === '_blank' || form.hasAttribute('data-no-loader') || form.classList.contains('no-loader') || e.defaultPrevented) return;
                 
                 showLoader();
             });

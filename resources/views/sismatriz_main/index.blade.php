@@ -70,7 +70,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('sismatriz-main.index') }}" method="GET" id="mainSearchForm" class="d-flex flex-column gap-3">
+            <form action="{{ route('sismatriz-main.index') }}" method="GET" id="mainSearchForm" data-no-loader="true" class="d-flex flex-column gap-3">
                 <!-- Linha 1: Filtros -->
                 <div class="d-flex flex-column flex-md-row gap-2">
                     <select name="status" class="form-select bg-light border-0 rounded-pill filter-input" style="min-width: 140px; flex: 1;">
@@ -1012,6 +1012,7 @@
     if (mainSearchForm) {
         mainSearchForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             clearTimeout(mainSearchTimeout);
             performSearch();
         });
@@ -1084,9 +1085,20 @@
     bindAjaxLinks();
 
     const mainSearchInput = document.getElementById('mainSearchInput');
-    if(mainSearchInput && mainSearchInput.value) {
-        mainSearchInput.focus();
-        mainSearchInput.setSelectionRange(mainSearchInput.value.length, mainSearchInput.value.length);
+    if(mainSearchInput) {
+        mainSearchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                clearTimeout(mainSearchTimeout);
+                performSearch();
+            }
+        });
+
+        if(mainSearchInput.value) {
+            mainSearchInput.focus();
+            mainSearchInput.setSelectionRange(mainSearchInput.value.length, mainSearchInput.value.length);
+        }
     }
 </script>
 @endpush
