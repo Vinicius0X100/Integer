@@ -36,6 +36,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
+    <style>
         :root {
             /* Integer Typography System - Inter (Google Fonts) */
             --integer-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -134,31 +135,55 @@
         .fw-semibold { font-weight: 600 !important; }
         .fw-bold { font-weight: 700 !important; }
 
-        /* Overrides para consistência de Tema */
-        .bg-light {
-            background-color: var(--apple-hover-bg) !important;
+        /* Overrides específicos para Modo Escuro */
+        [data-bs-theme="dark"] .bg-light {
+            background-color: rgba(255, 255, 255, 0.06) !important;
         }
         
-        .bg-white {
+        [data-bs-theme="dark"] .bg-white {
             background-color: var(--apple-card-bg) !important;
             color: var(--apple-text);
         }
         
-        .text-dark {
+        [data-bs-theme="dark"] .text-dark {
             color: var(--apple-text) !important;
         }
         
-        .text-muted {
-            color: var(--apple-text-secondary) !important;
+        [data-bs-theme="dark"] .text-muted {
+            color: rgba(235, 235, 245, 0.6) !important;
         }
 
-        /* Tabelas no estilo Apple com Inter */
-        .table {
+        [data-bs-theme="dark"] .table {
             color: var(--apple-text);
             --bs-table-color: var(--apple-text);
             --bs-table-hover-color: var(--apple-text);
             --bs-table-bg: transparent;
             --bs-table-border-color: var(--apple-border);
+        }
+
+        [data-bs-theme="dark"] .table-hover > tbody > tr:hover > * {
+            --bs-table-accent-bg: rgba(255, 255, 255, 0.05);
+            color: var(--apple-text);
+        }
+
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select {
+            color: var(--apple-text);
+            background-color: rgba(255, 255, 255, 0.06);
+            border-color: var(--apple-border);
+        }
+        
+        [data-bs-theme="dark"] .form-control::placeholder {
+            color: rgba(235, 235, 245, 0.4);
+        }
+
+        [data-bs-theme="dark"] .form-select option {
+            background-color: #1c1c1e;
+            color: var(--apple-text);
+        }
+
+        /* Tabelas no estilo Apple com Inter */
+        .table {
             font-family: var(--integer-font);
         }
 
@@ -178,11 +203,6 @@
         .table-hover > tbody > tr {
             transition: background-color 0.15s ease;
         }
-
-        .table-hover > tbody > tr:hover > * {
-            --bs-table-accent-bg: var(--apple-hover-bg);
-            color: var(--apple-text);
-        }
         
         /* Formulários e Inputs no estilo Apple com Inter */
         .form-label {
@@ -195,32 +215,20 @@
 
         .form-control,
         .form-select {
-            color: var(--apple-text);
-            background-color: var(--apple-hover-bg);
-            border: 1px solid var(--apple-border);
-            border-radius: var(--apple-radius-md);
             font-family: var(--integer-font);
             font-weight: 400; /* Normal nos campos de entrada */
             font-size: 0.92rem;
             padding: 8px 14px;
+            border-radius: var(--apple-radius-md);
             transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
         }
         
         .form-control::placeholder {
             font-weight: 300; /* Light nos placeholders */
-            color: var(--apple-text-tertiary);
-        }
-
-        .form-select option {
-            background-color: var(--apple-card-bg);
-            color: var(--apple-text);
-            font-weight: 400;
         }
 
         .form-control:focus,
         .form-select:focus {
-            color: var(--apple-text);
-            background-color: transparent;
             border-color: var(--apple-blue);
             box-shadow: 0 0 0 3.5px var(--apple-blue-subtle);
             outline: none;
