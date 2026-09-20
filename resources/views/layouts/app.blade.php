@@ -7,6 +7,21 @@
 
     <title>{{ config('app.name', 'Integer') }}</title>
     
+    <!-- Script Anti-FOUC (Apple Theme System: Claro, Escuro e Automático) -->
+    <script>
+        (function() {
+            try {
+                const storedPref = localStorage.getItem('integer_theme_preference') || localStorage.getItem('theme') || 'auto';
+                let effectiveTheme = storedPref;
+                if (storedPref === 'auto') {
+                    effectiveTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-bs-theme', effectiveTheme);
+                document.documentElement.setAttribute('data-theme-preference', storedPref);
+            } catch (e) {}
+        })();
+    </script>
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('img/logo-black.png') }}">
 
@@ -44,45 +59,84 @@
         }
 
         :root {
-            /* Light Mode Variables */
+            /* Apple Design System - Light Mode Variables */
             --apple-bg: #f5f5f7;
-            --apple-sidebar-bg: rgba(255, 255, 255, 0.8);
-            --apple-card-bg: rgba(255, 255, 255, 0.8);
+            --apple-sidebar-bg: rgba(255, 255, 255, 0.78);
+            --apple-header-bg: rgba(255, 255, 255, 0.78);
+            --apple-card-bg: rgba(255, 255, 255, 0.85);
             --apple-text: #1d1d1f;
-            --apple-border: rgba(0,0,0,0.05);
+            --apple-text-secondary: #86868b;
+            --apple-text-tertiary: #98989d;
+            --apple-border: rgba(0, 0, 0, 0.08);
+            --apple-border-subtle: rgba(0, 0, 0, 0.04);
             --apple-blue: #0071e3;
-            --apple-font: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --apple-blue-hover: #0077ed;
+            --apple-blue-subtle: rgba(0, 113, 227, 0.1);
+            --apple-hover-bg: rgba(0, 0, 0, 0.04);
+            --apple-hover-bg-subtle: rgba(0, 0, 0, 0.02);
+            --apple-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03);
+            --apple-shadow-md: 0 6px 24px rgba(0, 0, 0, 0.06);
+            --apple-shadow-dropdown: 0 12px 36px rgba(0, 0, 0, 0.12);
+            --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --apple-radius-sm: 8px;
+            --apple-radius-md: 10px;
+            --apple-radius-lg: 16px;
+            --apple-radius-xl: 20px;
         }
 
         [data-bs-theme="dark"] {
-            /* Dark Mode Variables */
+            /* Apple Design System - Dark Mode Variables */
             --apple-bg: #000000;
-            --apple-sidebar-bg: rgba(28, 28, 30, 0.8);
-            --apple-card-bg: rgba(28, 28, 30, 0.8);
+            --apple-sidebar-bg: rgba(24, 24, 26, 0.82);
+            --apple-header-bg: rgba(24, 24, 26, 0.82);
+            --apple-card-bg: rgba(28, 28, 30, 0.82);
             --apple-text: #f5f5f7;
-            --apple-border: rgba(255,255,255,0.1);
+            --apple-text-secondary: rgba(235, 235, 245, 0.6);
+            --apple-text-tertiary: rgba(235, 235, 245, 0.38);
+            --apple-border: rgba(255, 255, 255, 0.09);
+            --apple-border-subtle: rgba(255, 255, 255, 0.05);
             --apple-blue: #0a84ff;
+            --apple-blue-hover: #409cff;
+            --apple-blue-subtle: rgba(10, 132, 255, 0.16);
+            --apple-hover-bg: rgba(255, 255, 255, 0.06);
+            --apple-hover-bg-subtle: rgba(255, 255, 255, 0.03);
+            --apple-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --apple-shadow-md: 0 6px 24px rgba(0, 0, 0, 0.45);
+            --apple-shadow-dropdown: 0 16px 40px rgba(0, 0, 0, 0.6);
         }
 
-        /* Dark Mode Overrides */
-        [data-bs-theme="dark"] .bg-light {
-            background-color: rgba(255,255,255,0.05) !important;
+        /* Base & Global Styles */
+        body {
+            font-family: var(--apple-font);
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.012em;
+            transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-x: hidden;
+        }
+
+        /* Overrides para consistência de Tema */
+        .bg-light {
+            background-color: var(--apple-hover-bg) !important;
         }
         
-        [data-bs-theme="dark"] .bg-white {
+        .bg-white {
             background-color: var(--apple-card-bg) !important;
             color: var(--apple-text);
         }
         
-        [data-bs-theme="dark"] .text-dark {
+        .text-dark {
             color: var(--apple-text) !important;
         }
         
-        [data-bs-theme="dark"] .text-muted {
-            color: rgba(255,255,255,0.6) !important;
+        .text-muted {
+            color: var(--apple-text-secondary) !important;
         }
 
-        [data-bs-theme="dark"] .table {
+        /* Tabelas no estilo Apple */
+        .table {
             color: var(--apple-text);
             --bs-table-color: var(--apple-text);
             --bs-table-hover-color: var(--apple-text);
@@ -90,45 +144,103 @@
             --bs-table-border-color: var(--apple-border);
         }
 
-        [data-bs-theme="dark"] .table-hover > tbody > tr:hover > * {
-            --bs-table-accent-bg: rgba(255,255,255,0.05);
+        .table-hover > tbody > tr {
+            transition: background-color 0.15s ease;
+        }
+
+        .table-hover > tbody > tr:hover > * {
+            --bs-table-accent-bg: var(--apple-hover-bg);
             color: var(--apple-text);
         }
         
-        [data-bs-theme="dark"] .form-control,
-        [data-bs-theme="dark"] .form-select {
+        /* Formulários e Inputs no estilo Apple */
+        .form-control,
+        .form-select {
             color: var(--apple-text);
-            background-color: rgba(255,255,255,0.05);
+            background-color: var(--apple-hover-bg);
+            border: 1px solid var(--apple-border);
+            border-radius: var(--apple-radius-md);
+            font-family: var(--apple-font);
+            font-size: 0.92rem;
+            padding: 8px 14px;
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .form-control::placeholder {
+            color: var(--apple-text-tertiary);
+        }
+
+        .form-select option {
+            background-color: var(--apple-card-bg);
+            color: var(--apple-text);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            color: var(--apple-text);
+            background-color: transparent;
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3.5px var(--apple-blue-subtle);
+            outline: none;
+        }
+
+        /* Botões no estilo Apple Flat Design */
+        .btn {
+            font-family: var(--apple-font);
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            border-radius: var(--apple-radius-md);
+            padding: 8px 16px;
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.975);
+        }
+
+        .btn-primary {
+            background-color: var(--apple-blue);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 113, 227, 0.25);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--apple-blue-hover);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 113, 227, 0.35);
+        }
+
+        .btn-light {
+            background-color: var(--apple-hover-bg);
+            color: var(--apple-text);
             border-color: var(--apple-border);
         }
-        
-        [data-bs-theme="dark"] .form-control::placeholder {
-            color: rgba(255,255,255,0.4);
+
+        .btn-light:hover,
+        .btn-light:focus {
+            background-color: var(--apple-hover-bg-subtle);
+            color: var(--apple-text);
+            border-color: var(--apple-border);
         }
 
-        [data-bs-theme="dark"] .form-select option {
-            background-color: #1c1c1e;
+        .btn-outline-secondary {
+            border-color: var(--apple-border);
+            color: var(--apple-text-secondary);
+        }
+
+        .btn-outline-secondary:hover,
+        .btn-outline-secondary:focus {
+            background-color: var(--apple-hover-bg);
+            border-color: var(--apple-border);
             color: var(--apple-text);
         }
-        
-        [data-bs-theme="dark"] .btn-light {
-            background-color: rgba(255,255,255,0.1);
-            color: var(--apple-text);
-            border-color: transparent;
-        }
 
-        [data-bs-theme="dark"] .btn-light:hover {
-            background-color: rgba(255,255,255,0.2);
-        }
-
-
-        body {
-            font-family: var(--apple-font);
-            background-color: var(--apple-bg);
-            color: var(--apple-text);
-            -webkit-font-smoothing: antialiased;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            overflow-x: hidden;
+        .rounded-pill {
+            border-radius: 980px !important;
         }
 
         /* Layout Structure */
@@ -139,14 +251,15 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
+        /* Sidebar no estilo macOS Finder / Settings */
         #sidebar {
             min-width: 260px;
             max-width: 260px;
             background-color: var(--apple-sidebar-bg);
-            backdrop-filter: saturate(180%) blur(20px);
+            backdrop-filter: saturate(190%) blur(25px);
+            -webkit-backdrop-filter: saturate(190%) blur(25px);
             border-right: 1px solid var(--apple-border);
-            transition: all 0.3s;
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
             position: fixed;
             height: 100vh;
             z-index: 1000;
@@ -154,7 +267,7 @@
             overflow-x: hidden;
         }
 
-        /* Scrollbar sutil da sidebar */
+        /* Scrollbar sutil e minimalista */
         #sidebar::-webkit-scrollbar {
             width: 4px;
         }
@@ -162,11 +275,11 @@
             background: transparent;
         }
         #sidebar::-webkit-scrollbar-thumb {
-            background-color: rgba(128, 128, 128, 0.25);
+            background-color: rgba(128, 128, 128, 0.2);
             border-radius: 4px;
         }
         #sidebar::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(128, 128, 128, 0.45);
+            background-color: rgba(128, 128, 128, 0.4);
         }
 
         #sidebar.active {
@@ -174,41 +287,86 @@
         }
 
         #sidebar .sidebar-header {
-            padding: 20px;
+            padding: 18px 20px;
             border-bottom: 1px solid var(--apple-border);
         }
 
+        #sidebar-logo {
+            transition: opacity 0.2s ease;
+        }
+
         #sidebar ul.components {
-            padding: 20px 0;
+            padding: 14px 0;
         }
 
         #sidebar ul li a {
-            padding: 12px 20px;
-            font-size: 0.95rem;
-            display: block;
+            padding: 8px 14px;
+            font-size: 0.89rem;
+            display: flex;
+            align-items: center;
             color: var(--apple-text);
             text-decoration: none;
-            border-radius: 12px;
-            margin: 0 10px;
-            transition: background 0.2s;
+            border-radius: var(--apple-radius-sm);
+            margin: 2px 10px;
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
             font-weight: 500;
         }
 
-        #sidebar ul li a:hover, #sidebar ul li a.active {
-            background-color: var(--apple-blue);
-            color: #fff;
+        #sidebar ul li a:hover {
+            background-color: var(--apple-hover-bg);
+            color: var(--apple-text);
+        }
+
+        #sidebar ul li a.active {
+            background-color: var(--apple-blue-subtle);
+            color: var(--apple-blue);
+            font-weight: 600;
+        }
+
+        #sidebar ul li a.active i {
+            color: var(--apple-blue);
         }
 
         #sidebar ul li a i {
-            margin-right: 10px;
-            font-size: 1.1rem;
+            margin-right: 11px;
+            font-size: 1.05rem;
+            width: 20px;
+            text-align: center;
+            opacity: 0.88;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--apple-text-tertiary);
+            padding: 14px 22px 4px 22px;
+            display: block;
+        }
+
+        /* Submenus colapsáveis limpos */
+        #sidebar .collapse-submenu {
+            background-color: transparent !important;
+            border-left: 1.5px solid var(--apple-border);
+            border-radius: 0 !important;
+            margin: 4px 10px 6px 24px !important;
+            padding-left: 6px !important;
+        }
+
+        #sidebar .collapse-submenu li a {
+            padding: 6px 12px !important;
+            font-size: 0.84rem !important;
+            border-radius: 7px !important;
+            margin: 1px 0 !important;
         }
 
         /* Content */
         #content {
             width: 100%;
-            margin-left: 260px; /* Same as sidebar width */
-            transition: all 0.3s;
+            margin-left: 260px;
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
             min-width: 0;
             max-width: 100%;
             overflow-x: hidden;
@@ -229,45 +387,94 @@
             }
         }
 
-        /* Navbar/Header */
+        /* Navbar/Header no estilo macOS Toolbar */
         .main-header {
-            background-color: var(--apple-sidebar-bg);
-            backdrop-filter: saturate(180%) blur(20px);
+            background-color: var(--apple-header-bg);
+            backdrop-filter: saturate(190%) blur(25px);
+            -webkit-backdrop-filter: saturate(190%) blur(25px);
             border-bottom: 1px solid var(--apple-border);
-            padding: 10px 16px;
+            padding: 10px 20px;
             position: sticky;
             top: 0;
             z-index: 900;
             min-width: 0;
+            min-height: 56px;
         }
 
-        /* Components */
+        /* Cards no estilo Apple */
         .card {
             background-color: var(--apple-card-bg);
-            backdrop-filter: saturate(180%) blur(20px);
+            backdrop-filter: saturate(190%) blur(25px);
+            -webkit-backdrop-filter: saturate(190%) blur(25px);
             border: 1px solid var(--apple-border);
-            border-radius: 18px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+            border-radius: var(--apple-radius-lg);
+            box-shadow: var(--apple-shadow-sm);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .btn-primary {
-            background-color: var(--apple-blue);
-            border-color: var(--apple-blue);
-            border-radius: 980px;
+        .card-header {
+            border-bottom: 1px solid var(--apple-border);
+            background-color: transparent;
         }
 
-        .form-control {
-            background-color: transparent;
+        /* Dropdowns no estilo Apple macOS */
+        .dropdown-menu {
+            background-color: var(--apple-card-bg);
+            backdrop-filter: saturate(190%) blur(25px);
+            -webkit-backdrop-filter: saturate(190%) blur(25px);
+            border: 1px solid var(--apple-border);
+            border-radius: 12px;
+            box-shadow: var(--apple-shadow-dropdown);
+            padding: 6px;
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.88rem;
+            color: var(--apple-text);
+            transition: background-color 0.12s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background-color: var(--apple-hover-bg);
+            color: var(--apple-text);
+        }
+
+        .dropdown-item.active,
+        .dropdown-item:active {
+            background-color: var(--apple-blue-subtle);
+            color: var(--apple-blue);
+            font-weight: 500;
+        }
+
+        .dropdown-divider {
+            border-color: var(--apple-border);
+            margin: 6px 0;
+        }
+
+        /* Botão de controle de tema */
+        .theme-selector-btn {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background-color: var(--apple-hover-bg);
             border: 1px solid var(--apple-border);
             color: var(--apple-text);
-            border-radius: 10px;
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 0;
         }
-        
-        .form-control:focus {
-            background-color: transparent;
+
+        .theme-selector-btn:hover {
+            background-color: var(--apple-hover-bg-subtle);
             color: var(--apple-text);
-            border-color: var(--apple-blue);
-            box-shadow: 0 0 0 4px rgba(0,113,227,0.15);
+            border-color: var(--apple-border);
         }
 
         /* Auth Page Specific */
@@ -283,13 +490,12 @@
         .footer {
             padding: 20px;
             text-align: center;
-            color: var(--apple-text);
-            opacity: 0.7;
-            font-size: 0.85rem;
+            color: var(--apple-text-secondary);
+            font-size: 0.82rem;
             margin-top: auto;
         }
 
-        /* Utility: w-sm-auto (Bootstrap 5 não tem este breakpoint utilitário nativo) */
+        /* Utility: w-sm-auto */
         @media (min-width: 576px) {
             .w-sm-auto { width: auto !important; }
         }
@@ -314,11 +520,33 @@
     @guest
         <!-- Layout for Login/Guest -->
         <div id="app" class="auth-wrapper">
-             <!-- Theme Toggle for Guest -->
-             <div class="position-absolute top-0 end-0 p-3">
-                <button class="btn btn-sm btn-outline-secondary rounded-circle text-white-50 border-0" id="theme-toggle" title="Alternar Tema">
-                    <i class="bi bi-moon-stars-fill"></i>
-                </button>
+            <!-- Theme Dropdown for Guest -->
+            <div class="position-absolute top-0 end-0 p-3">
+                <div class="dropdown">
+                    <button class="theme-selector-btn text-white-50 border-0" id="theme-toggle-guest" data-bs-toggle="dropdown" aria-expanded="false" title="Tema: Automático">
+                        <i class="bi bi-circle-half theme-icon-current"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="theme-toggle-guest">
+                        <li>
+                            <button type="button" class="dropdown-item d-flex justify-content-between align-items-center" onclick="setThemePreference('light')">
+                                <span><i class="bi bi-sun-fill me-2 text-warning"></i> Claro</span>
+                                <i class="bi bi-check2 theme-check-light d-none"></i>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item d-flex justify-content-between align-items-center" onclick="setThemePreference('dark')">
+                                <span><i class="bi bi-moon-stars-fill me-2 text-primary"></i> Escuro</span>
+                                <i class="bi bi-check2 theme-check-dark d-none"></i>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-item d-flex justify-content-between align-items-center" onclick="setThemePreference('auto')">
+                                <span><i class="bi bi-circle-half me-2 text-info"></i> Automático (Sistema)</span>
+                                <i class="bi bi-check2 theme-check-auto d-none"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <main class="py-4 flex-grow-1 d-flex align-items-center justify-content-center">
                 @yield('content')
@@ -334,10 +562,10 @@
             <nav id="sidebar">
                 <div class="sidebar-header d-flex align-items-center justify-content-between">
                     <a class="navbar-brand" href="{{ url('/') }}">
-                        <img src="{{ asset('img/logo-white.png') }}" id="sidebar-logo" alt="Integer" style="height: 35px; width: auto;">
+                        <img src="{{ asset('img/logo-white.png') }}" id="sidebar-logo" alt="Integer" style="height: 32px; width: auto;">
                     </a>
-                    <button type="button" id="sidebarCollapse" class="btn btn-link d-md-none text-reset">
-                        <i class="bi bi-x-lg"></i>
+                    <button type="button" id="sidebarCollapse" class="btn btn-link d-md-none text-reset p-0">
+                        <i class="bi bi-x-lg fs-5"></i>
                     </button>
                 </div>
 
@@ -363,12 +591,12 @@
                         </a>
                     </li>
                     <li class="mt-2">
-                        <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Gerenciamento</span>
+                        <span class="sidebar-section-title">Gerenciamento</span>
                     </li>
                     <li class="mt-1">
                         <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }} d-flex align-items-center">
                             @if(file_exists(public_path('img/sacratech-id.png')))
-                                <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech iD Logo" style="width: 20px; height: 20px; object-fit: contain; margin-right: 10px;">
+                                <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech iD Logo" style="width: 20px; height: 20px; object-fit: contain; margin-right: 11px;">
                             @else
                                 <i class="bi bi-people"></i> 
                             @endif
@@ -376,12 +604,12 @@
                         </a>
                     </li>
                     <li class="mt-2">
-                        <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Controle de Acessos</span>
+                        <span class="sidebar-section-title">Controle de Acessos</span>
                     </li>
                     <li class="mt-1">
                         <a href="{{ route('sismatriz.index') }}" class="{{ request()->routeIs('sismatriz.*') ? 'active' : '' }} d-flex align-items-center">
                             @if(file_exists(public_path('img/sismatriz-ticket-logo.jpg')))
-                                <img src="{{ asset('img/sismatriz-ticket-logo.jpg') }}" alt="Ticket Logo" style="width: 20px; height: 20px; object-fit: contain; margin-right: 10px;">
+                                <img src="{{ asset('img/sismatriz-ticket-logo.jpg') }}" alt="Ticket Logo" style="width: 20px; height: 20px; object-fit: contain; margin-right: 11px;">
                             @else
                                 <i class="bi bi-ticket-detailed-fill"></i> 
                             @endif
@@ -391,32 +619,32 @@
                     <li class="mt-1">
                         <a href="#sismatrizSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('sismatriz-main.*') || request()->routeIs('paroquias.*') ? 'true' : 'false' }}" class="dropdown-toggle d-flex align-items-center">
                             @if(file_exists(public_path('img/sismatriz-logo.png')))
-                                <img src="{{ asset('img/sismatriz-logo.png') }}" alt="SisMatriz Logo" style="width: 20px; height: 20px; object-fit: contain; margin-right: 10px;">
+                                <img src="{{ asset('img/sismatriz-logo.png') }}" alt="SisMatriz Logo" style="width: 20px; height: 20px; object-fit: contain; margin-right: 11px;">
                             @else
                                 <i class="bi bi-building-fill"></i> 
                             @endif
                             SisMatriz
                         </a>
-                        <ul class="collapse list-unstyled {{ request()->routeIs('sismatriz-main.*') || request()->routeIs('paroquias.*') ? 'show' : '' }}" id="sismatrizSubmenu" style="background-color: rgba(0,0,0,0.05); border-radius: 12px; margin: 5px 10px;">
+                        <ul class="collapse list-unstyled collapse-submenu {{ request()->routeIs('sismatriz-main.*') || request()->routeIs('paroquias.*') ? 'show' : '' }}" id="sismatrizSubmenu">
                             <li>
-                                <a href="{{ route('sismatriz-main.index') }}" class="{{ request()->routeIs('sismatriz-main.index') || request()->routeIs('sismatriz-main.show') || request()->routeIs('sismatriz-main.create') || request()->routeIs('sismatriz-main.edit') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('sismatriz-main.index') }}" class="{{ request()->routeIs('sismatriz-main.index') || request()->routeIs('sismatriz-main.show') || request()->routeIs('sismatriz-main.create') || request()->routeIs('sismatriz-main.edit') ? 'active' : '' }}">
                                     Acessos e Usuários
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('sismatriz-main.metrics') }}" class="{{ request()->routeIs('sismatriz-main.metrics') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('sismatriz-main.metrics') }}" class="{{ request()->routeIs('sismatriz-main.metrics') ? 'active' : '' }}">
                                     Métricas e KPIs
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('paroquias.index') }}" class="{{ request()->routeIs('paroquias.*') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('paroquias.index') }}" class="{{ request()->routeIs('paroquias.*') ? 'active' : '' }}">
                                     Paróquias
                                 </a>
                             </li>
                         </ul>
                     </li>
                     <li class="mt-2">
-                        <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Monitoramento</span>
+                        <span class="sidebar-section-title">Monitoramento</span>
                     </li>
                     <li class="mt-1">
                         <a href="{{ route('system_health.index') }}" class="{{ request()->routeIs('system_health.*') ? 'active' : '' }}">
@@ -429,7 +657,7 @@
                         </a>
                     </li>
                     <li class="mt-2">
-                        <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Marketing</span>
+                        <span class="sidebar-section-title">Marketing</span>
                     </li>
                     <li class="mt-1">
                         <a href="{{ route('campanhas_email.index') }}" class="{{ request()->routeIs('campanhas_email.*') ? 'active' : '' }}">
@@ -438,7 +666,7 @@
                     </li>
                     @if(Auth::user()->papel === 'admin')
                     <li class="mt-2">
-                        <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Financeiro</span>
+                        <span class="sidebar-section-title">Financeiro</span>
                     </li>
                     <li class="mt-1">
                         <a href="{{ route('nodal-billing.index') }}" class="{{ request()->routeIs('nodal-billing.*') ? 'active' : '' }}">
@@ -451,48 +679,46 @@
                         </a>
                     </li>
                     <li class="mt-2">
-                        <span class="px-4 text-uppercase small text-muted fw-bold" style="font-size: 0.75rem;">Integrações</span>
+                        <span class="sidebar-section-title">Integrações</span>
                     </li>
                     <li class="mt-1">
                         <a href="#nodalSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('nodal.*') || request()->routeIs('nodal-verifications.*') || request()->routeIs('nodal-billing.*') || request()->routeIs('nodal-plans.*') ? 'true' : 'false' }}" class="dropdown-toggle d-flex align-items-center">
                             @if(file_exists(public_path('img/Nodal-Icon.png')))
-                                <img src="{{ asset('img/Nodal-Icon.png') }}" alt="Nodal" style="width: 20px; height: 20px; object-fit: contain; margin-right: 10px;">
+                                <img src="{{ asset('img/Nodal-Icon.png') }}" alt="Nodal" style="width: 20px; height: 20px; object-fit: contain; margin-right: 11px;">
                             @else
                                 <i class="bi bi-building-check"></i>
                             @endif
                             Nodal
                         </a>
-                        <ul class="collapse list-unstyled {{ request()->routeIs('nodal.*') || request()->routeIs('nodal-verifications.*') || request()->routeIs('nodal-billing.*') || request()->routeIs('nodal-plans.*') ? 'show' : '' }}" id="nodalSubmenu" style="background-color: rgba(0,0,0,0.05); border-radius: 12px; margin: 5px 10px;">
+                        <ul class="collapse list-unstyled collapse-submenu {{ request()->routeIs('nodal.*') || request()->routeIs('nodal-verifications.*') || request()->routeIs('nodal-billing.*') || request()->routeIs('nodal-plans.*') ? 'show' : '' }}" id="nodalSubmenu">
                             <li>
-                                <a href="{{ route('nodal.index') }}" class="{{ request()->routeIs('nodal.index') || request()->routeIs('nodal.create') || request()->routeIs('nodal.store') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('nodal.index') }}" class="{{ request()->routeIs('nodal.index') || request()->routeIs('nodal.create') || request()->routeIs('nodal.store') ? 'active' : '' }}">
                                     Empresas
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('nodal-plans.index') }}" class="{{ request()->routeIs('nodal-plans.*') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('nodal-plans.index') }}" class="{{ request()->routeIs('nodal-plans.*') ? 'active' : '' }}">
                                     Planos de Licenciamento
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('nodal-billing.index') }}" class="{{ request()->routeIs('nodal-billing.*') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('nodal-billing.index') }}" class="{{ request()->routeIs('nodal-billing.*') ? 'active' : '' }}">
                                     Faturamento Nodal
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('nodal.settings') }}" class="{{ request()->routeIs('nodal.settings') || request()->routeIs('nodal.save-settings') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('nodal.settings') }}" class="{{ request()->routeIs('nodal.settings') || request()->routeIs('nodal.save-settings') ? 'active' : '' }}">
                                     Configurações
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('nodal-verifications.index') }}" class="{{ request()->routeIs('nodal-verifications.*') ? 'active' : '' }} ps-4" style="font-size: 0.9rem;">
+                                <a href="{{ route('nodal-verifications.index') }}" class="{{ request()->routeIs('nodal-verifications.*') ? 'active' : '' }}">
                                     Verificações KYC
                                 </a>
                             </li>
                         </ul>
                     </li>
                     @endif
-                    <!-- Add more menu items here -->
-
                 </ul>
             </nav>
 
@@ -503,29 +729,55 @@
                         <button type="button" id="sidebarCollapseBtn" class="btn btn-link text-reset me-2 me-sm-3 p-0 d-md-none flex-shrink-0">
                             <i class="bi bi-list fs-4"></i>
                         </button>
-                        <h5 class="m-0 fw-bold text-truncate" style="font-size: clamp(0.9rem, 2.5vw, 1.15rem);">@yield('page-title', 'Dashboard')</h5>
+                        <h5 class="m-0 fw-semibold text-truncate" style="font-size: clamp(0.9rem, 2.5vw, 1.15rem); letter-spacing: -0.015em;">@yield('page-title', 'Dashboard')</h5>
                     </div>
 
                     <div class="d-flex align-items-center gap-2 gap-sm-3 flex-shrink-0">
-                        <!-- Theme Toggle -->
-                        <button class="btn btn-link text-reset p-1" id="theme-toggle-dash" title="Alternar Tema">
-                            <i class="bi bi-moon-stars-fill"></i>
-                        </button>
+                        <!-- Apple Theme Selector Dropdown -->
+                        <div class="dropdown">
+                            <button class="theme-selector-btn" id="theme-toggle-dash" data-bs-toggle="dropdown" aria-expanded="false" title="Tema: Automático">
+                                <i class="bi bi-circle-half theme-icon-current"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="theme-toggle-dash">
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex justify-content-between align-items-center" onclick="setThemePreference('light')">
+                                        <span><i class="bi bi-sun-fill me-2 text-warning"></i> Claro</span>
+                                        <i class="bi bi-check2 theme-check-light d-none text-primary"></i>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex justify-content-between align-items-center" onclick="setThemePreference('dark')">
+                                        <span><i class="bi bi-moon-stars-fill me-2 text-primary"></i> Escuro</span>
+                                        <i class="bi bi-check2 theme-check-dark d-none text-primary"></i>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex justify-content-between align-items-center" onclick="setThemePreference('auto')">
+                                        <span><i class="bi bi-circle-half me-2 text-info"></i> Automático (Sistema)</span>
+                                        <i class="bi bi-check2 theme-check-auto d-none text-primary"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
 
                         <!-- User Dropdown -->
                         <div class="dropdown">
                             <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-reset" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white me-1 me-sm-2 flex-shrink-0" style="width: 32px; height: 32px;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white me-1 me-sm-2 flex-shrink-0" style="width: 32px; height: 32px; background: linear-gradient(135deg, #0071e3 0%, #0a84ff 100%); font-weight: 600; font-size: 0.85rem;">
                                     {{ substr(Auth::user()->nome ?? 'A', 0, 1) }}
                                 </div>
-                                <span class="d-none d-sm-inline text-truncate" style="max-width: 140px;">{{ Auth::user()->nome }} {{ Auth::user()->sobrenome }}</span>
+                                <span class="d-none d-sm-inline text-truncate fw-medium" style="max-width: 140px; font-size: 0.9rem;">{{ Auth::user()->nome }} {{ Auth::user()->sobrenome }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4" aria-labelledby="dropdownUser1">
-                                <li><a class="dropdown-item" href="{{ route('profile.index') }}">Perfil</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="dropdownUser1">
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('profile.index') }}">
+                                        <i class="bi bi-person me-2"></i> Perfil
+                                    </a>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                                        Sair
+                                        <i class="bi bi-box-arrow-right me-2"></i> Sair
                                     </a>
                                 </li>
                             </ul>
@@ -535,7 +787,7 @@
                         </div>
 
                         <!-- LOGO SACRATECH_ID -->
-                        <div class="border-start ps-2 ps-sm-3 ms-1 ms-sm-2 d-flex align-items-center" title="Sacratech ID">
+                        <div class="border-start ps-2 ps-sm-3 ms-1 ms-sm-2 d-flex align-items-center" title="Sacratech ID" style="border-color: var(--apple-border) !important;">
                              @if(file_exists(public_path('img/sacratech-id.png')))
                                 <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech ID" height="24" class="d-none d-md-block">
                                 <img src="{{ asset('img/sacratech-id.png') }}" alt="Sacratech ID" height="18" class="d-md-none">
@@ -558,27 +810,27 @@
     @endguest
 
     <!-- Global Page Transition Overlay -->
-    <div id="global-page-loader" class="position-fixed top-0 start-0 w-100 h-100 d-none" style="z-index: 10000; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); transition: opacity 0.3s ease;">
+    <div id="global-page-loader" class="position-fixed top-0 start-0 w-100 h-100 d-none" style="z-index: 10000; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity 0.3s ease;">
         <div class="d-flex flex-column align-items-center justify-content-center h-100">
-            <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+            <div class="spinner-border text-light" style="width: 2.8rem; height: 2.8rem; border-width: 2.5px;" role="status">
                 <span class="visually-hidden">Carregando...</span>
             </div>
-            <p class="mt-3 text-white fw-medium fs-5">Carregando...</p>
+            <p class="mt-3 text-white fw-medium fs-6" style="letter-spacing: -0.01em;">Carregando...</p>
         </div>
     </div>
 
     <!-- Logout Confirmation Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow-lg" style="background-color: var(--apple-card-bg); backdrop-filter: saturate(180%) blur(20px);">
-                <div class="modal-header border-0 pb-0">
+            <div class="modal-content rounded-4 border-0 shadow-lg" style="background-color: var(--apple-card-bg); backdrop-filter: saturate(190%) blur(25px); -webkit-backdrop-filter: saturate(190%) blur(25px); border: 1px solid var(--apple-border);">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
                     <h5 class="modal-title fw-bold" id="logoutModalLabel">Confirmar Saída</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body py-4">
+                <div class="modal-body py-4 px-4">
                     <p class="mb-0 text-muted">Você será desconectado do sistema e seu acesso automático será removido. Para acessar novamente, será necessário realizar o login manualmente com a opção "Lembrar-me" marcada, se desejar.</p>
                 </div>
-                <div class="modal-footer border-0 pt-0">
+                <div class="modal-footer border-0 pt-0 pb-4 px-4">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-danger rounded-pill px-4" onclick="document.getElementById('logout-form').submit();">
                         Sair Agora
@@ -591,16 +843,91 @@
     <!-- Bootstrap Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Theme & Sidebar Script -->
+    <!-- Apple Theme & Layout Engine -->
     <script>
+        // --- GERENCIADOR DE TEMAS APPLE (Claro, Escuro e Automático) ---
+        const logoWhiteUrl = "{{ asset('img/logo-white.png') }}";
+        const logoBlackUrl = "{{ asset('img/logo-black.png') }}";
+
+        function getSystemTheme() {
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function getStoredThemePreference() {
+            return localStorage.getItem('integer_theme_preference') || localStorage.getItem('theme') || 'auto';
+        }
+
+        function setThemePreference(preference) {
+            localStorage.setItem('integer_theme_preference', preference);
+            localStorage.setItem('theme', preference); // Retrocompatibilidade
+            applyTheme(preference);
+        }
+
+        function applyTheme(preference) {
+            const html = document.documentElement;
+            const effectiveTheme = preference === 'auto' ? getSystemTheme() : preference;
+            
+            html.setAttribute('data-bs-theme', effectiveTheme);
+            html.setAttribute('data-theme-preference', preference);
+
+            // Atualiza o logotipo da sidebar
+            const sidebarLogo = document.getElementById('sidebar-logo');
+            if (sidebarLogo) {
+                sidebarLogo.src = effectiveTheme === 'dark' ? logoWhiteUrl : logoBlackUrl;
+            }
+
+            // Atualiza ícones dos botões de alternância
+            const iconClass = preference === 'auto' 
+                ? 'bi-circle-half' 
+                : (preference === 'dark' ? 'bi-moon-stars-fill' : 'bi-sun-fill');
+
+            const titleText = preference === 'auto'
+                ? 'Tema: Automático (Sistema)'
+                : (preference === 'dark' ? 'Tema: Escuro' : 'Tema: Claro');
+
+            document.querySelectorAll('.theme-icon-current').forEach(el => {
+                el.className = `bi ${iconClass} theme-icon-current`;
+            });
+
+            document.querySelectorAll('#theme-toggle-dash, #theme-toggle-guest').forEach(btn => {
+                btn.setAttribute('title', titleText);
+            });
+
+            // Atualiza marcas de seleção dos dropdowns
+            ['light', 'dark', 'auto'].forEach(t => {
+                document.querySelectorAll(`.theme-check-${t}`).forEach(check => {
+                    if (t === preference) {
+                        check.classList.remove('d-none');
+                    } else {
+                        check.classList.add('d-none');
+                    }
+                });
+            });
+        }
+
+        // Listener para alterações de tema no Sistema Operacional (Windows / macOS / Navegador)
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                const currentPref = getStoredThemePreference();
+                if (currentPref === 'auto') {
+                    applyTheme('auto');
+                }
+            });
+        }
+
+        // Inicializa o tema ao carregar
         document.addEventListener('DOMContentLoaded', () => {
-            // Global Page Loader Logic
+            const initialPref = getStoredThemePreference();
+            applyTheme(initialPref);
+        });
+
+        // --- GLOBAL PAGE LOADER ---
+        document.addEventListener('DOMContentLoaded', () => {
             const globalLoader = document.getElementById('global-page-loader');
             
             const showLoader = () => {
                 if (globalLoader) {
                     globalLoader.classList.remove('d-none');
-                    // Force opacity transition if needed
                     globalLoader.style.opacity = '0';
                     setTimeout(() => { globalLoader.style.opacity = '1'; }, 10);
                 }
@@ -613,26 +940,17 @@
                 }
             };
 
-            // Handle Link Clicks
+            // Links com navegação
             document.addEventListener('click', (e) => {
                 const link = e.target.closest('a');
                 if (link) {
                     const href = link.getAttribute('href');
                     const target = link.getAttribute('target');
                     
-                    // Ignore:
-                    // 1. Links without href or empty href
-                    // 2. Links starting with # (anchors)
-                    // 3. Links starting with javascript:
-                    // 4. External links (optional, but good practice to keep loader if we want transition there too, usually strictly internal)
-                    // 5. Links with target="_blank"
-                    // 6. Download links
-                    
                     if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:') || target === '_blank' || link.hasAttribute('download')) {
                         return;
                     }
 
-                    // Check if it's a modifier key click (ctrl/cmd + click)
                     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
                         return;
                     }
@@ -641,49 +959,37 @@
                 }
             });
 
-            // Handle Form Submits
+            // Formulários com envio
             document.addEventListener('submit', (e) => {
                 const form = e.target;
-                // If form has target="_blank", data-no-loader, or submission was prevented (AJAX), don't show loader
                 if (form.target === '_blank' || form.hasAttribute('data-no-loader') || form.classList.contains('no-loader') || e.defaultPrevented) return;
                 
                 showLoader();
             });
             
-            // Hide loader when page is fully loaded (bfcache support)
-            window.addEventListener('pageshow', (event) => {
+            window.addEventListener('pageshow', () => {
                 hideLoader();
             });
             
-            // Initial hide
             hideLoader();
         });
 
-        // Sidebar Toggle
+        // --- SIDEBAR TOGGLE ---
         const sidebar = document.getElementById('sidebar');
         const sidebarCollapse = document.getElementById('sidebarCollapse');
         const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
-        const content = document.getElementById('content');
 
         function toggleSidebar() {
-            sidebar.classList.toggle('active');
+            if (sidebar) sidebar.classList.toggle('active');
         }
 
-        if (sidebarCollapse) {
-            sidebarCollapse.addEventListener('click', toggleSidebar);
-        }
-        
-        if (sidebarCollapseBtn) {
-            sidebarCollapseBtn.addEventListener('click', toggleSidebar);
-        }
+        if (sidebarCollapse) sidebarCollapse.addEventListener('click', toggleSidebar);
+        if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener('click', toggleSidebar);
 
-        // Close sidebar on mobile when clicking outside
+        // Fecha a sidebar no mobile ao clicar fora
         document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !sidebarCollapseBtn.contains(e.target) && !sidebar.classList.contains('active')) {
-                    // In mobile, active means hidden (margin-left: -260px is default, active is 0)
-                    // Wait, css says: #sidebar { margin-left: -260px } #sidebar.active { margin-left: 0 }
-                    // So if it contains active, it is VISIBLE.
+            if (window.innerWidth <= 768 && sidebar) {
+                if (!sidebar.contains(e.target) && sidebarCollapseBtn && !sidebarCollapseBtn.contains(e.target)) {
                     if (sidebar.classList.contains('active')) {
                         sidebar.classList.remove('active');
                     }
@@ -691,36 +997,9 @@
             }
         });
 
-        // Theme Toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeToggleDash = document.getElementById('theme-toggle-dash');
-        const html = document.documentElement;
-        
-        function toggleTheme() {
-            const currentTheme = html.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-bs-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        }
-
-        function updateThemeIcon(theme) {
-            const iconClass = theme === 'dark' ? 'bi-moon-stars-fill' : 'bi-sun-fill';
-            if (themeToggle) themeToggle.innerHTML = `<i class="bi ${iconClass}"></i>`;
-            if (themeToggleDash) themeToggleDash.innerHTML = `<i class="bi ${iconClass}"></i>`;
-        }
-
-        if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
-        if (themeToggleDash) themeToggleDash.addEventListener('click', toggleTheme);
-
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-bs-theme', savedTheme);
-        updateThemeIcon(savedTheme);
-        
-        // Enable Tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+        // Tooltips Bootstrap
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     </script>
 
     @stack('scripts')
