@@ -12,6 +12,8 @@ class SisMatrizMainUser extends Model
     protected $connection = 'sismatriz_main';
     protected $table = 'users';
 
+    const UPDATED_AT = null;
+
     protected $fillable = [
         'name',
         'user',
